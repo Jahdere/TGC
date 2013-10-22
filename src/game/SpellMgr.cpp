@@ -347,6 +347,16 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2)
 	if (!spellInfo_1 || !spellInfo_2) return false;
 	if (spellInfo_1->Id == spellId_2) return false;
 
+	//Fortifiant vs Graine cauchemardelle @Kordbc
+	if ((spellInfo_1->Id == 28726 && spellInfo_2->Id == 28518) || (spellInfo_2->Id == 28726 && spellInfo_1->Id == 28518))
+		return false;
+	//Potion heroique vs Graine cauchemardelle @Kordbc
+	if ((spellInfo_1->Id == 28726 && spellInfo_2->Id == 28506) || (spellInfo_2->Id == 28726 && spellInfo_1->Id == 28506))
+		return false;
+	//Fortifiant vs Potion Heroique @Kordbc
+	if ((spellInfo_1->Id == 28518 && spellInfo_2->Id == 28506) || (spellInfo_2->Id == 28518 && spellInfo_1->Id == 28506))
+		return false;    
+
 	for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
 	{
 		for (int32 j = 0; j < MAX_EFFECT_INDEX; ++j)
