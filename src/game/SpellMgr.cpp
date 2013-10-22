@@ -1974,10 +1974,44 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 				break;
 			}
 		}
-		// Dragonmaw Illusion, Blood Elf Illusion, Human Illusion, Illidari Agent Illusion, Scarlet Crusade Disguise
-		if (spellInfo_1->SpellIconID == 1691 && spellInfo_2->SpellIconID == 1691)
-			return false;
-		break;
+		case SPELLFAMILY_POTION:
+			{
+				//Pierre Alchi vs Sayge @Kordbc
+				if ((spellInfo_1->Id == 23768  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23768  && spellInfo_1->Id == 17619 ))
+					return false;
+
+				if ((spellInfo_1->Id == 23769  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23769  && spellInfo_1->Id == 17619))
+					return false;
+
+				if ((spellInfo_1->Id == 23767  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23767  && spellInfo_1->Id == 17619))
+					return false;
+
+				if ((spellInfo_1->Id == 23738  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23738  && spellInfo_1->Id == 17619))
+					return false;
+				if ((spellInfo_1->Id == 23766  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23766  && spellInfo_1->Id == 17619))
+					return false;
+
+				if ((spellInfo_1->Id == 23737  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23737  && spellInfo_1->Id == 17619))
+					return false;
+
+				if ((spellInfo_1->Id == 23735  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23735  && spellInfo_1->Id == 17619))
+					return false;
+
+				if ((spellInfo_1->Id == 23736  && spellInfo_2->Id == 17619) ||  
+					(spellInfo_2->Id == 23736  && spellInfo_1->Id == 17619))
+					return false;
+			}
+			// Dragonmaw Illusion, Blood Elf Illusion, Human Illusion, Illidari Agent Illusion, Scarlet Crusade Disguise
+			if (spellInfo_1->SpellIconID == 1691 && spellInfo_2->SpellIconID == 1691)
+				return false;
+			break;
 	case SPELLFAMILY_MAGE:
 		if (spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE)
 		{
@@ -2194,6 +2228,43 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 		// Bloodlust and Bloodthirst (multi-family check)
 		if (spellInfo_1->Id == 2825 && spellInfo_2->SpellIconID == 38 && spellInfo_2->SpellVisual == 0)
 			return false;
+		break;
+	case SPELLFAMILY_POTION:
+		//Pierre Alchi vs Sayge @Kordbc
+		if(spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC)
+		{
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23768) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23768 ))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23769) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23769))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23767) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23767))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23738) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23738))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23766) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23766))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23737) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23737))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23735) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23735))
+				return false;
+
+			if ((spellInfo_1->Id == 17619  && spellInfo_2->Id == 23736) ||  
+				(spellInfo_2->Id == 17619  && spellInfo_1->Id == 23736))
+				return false;
+		}
 		break;
 	default:
 		break;
