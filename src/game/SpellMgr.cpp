@@ -1937,6 +1937,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					(spellInfo_2->Id == 36091  && spellInfo_1->Id == 36089))
 					return false;
 
+				//Truite au beurre blanc @Kordbc
+				if ((spellInfo_1->Id == 42311  && spellInfo_2->Id == 42312) ||  
+					(spellInfo_2->Id == 42311  && spellInfo_1->Id == 42312))
+					return false;
+
 				break;
 			}
 		case SPELLFAMILY_MAGE:
