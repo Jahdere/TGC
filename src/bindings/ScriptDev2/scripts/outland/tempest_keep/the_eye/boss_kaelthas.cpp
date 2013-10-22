@@ -1127,11 +1127,8 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
 		{
-			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-			{
-				advisor_base_ai::Reset();
+			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)			
 				advisor_base_ai::JustReachedHome();
-			}
 			return;
 		}
 
@@ -1212,10 +1209,7 @@ struct MANGOS_DLL_DECL boss_lord_sanguinarAI : public advisor_base_ai
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
 		{
 			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-			{
-				advisor_base_ai::Reset();
 				advisor_base_ai::JustReachedHome();
-			}
 			return;
 		}
 
@@ -1317,10 +1311,7 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 		if (!SelectHostileTarget() || !m_creature->getVictim())
 		{
 			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-			{
-				advisor_base_ai::Reset();
 				advisor_base_ai::JustReachedHome();
-			}
 			return;
 		}
 
@@ -1413,10 +1404,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
 		{
 			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-			{
-				advisor_base_ai::Reset();
 				advisor_base_ai::JustReachedHome();
-			}
 			return;
 		}
 
