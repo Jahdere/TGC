@@ -1027,9 +1027,6 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 
 			m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
 		}
-		m_creature->AI()->EnterEvadeMode();
-		DoStopAttack();
-		Reset();
 	}
 
 	void DamageTaken(Unit* pDoneby, uint32 &uiDamage)
