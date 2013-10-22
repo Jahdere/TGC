@@ -92,11 +92,11 @@ enum
 	//Phase 5 spells
 	SPELL_GAIN_POWER                    = 36091,
 	SPELL_EXPLODE                       = 36092,
-	SPELL_EXPLODE_1                                                = 36354,            // light
+	SPELL_EXPLODE_1                     = 36354,            // light
 	SPELL_EXPLODE_2                     = 36373,                        // Strong
-	SPELL_EXPLODE_3                                                = 36375,                        // Middle
-	SPELL_EXPLODE_4                                                = 36376,                        // Light
-	SPELL_KAEL_STUN                                                = 36185,            // purpose unk
+	SPELL_EXPLODE_3                     = 36375,                        // Middle
+	SPELL_EXPLODE_4                     = 36376,                        // Light
+	SPELL_KAEL_STUN                     = 36185,            // purpose unk
 	SPELL_FULLPOWER                     = 36187,
 	SPELL_GRAVITY_LAPSE                 = 35941,
 	SPELL_GRAVITY_LAPSE_KNOCKBACK       = 34480,            // cast by players - damage effect
@@ -137,6 +137,8 @@ enum
 	NPC_PHOENIX                         = 21362,
 	NPC_PHOENIX_EGG                     = 21364,
 	NPC_NETHER_VAPOR                    = 21002,
+	NPC_HELPER_BEAM				= 20602,
+	NPC_LONGBOW					= 21268,
 
 	// ***** Other ********
 	PHASE_0_NOT_BEGUN                   = 0,
@@ -150,11 +152,11 @@ enum
 
 
 	// ***** Animation *****
-	SPELL_BOULE_1                                                = 36364,
-	SPELL_BOULE_2                                                = 36370,
-	SPELL_BOULE_3                                                = 36371,
-	SPELL_BEAM_EFFECT_1                                        = 36089,
-	SPELL_BEAM_EFFECT_2                                        = 36090,
+	SPELL_BOULE_1                       = 36364,
+	SPELL_BOULE_2                       = 36370,
+	SPELL_BOULE_3                       = 36371,
+	SPELL_BEAM_EFFECT_1                 = 36089,
+	SPELL_BEAM_EFFECT_2                 = 36090,
 
 	POINT_ID_CENTER                     = 1,
 	POINT_ID_AIR                        = 2,
@@ -367,14 +369,14 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 			pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
 		else if (pSummoned->GetEntry() == NPC_NETHER_VAPOR)
 			pSummoned->CastSpell(pSummoned, SPELL_NETHER_VAPOR, false, NULL, NULL, m_creature->GetObjectGuid());
-		else if(pSummoned->GetEntry() == 20602)
+		else if(pSummoned->GetEntry() == NPC_HELPER_BEAM)
 		{
 			if(m_uiCountBeamer == 0 || m_uiCountBeamer == 2)
 				pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_1, true);
 			else
 				pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_2, true);
 			m_uiCountBeamer++;
-		}else if(pSummoned->GetEntry() == 21268){
+		}else if(pSummoned->GetEntry() == NPC_LONGBOW){
 			if(Unit* pTarget = pSummoned->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 			{
 				pSummoned->AddThreat(pTarget);
@@ -1003,7 +1005,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 	bool m_bFakeDeath;
 	bool m_bCanFakeDeath;
 
-	void Reset()
+	void Reset() override
 	{
 		m_bCanFakeDeath = true;
 		m_bFakeDeath    = false;
@@ -1015,7 +1017,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 		SetCombatMovement(true);
 	}
 
-	void JustReachedHome()
+	void JustReachedHome() override
 	{
 		// Reset Kael if needed
 		if (m_pInstance)
@@ -1025,6 +1027,9 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 
 			m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
 		}
+		m_creature->AI()->EnterEvadeMode();
+		DoStopAttack();
+		Reset();
 	}
 
 	void DamageTaken(Unit* pDoneby, uint32 &uiDamage)
@@ -1124,7 +1129,14 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+		{
+			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
+			{
+				advisor_base_ai::Reset();
+				advisor_base_ai::JustReachedHome();
+			}
 			return;
+		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
@@ -1201,7 +1213,14 @@ struct MANGOS_DLL_DECL boss_lord_sanguinarAI : public advisor_base_ai
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+		{
+			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
+			{
+				advisor_base_ai::Reset();
+				advisor_base_ai::JustReachedHome();
+			}
 			return;
+		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
@@ -1299,7 +1318,14 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!SelectHostileTarget() || !m_creature->getVictim())
+		{
+			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
+			{
+				advisor_base_ai::Reset();
+				advisor_base_ai::JustReachedHome();
+			}
 			return;
+		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
@@ -1388,7 +1414,14 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+		{
+			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
+			{
+				advisor_base_ai::Reset();
+				advisor_base_ai::JustReachedHome();
+			}
 			return;
+		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
