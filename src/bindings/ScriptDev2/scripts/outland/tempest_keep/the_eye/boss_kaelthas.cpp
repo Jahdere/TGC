@@ -971,15 +971,15 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 	}
 };
 
-bool EffectDummyCreature_kael_phase_2(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget)
+bool EffectDummyCreature_kael_phase_2(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-	//always check spellid and effectindex
+	// always check spellid and effectindex
 	if (uiSpellId == SPELL_KAEL_PHASE_2 && uiEffIndex == EFFECT_INDEX_0)
 	{
 		if (boss_kaelthasAI* pKaelAI = dynamic_cast<boss_kaelthasAI*>(pCreatureTarget->AI()))
 			pKaelAI->AdvisorDefeated(pCaster->GetEntry());
 
-		//always return true when we are handling this spell and effect
+		// always return true when we are handling this spell and effect
 		return true;
 	}
 
