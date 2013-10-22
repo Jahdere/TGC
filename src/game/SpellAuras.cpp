@@ -4090,11 +4090,20 @@ void Aura::HandleModTaunt(bool apply, bool Real)
 /*********************************************************/
 /***                  MODIFY SPEED                     ***/
 /*********************************************************/
-void Aura::HandleAuraModIncreaseSpeed(bool /*apply*/, bool Real)
+void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
 {
 	// all applied/removed only at real aura add/remove
 	if (!Real)
 		return;
+
+	//Fix celerite farouche @Kordbc
+	if(apply)
+	{
+		if(GetId() == 24866 && !GetTarget()->HasAura(768))
+			return;
+		if(GetId() == 17002 && !GetTarget()->HasAura(768))
+			return;
+	}
 
 	GetTarget()->UpdateSpeed(MOVE_RUN, true);
 }
