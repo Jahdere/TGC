@@ -1911,6 +1911,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					(spellInfo_2->Id == 39993 && spellInfo_1->Id == 40041))
 					return false;
 
+				//Proc Frappe sort and Anciens scribes
+				if ((spellInfo_1->Id == 32108  && spellInfo_2->Id == 34597) ||  
+					(spellInfo_2->Id == 32108  && spellInfo_1->Id == 34597))
+					return false;
+
 				break;
 			}
 		case SPELLFAMILY_MAGE:
