@@ -6546,6 +6546,38 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
 	{
 		APbonus += pVictim->GetTotalAuraModifier(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
 		APbonus += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS, creatureTypeMask);
+
+		//Fix Hunter's Mark Amélio @Kordbc
+		AuraList const& mModDRangedAttackPower = pVictim->GetAurasByType(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
+		for (AuraList::const_iterator i = mModDRangedAttackPower.begin(); i != mModDRangedAttackPower.end(); ++i)
+		{
+			switch((*i)->GetId())
+			{
+			case 1130:
+			case 14323:
+			case 14324:
+			case 14325:
+				if(Unit* caster = (*i)->GetCaster())
+				{
+					AuraList const& mclassScritAuras = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+					for (AuraList::const_iterator j = mclassScritAuras.begin(); j != mclassScritAuras.end(); ++j)
+					{
+						switch((*j)->GetModifier()->m_miscvalue)
+						{
+						case 5240:
+						case 5237:
+						case 5238:
+						case 5236:
+						case 5239:
+							APbonus += ((*j)->GetModifier()->m_amount / 100) * (*i)->GetModifier()->m_amount;
+							break;
+						}
+					}
+				}
+				break;
+			}
+		}
+
 	}
 
 	// PERCENT damage auras
