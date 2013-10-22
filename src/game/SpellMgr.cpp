@@ -1916,6 +1916,27 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					(spellInfo_2->Id == 32108  && spellInfo_1->Id == 34597))
 					return false;
 
+				//Kael'thas Animation @Kordbc
+				if ((spellInfo_1->Id == 36091  && spellInfo_2->Id == 36364) ||  
+					(spellInfo_2->Id == 36091  && spellInfo_1->Id == 36364))
+					return false;
+
+				if ((spellInfo_1->Id == 36091  && spellInfo_2->Id == 36370) ||  
+					(spellInfo_2->Id == 36091  && spellInfo_1->Id == 36370))
+					return false;
+
+				if ((spellInfo_1->Id == 36091  && spellInfo_2->Id == 36371) ||  
+					(spellInfo_2->Id == 36091  && spellInfo_1->Id == 36371))
+					return false;
+
+				if ((spellInfo_1->Id == 36091  && spellInfo_2->Id == 36090) ||  
+					(spellInfo_2->Id == 36091  && spellInfo_1->Id == 36090))
+					return false;
+
+				if ((spellInfo_1->Id == 36091  && spellInfo_2->Id == 36089) ||  
+					(spellInfo_2->Id == 36091  && spellInfo_1->Id == 36089))
+					return false;
+
 				break;
 			}
 		case SPELLFAMILY_MAGE:
