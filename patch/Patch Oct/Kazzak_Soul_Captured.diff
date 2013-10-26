@@ -1,0 +1,28 @@
+src/bindings/ScriptDev2/scripts/outland/boss_doomlord_kazzak.cpp View file @ ba2c5fc
+@@ -44,7 +44,8 @@ enum
+     SPELL_VOID_BOLT                 = 39329,
+     SPELL_MARK_OF_KAZZAK            = 32960,
+     SPELL_FRENZY                    = 32964,        // triggers 32963
+-    SPELL_CAPTURE_SOUL              = 48473,        // procs 32966 on player kill
++  //  SPELL_CAPTURE_SOUL              = 48473,        // procs 32966 on player kill
++    SPELL_SOUL_CAPTURED             = 32966,
+     SPELL_TWISTED_REFLECTION        = 21063,
+     SPELL_BERSERK                   = 32965,        // triggers 32963
+ };
+@@ -82,7 +83,6 @@ struct MANGOS_DLL_DECL boss_doomlordkazzakAI : public ScriptedAI
+     void Aggro(Unit* /*pWho*/) override
+     {
+         DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
+-        DoCastSpellIfCan(m_creature, SPELL_CAPTURE_SOUL, CAST_TRIGGERED);
+     }
+ 
+     void KilledUnit(Unit* pVictim) override
+@@ -91,6 +91,8 @@ struct MANGOS_DLL_DECL boss_doomlordkazzakAI : public ScriptedAI
+         if (pVictim->GetTypeId() != TYPEID_PLAYER)
+             return;
+ 
++        DoCastSpellIfCan(m_creature, SPELL_SOUL_CAPTURED, CAST_TRIGGERED);
++
+         switch (urand(0, 2))
+         {
+             case 0: DoScriptText(SAY_KILL1, m_creature); break;

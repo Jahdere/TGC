@@ -1,0 +1,24 @@
+src/game/SpellEffects.cpp View file @ 73c6a78
+@@ -3989,6 +3989,22 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
+     spawnCreature->InitStatsForLevel(level, m_caster);
+     spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
+ 
++
++    //Exception Gardien Elementaire / Feu Shaman totem  @Kordbc
++    if(spawnCreature->GetEntry() == 15352 || spawnCreature->GetEntry() == 15438)
++    {
++      spawnCreature->SetCreateHealth(cInfo->maxhealth);
++      spawnCreature->SetCreateMana(cInfo->maxmana);
++      spawnCreature->SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(cInfo->armor));
++      spawnCreature->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cInfo->mindmg);
++      spawnCreature->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cInfo->maxdmg);
++      spawnCreature->SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cInfo->attackpower));
++      spawnCreature->UpdateAllStats();
++      spawnCreature->SetHealth(spawnCreature->GetMaxHealth());
++      spawnCreature->SetPower(POWER_MANA, spawnCreature->GetMaxPower(POWER_MANA));
++    }
++
++
+     spawnCreature->AIM_Initialize();
+ 
+     m_caster->AddGuardian(spawnCreature);

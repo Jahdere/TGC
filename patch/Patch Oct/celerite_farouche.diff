@@ -1,0 +1,23 @@
+src/game/SpellAuras.cpp View file @ 175a62b
+@@ -4090,12 +4090,21 @@ void Aura::HandleModTaunt(bool apply, bool Real)
+ /*********************************************************/
+ /***                  MODIFY SPEED                     ***/
+ /*********************************************************/
+-void Aura::HandleAuraModIncreaseSpeed(bool /*apply*/, bool Real)
++void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
+ {
+   // all applied/removed only at real aura add/remove
+   if (!Real)
+     return;
+ 
++  //Fix celerite farouche (only cat form) @Kordbc
++  if(apply)
++  {
++    if(GetId() == 24866 && !GetTarget()->HasAura(768))
++      return;
++    if(GetId() == 17002 && !GetTarget()->HasAura(768))
++      return;
++  }
++
+   GetTarget()->UpdateSpeed(MOVE_RUN, true);
+ }

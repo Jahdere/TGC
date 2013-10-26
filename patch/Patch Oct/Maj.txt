@@ -1,0 +1,31 @@
+#Kael'thas:
+- Fix d'un bug qui empêchait les adds de bouger après un wipe
+- Capernian ne devrait plus bouger lorsqu'elle est morte
+- L'arc devrait être tankable à distance
+- Amélioration du processus de reset des adds
+- Les armes légendaires devraient être correctement détruites dans les slots et sacs des joueurs au pull
+- Les adds devraient reset leur aggro après leur résurection
+- Ajout des animations lorsque Kael'thas s'envole
+
+#Kazzak :
+- Kazzak devrait regagner 150k hp après avoir tué un joueur
+
+
+Priest :
+- Le puit de lumière devrait apparaître correctement
+
+Druide :
+- La modification de la vitesse de déplacement de célérité farouche ne devrait prendre effet qu'en forme de félin
+
+Shaman :
+- Les gardiens de feu et de terre devraient avoir des stats correctes
+
+Hunter :
+- La marque du chasseur améliorée devrait maintenant fonctionner correctement
+
+General :
+- Fix d'override d'icone 
+http://thegeekcrusade-serveur.com/forums/viewtopic.php?f=34&t=1555
+http://thegeekcrusade-serveur.com/forums/viewtopic.php?f=34&t=1711
+http://thegeekcrusade-serveur.com/forums/viewtopic.php?f=34&t=1646
+http://thegeekcrusade-serveur.com/forums/viewtopic.php?f=34&t=2206
