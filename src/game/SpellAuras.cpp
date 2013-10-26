@@ -914,6 +914,31 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 			// prevent expire spell mods with (charges > 0 && m_stackAmount > 1)
 			// all this spell expected expire not at use but at spell proc event check
 			spellProto->StackAmount > 1 ? 0 : GetHolder()->GetAuraCharges());
+	}else{	
+
+		//Fixe bonus T5 Mage (4pieces) @Kordbc
+		if(GetSpellProto()->Id == 37441 && GetTarget()->GetTypeId() == TYPEID_PLAYER)
+		{
+			uint8 countSet = 0;
+			for(uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+			{
+				if(((Player*)GetTarget())->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+				{
+					switch(((Player*)GetTarget())->GetItemByPos(INVENTORY_SLOT_BAG_0, i)->GetEntry())
+					{
+					case 30206:
+					case 30205:
+					case 30207:
+					case 30210:
+					case 30196:
+						countSet++;
+						break;
+					}
+				}
+			}
+			if(countSet >= 4)
+				GetTarget()->SetObjectScale(2.0f);
+		}
 	}
 
 	((Player*)GetTarget())->AddSpellMod(m_spellmod, apply);
