@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Kaelthas
-SD%Complete: 80
-SDComment: Timers; Transition phase is incomplete, some spells are unk.
+SD%Complete: 95
+SDComment: Miss some spell animation
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
@@ -137,8 +137,8 @@ enum
 	NPC_PHOENIX                         = 21362,
 	NPC_PHOENIX_EGG                     = 21364,
 	NPC_NETHER_VAPOR                    = 21002,
-	NPC_HELPER_BEAM				= 20602,
-	NPC_LONGBOW					= 21268,
+	NPC_HELPER_BEAM						= 20602,
+	NPC_LONGBOW							= 21268,
 
 	// ***** Other ********
 	PHASE_0_NOT_BEGUN                   = 0,
@@ -275,16 +275,15 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
 		m_uiSwitchAdd               = false;
 
-		m_uiKaelStunTimer                        = 0;
-		m_uiCountBoule                                = 0;
-		m_uiFullPowerTimer                        = 0;
-		m_uiCountBeamer                                = 0;
-		m_uiFlyTimer                                = 0;                
+		m_uiKaelStunTimer           = 0;
+		m_uiCountBoule              = 0;
+		m_uiFullPowerTimer          = 0;
+		m_uiCountBeamer             = 0;
+		m_uiFlyTimer                = 0;                
 
 		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 		m_creature->SetObjectScale(float(1));
-		SetCombatMovement(true);
-		clearWeapon();
+		SetCombatMovement(true);		
 	}
 
 	void clearWeapon()
@@ -318,6 +317,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 			// Set the player in combat with the boss
 			pWho->SetInCombatWith(m_creature);
 			m_creature->AddThreat(pWho);
+			clearWeapon();
 
 			if (m_pInstance)
 				m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
@@ -439,9 +439,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 		{
 			if (m_uiPhase == PHASE_5_WAITING)
 			{
-				m_creature->SetWalk(true);                                                        
+				m_creature->SetWalk(true);                                               
 				m_creature->SetLevitate(true);
 				m_creature->SetOrientation(3.12f);
+				SetCombatMovement(false);
 				m_uiFlyTimer = 2000;                                
 			}
 			else if (m_uiPhase == PHASE_6_FLYING)
@@ -458,15 +459,9 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 				m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 			}
 		}
+
 		if (uiPointId == POINT_ID_AIR)
-		{            
-			if(DoCastSpellIfCan(m_creature, SPELL_EXPLODE_2, CAST_TRIGGERED) == CAST_OK)
-			{               
-				// m_creature->InterruptNonMeleeSpells(false);
-				// ToDo: start channeling some additional crystals
-				// Also it's not very clear which other spells should be used here (which modifies his scale)                                
-			}                        
-		}
+			DoCastSpellIfCan(m_creature, SPELL_EXPLODE_2, CAST_TRIGGERED);                      
 	}
 
 	void AdvisorDefeated(uint32 uiEntry)
@@ -636,7 +631,6 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
 						// non Attackable pdt son animation
 						m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);                                                
-						SetCombatMovement(false);
 						m_creature->GetMotionMaster()->Clear();
 						m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aCenterPos[0], aCenterPos[1], aCenterPos[2]);
 
@@ -853,8 +847,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 			{
 				if(m_uiFlyTimer <= uiDiff)
 				{
-					m_creature->SummonCreature(20602, aPositionTrigger[0].m_fX , aPositionTrigger[0].m_fY , aPositionTrigger[0].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
-					m_creature->SummonCreature(20602, aPositionTrigger[1].m_fX , aPositionTrigger[1].m_fY , aPositionTrigger[1].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
+					m_creature->SummonCreature(NPC_HELPER_BEAM, aPositionTrigger[0].m_fX , aPositionTrigger[0].m_fY , aPositionTrigger[0].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
+					m_creature->SummonCreature(NPC_HELPER_BEAM, aPositionTrigger[1].m_fX , aPositionTrigger[1].m_fY , aPositionTrigger[1].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
 					DoCastSpellIfCan(m_creature , SPELL_GAIN_POWER);
 					m_creature->SetObjectScale(1.5f);
 					m_creature->GetMotionMaster()->MovePoint(POINT_ID_AIR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 30.0f, false);                                
@@ -884,8 +878,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 						break;
 					case 1:
 						DoCastSpellIfCan(m_creature, SPELL_EXPLODE_3, CAST_TRIGGERED);
-						m_creature->SummonCreature(20602, aPositionTrigger[2].m_fX , aPositionTrigger[2].m_fY , aPositionTrigger[2].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 8000);
-						m_creature->SummonCreature(20602, aPositionTrigger[3].m_fX , aPositionTrigger[3].m_fY , aPositionTrigger[3].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 8000);
+						m_creature->SummonCreature(NPC_HELPER_BEAM, aPositionTrigger[2].m_fX , aPositionTrigger[2].m_fY , aPositionTrigger[2].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 8000);
+						m_creature->SummonCreature(NPC_HELPER_BEAM, aPositionTrigger[3].m_fX , aPositionTrigger[3].m_fY , aPositionTrigger[3].m_fZ , 0.0f, TEMPSUMMON_TIMED_DESPAWN, 8000);
 						DoCastSpellIfCan(m_creature, SPELL_BOULE_2, CAST_TRIGGERED);
 						m_uiBouleTimer = 4000;
 						m_uiCountBoule++;
@@ -1343,16 +1337,14 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 			m_uiArcaneExplosionTimer -= uiDiff;
 
 		if (m_uiConflagrationTimer < uiDiff)
-		{
+		{			
 			Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CONFLAGRATION, SELECT_FLAG_PLAYER);
 
-			if (pTarget && m_creature->IsWithinDistInMap(pTarget, 30.0f))
-				if(DoCastSpellIfCan(pTarget, SPELL_CONFLAGRATION) == CAST_OK)
-					m_uiConflagrationTimer = urand(15000, 20000);
-				else
-					if(DoCastSpellIfCan(m_creature->getVictim(), SPELL_CONFLAGRATION) == CAST_OK)
-						m_uiConflagrationTimer = urand(15000, 20000);
+			if (!pTarget || !m_creature->IsWithinDistInMap(pTarget, 30.0f))
+				pTarget = m_creature->getVictim();
 
+			if(DoCastSpellIfCan(pTarget, SPELL_CONFLAGRATION) == CAST_OK)
+				m_uiConflagrationTimer = urand(15000, 20000);				
 		}
 		else
 			m_uiConflagrationTimer -= uiDiff;
@@ -1432,7 +1424,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
 			m_uiRemoteToyTimer -= uiDiff;
 
 
-		if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+		if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 7.0f))
 		{
 			DoMeleeAttackIfReady();
 		}else{
@@ -1457,7 +1449,6 @@ struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
 	{
 		m_uiCycleTimer = 2000;
 		m_bFakeDeath = false;
-		//m_creature->SetSpeedRate(MOVE_WALK, 12, true);
 	}
 
 	void Aggro(Unit* pWho)
