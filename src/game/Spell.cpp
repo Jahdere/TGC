@@ -1031,6 +1031,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		procEx = createProcExtendMask(&damageInfo, missInfo);
 		procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
+		//Fix misredirection @Kordbc
+		bool is_redirect = false;
+		if(caster->getHostileRefManager().GetThreatRedirectionTarget() && caster->HasAura(34477))
+		{
+			caster->DealSpellDamage(&damageInfo, true);
+			is_redirect = true;
+		}
+
 		// Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
 		if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
 			caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo);
@@ -1040,7 +1048,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 			!m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
 			((Player*)m_caster)->CastItemCombatSpell(unitTarget, m_attackType);
 
-		caster->DealSpellDamage(&damageInfo, true);
+		if(is_redirect == false)
+			caster->DealSpellDamage(&damageInfo, true);
 
 		// Judgement of Blood
 		if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000800000000) && m_spellInfo->SpellIconID == 153)
