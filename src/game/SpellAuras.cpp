@@ -4605,6 +4605,29 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 				}
 				break;
 			}
+		case SPELLFAMILY_HUNTER:
+			{
+				// Remove Stack Misdirection Serpent Sting and Traps @Kordbc
+				if(spellProto->SpellFamilyFlags & UI64LIT(0X000000000000004000) || spellProto->SpellFamilyFlags & UI64LIT(0X000000000000000004))
+				{
+					if (caster->GetTypeId() != TYPEID_PLAYER)
+						break;
+
+					Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+					for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+					{
+						if ((*itr)->GetId() == 34477)
+						{
+							if((*itr)->GetHolder()->GetAuraCharges() > 1)
+								(*itr)->GetHolder()->SetAuraCharges((*itr)->GetHolder()->GetAuraCharges() - 1);
+							else
+								caster->RemoveAurasDueToSpell(34477);
+							break;
+						}
+					}
+				}
+				break;
+			}
 		default:
 			break;
 		}
@@ -7340,7 +7363,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 					return;
 				}
 			default:
-				return;
+				return; 
 			}
 			break;
 		}
