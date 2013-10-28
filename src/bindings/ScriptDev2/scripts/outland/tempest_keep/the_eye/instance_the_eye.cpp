@@ -46,6 +46,20 @@ bool instance_the_eye::IsEncounterInProgress() const
     return false;
 }
 
+void instance_the_eye::OnCreatureEvade(Creature* pCreature)
+{
+	switch (pCreature->GetEntry())
+    {
+        case NPC_THALADRED:
+        case NPC_TELONICUS:
+        case NPC_CAPERNIAN:
+        case NPC_SANGUINAR:
+			pCreature->AI()->JustReachedHome();
+			break;
+
+    }
+}
+
 void instance_the_eye::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())

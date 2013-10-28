@@ -1120,11 +1120,7 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-		{
-			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)			
-				advisor_base_ai::JustReachedHome();
 			return;
-		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
@@ -1201,11 +1197,7 @@ struct MANGOS_DLL_DECL boss_lord_sanguinarAI : public advisor_base_ai
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-		{
-			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-				advisor_base_ai::JustReachedHome();
 			return;
-		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
@@ -1303,11 +1295,7 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!SelectHostileTarget() || !m_creature->getVictim())
-		{
-			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-				advisor_base_ai::JustReachedHome();
 			return;
-		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
@@ -1394,11 +1382,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
 	void UpdateAI(const uint32 uiDiff)
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-		{
-			if(!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && m_bFakeDeath == false)
-				advisor_base_ai::JustReachedHome();
 			return;
-		}
 
 		// Don't use abilities during fake death
 		if (m_bFakeDeath)
