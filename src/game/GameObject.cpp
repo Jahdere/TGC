@@ -1444,6 +1444,25 @@ void GameObject::Use(Unit* user)
 
             spellId = info->spellcaster.spellId;
 
+			// SoulWell upgrade soulstone if Improved Healthstone on caster @Kordbc
+			if(info->id == 181621)
+			{
+				Unit* caster = GetOwner();
+				Unit::AuraList const& mDummyAura = caster->GetAurasByType(SPELL_AURA_DUMMY);
+				for (Unit::AuraList::const_iterator i = mDummyAura.begin(); i != mDummyAura.end(); ++i)
+				{
+					switch((*i)->GetId())
+					{
+					case 18692:		// rank1
+						spellId = 34149;
+						break;
+					case 18693:		// rank2
+						spellId = 34150;
+						break;
+					}
+				}
+			}
+
             AddUse();
             break;
         }
