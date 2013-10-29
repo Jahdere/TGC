@@ -1,0 +1,16 @@
+src/game/SpellMgr.cpp View file @ 0a46b84
+@@ -861,6 +861,14 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
+            switch (spellproto->EffectMiscValue[effIndex])
+            {
+            case SPELLMOD_COST:                 // dependent from bas point sign (negative -> positive)
++            // Some Exceptions @Kordbc
++            switch(spellproto->Id)
++            {
++            case 12042:    // Pouvoir des arcanes (mage)
++            case 37441:    // Bonus set T5 (4) (mage)
++              return true;
++              break;
++            }
+              if (spellproto->CalculateSimpleValue(effIndex) > 0)
+                return false;
+              break;

@@ -1,0 +1,11 @@
+src/game/Spell.cpp View file @ 2d46e52
+@@ -6217,6 +6217,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+    case 37433:                                         // Spout (The Lurker Below), only players affected if its not in water
+      if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
+        return false;
+     break;
++  case 29511:                      // Repentance (Maiden of Virtue) , can't hit current target @Kordbc
++    if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->getVictim())
++      return false;
++    break;
+ 	case 30531:                                         //Check If Magtheridon get Soul Transfert

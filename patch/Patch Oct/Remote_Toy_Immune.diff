@@ -1,0 +1,8 @@
+@@ -6222,6 +6222,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+	case 29511:											// Repentance (Maiden of Virtue) , can't hit current target @Kordbc
+      if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->getVictim())
+        return false;
+      break;
++  case 37029:                      // Force immune remote toy (Telonicius) when player have Mental Protection Field @kordbc
++    if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
++      return false;

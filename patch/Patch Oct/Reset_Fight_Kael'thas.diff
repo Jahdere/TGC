@@ -1,0 +1,33 @@
+src/bindings/ScriptDev2/scripts/outland/tempest_keep/the_eye/instance_the_eye.cpp View file @ fc30146
+@@ -46,6 +46,20 @@ bool instance_the_eye::IsEncounterInProgress() const
+      return false;
+  }
+  
++void instance_the_eye::OnCreatureEvade(Creature* pCreature)
++{
++  switch (pCreature->GetEntry())
++    {
++        case NPC_THALADRED:
++        case NPC_TELONICUS:
++        case NPC_CAPERNIAN:
++        case NPC_SANGUINAR:
++      pCreature->AI()->JustReachedHome();
++      break;
++
++    }
++}
++
+  void instance_the_eye::OnCreatureCreate(Creature* pCreature)
+  {
+      switch (pCreature->GetEntry())
+
+
+src/bindings/ScriptDev2/scripts/outland/tempest_keep/the_eye/the_eye.h View file @ fc30146
+@@ -46,6 +46,7 @@ class MANGOS_DLL_DECL instance_the_eye : public ScriptedInstance
+  
+          void OnCreatureCreate(Creature* pCreature) override;
+          void OnObjectCreate(GameObject* pGo) override;
++    	  void OnCreatureEvade(Creature* pCreature) override;
+  
+          void SetData(uint32 uiType, uint32 uiData) override;
+          uint32 GetData(uint32 uiType) const override;

@@ -1,15 +1,23 @@
 #Kael'thas:
 - Fix d'un bug qui empêchait les adds de bouger après un wipe
 - Capernian ne devrait plus bouger lorsqu'elle est morte
+- Capernian devrait avoir une gestion d'aggro plus logique
 - L'arc devrait être tankable à distance
 - Amélioration du processus de reset des adds
 - Les armes légendaires devraient être correctement détruites dans les slots et sacs des joueurs au pull
 - Les adds devraient reset leur aggro après leur résurection
+- Telonicius devrait être plus facile à déplacer lorsqu'il est tanké au cac
+- Fix d'un bug qui permettait au jouet de telonicius de s'activer même sous protection du bâton
 - Ajout des animations lorsque Kael'thas s'envole
 
 #Kazzak :
 - Kazzak devrait regagner 150k hp après avoir tué un joueur
 
+#Damoiselle de vertue :
+- La cible du boss ne devrait plus pouvoir être sous l'effet de repentir
+
+#Chess event
+- Rescript complet (lorh)
 
 Priest :
 - Le puit de lumière devrait apparaître correctement
@@ -22,6 +30,15 @@ Shaman :
 
 Hunter :
 - La marque du chasseur améliorée devrait maintenant fonctionner correctement
+- Fix du 3ieme stack du détournement ainsi que des charges consommées par les pièges et piqure du serpent
+- Coupure d'ailes améliorée ne devrait plus s'enlever prématurément
+
+Mage :
+- Pouvoir des arcanes devrait etre considéré comme un buff
+- Fix d'un bug qui annulait le bonus T5 mage 4pièces
+
+Demoniste :
+- Puit d'ames devrait maintenant prendre en compte le talent d'amélioration
 
 General :
 - Fix d'override d'icone 
