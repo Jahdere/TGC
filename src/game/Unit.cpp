@@ -526,7 +526,7 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
 	uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
 	float chance = float(damage) / max_dmg * 100.0f;
 	if (roll_chance_f(chance))
-		RemoveSpellsCausingAura(auraType);
+		RemoveSpellsCausingAura(auraType, GetSpellAuraHolder(47168));	//Can't break Improved Wing Clip (hunt) @Kordbc
 }
 
 void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
