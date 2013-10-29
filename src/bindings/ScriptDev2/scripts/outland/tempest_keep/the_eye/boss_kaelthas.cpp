@@ -408,8 +408,11 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 				{
 					if(Unit* pTarget = m_creature->GetMap()->GetUnit((itr->getSource())->GetObjectGuid()))
 					{
-						DoCastSpellIfCan(pTarget,SPELL_EFFECT_NETHER_BEAM, CAST_TRIGGERED);
-						countNetherBeam++;
+						if(pTarget->isAlive())
+						{
+							DoCastSpellIfCan(pTarget,SPELL_EFFECT_NETHER_BEAM, CAST_TRIGGERED);
+							countNetherBeam++;
+						}
 					}
 					if(countNetherBeam == lPlayers.getSize() || countNetherBeam == 5)           // Max 5 Target
 						break;
@@ -732,7 +735,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 								}
 							}
 						}
-						m_uiCheckSol = 4000;
+						m_uiCheckSol = 5000;
 					}else
 						m_uiCheckSol -= uiDiff;
 
@@ -1285,7 +1288,10 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 						}
 					}
 				}
-			}                
+			}else{
+				AttackStart(pTarget);
+				return true;
+			}
 		}
 
 		// Will call EnterEvadeMode if fit
@@ -1511,7 +1517,7 @@ struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
 	{
 		// Self kill if the egg is killed
 		if (m_bFakeDeath)
-			m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+			m_creature->ForcedDespawn();
 	}
 
 	void UpdateAI(const uint32 uiDiff)
