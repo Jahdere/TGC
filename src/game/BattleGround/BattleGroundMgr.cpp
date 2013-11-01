@@ -746,7 +746,7 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 	time_t now = time(0);	//Timestamp now
 	time_t last_week = time((time_t*) now - 604800);	//Timestamp now - 7 days
 	uint64 total_team = 0;	// Total activ teams
-	uint8 limit_matches = 3;	//Limit different match before team1 can battle again vs team2 (set 3 by default)
+	uint8 limit_matches = sWorld.getConfig(CONFIG_INT32_ARENA_LIMIT_MATCHES);	//Limit different matches before team1 can battle again vs team2 (set 3 by default)
 
 	//Query to get total activ teams during the 7 last days (only in rated arena)
 	QueryResult* result_team = CharacterDatabase.PQuery("SELECT DISTINCT COALESCE(winner_tid, loser_tid) FROM character_arena_result WHERE start BETWEEN '%u' AND '%u' AND (w_rate_out != 0 || w_rate_in != 0)", now, last_week);
@@ -776,7 +776,7 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 	}
 
 	//get the last matchces of team1 (depend of limit_matches)
-	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT * FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') ORDER BY id DESC LIMIT %u", team_id1, team_id1, limit_matches);
+	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT * FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') AND (w_rate_out != 0 || w_rate_in != 0) ORDER BY id DESC LIMIT %u", team_id1, team_id1, limit_matches);
 
 	if(result_matches)
 	{
