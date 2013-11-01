@@ -744,9 +744,10 @@ this method check if two teams can battle in arena
 bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 {
 	time_t now = time(0);	//Timestamp now
-	time_t last_week = time((time_t*) now - 604800);	//Timestamp now - 7 days
+	time_t last_week = time((time_t*) now - 604800);//Timestamp now - 7 days
 	uint64 total_team = 0;	// Total activ teams
 	uint8 limit_matches = sWorld.getConfig(CONFIG_INT32_ARENA_LIMIT_MATCHES);	//Limit different matches before team1 can battle again vs team2 (set 3 by default)
+	uint32 temp_team = total_team - (limit_matches * 5); //
 
 	//Query to get total activ teams during the 7 last days (only in rated arena)
 	QueryResult* result_team = CharacterDatabase.PQuery("SELECT DISTINCT COALESCE(winner_tid, loser_tid) FROM character_arena_result WHERE start BETWEEN '%u' AND '%u' AND (w_rate_out != 0 || w_rate_in != 0)", now, last_week);
@@ -756,23 +757,20 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 		total_team = result_team->GetRowCount();
 	delete result_team;
 
-	//Set limit matches (algo can be better)
+	//Set limit matches (best algo ever)
 	if(total_team)
 	{
-		if(total_team >= 20 && total_team < 25)
-			limit_matches = 4;
-		else if(total_team >= 25 && total_team < 30)
-			limit_matches = 5;
-		else if(total_team >= 30 && total_team < 35)
-			limit_matches = 6;
-		else if(total_team >= 35 && total_team < 40)
-			limit_matches = 7;
-		else if(total_team >= 40 && total_team < 45)
-			limit_matches = 8;
-		else if(total_team >= 45 && total_team < 50)
-			limit_matches = 9;
-		else if(total_team >= 50)
-			limit_matches = 10;
+		//Check if limit matches have to be changed
+		if(total_team > (limit_matches * 5))
+		{
+			while((temp_team - 5) >= -4)
+			{
+				++limit_matches;	//Increase limit matches each 5 more teams
+				if(limit_matches == 10)	//limit_matches max 
+					break;
+				temp_team = temp_team - 5;	//Decrease temp_team
+			}
+		}
 	}
 
 	//get the last matchces of team1 (depend of limit_matches)
