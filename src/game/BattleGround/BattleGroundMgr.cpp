@@ -739,6 +739,62 @@ bool BattleGroundQueue::CheckSkirmishForSameFaction(BattleGroundBracketId bracke
 }
 
 /*
+this method check if two teams can battle in arena
+*/
+bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
+{
+	time_t now = time(0);	//Timestamp now
+	time_t last_week = time((time_t*) now - 604800);	//Timestamp now - 7 days
+	uint64 total_team = 0;	// Total activ teams
+	uint8 limit_matches = 3;	//Limit different match before team1 can battle again vs team2 (set 3 by default)
+
+	//Query to get total activ teams during the 7 last days (only in rated arena)
+	QueryResult* result_team = CharacterDatabase.PQuery("SELECT DISTINCT COALESCE(winner_tid, loser_tid) FROM character_arena_result WHERE start BETWEEN '%u' AND '%u' AND (w_rate_out != 0 || w_rate_in != 0)", now, last_week);
+
+	//Set total_team
+	if(result_team)
+		total_team = result_team->GetRowCount();
+	delete result_team;
+
+	//Set limit matches (algo can be better)
+	if(total_team)
+	{
+		if(total_team >= 20 && total_team < 25)
+			limit_matches = 4;
+		else if(total_team >= 25 && total_team < 30)
+			limit_matches = 5;
+		else if(total_team >= 30 && total_team < 35)
+			limit_matches = 6;
+		else if(total_team >= 35 && total_team < 40)
+			limit_matches = 7;
+		else if(total_team >= 40 && total_team < 45)
+			limit_matches = 8;
+		else if(total_team >= 45 && total_team < 50)
+			limit_matches = 9;
+		else if(total_team >= 50)
+			limit_matches = 10;
+	}
+
+	//get the last matchces of team1 (depend of limit_matches)
+	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT * FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') ORDER BY id DESC LIMIT %u", team_id1, team_id1, limit_matches);
+
+	if(result_matches)
+	{
+		do{
+			Field* fields = result_matches->Fetch();
+			if(fields[2].GetInt32() == team_id2 || fields[3].GetInt32() == team_id2)	//Compare and check if team1 battled team2 during the last limit_matches
+			{
+				delete result_matches;
+				return false;
+			}
+		}while (result_matches->NextRow());
+	}
+
+	delete result_matches;
+	return true;
+}
+
+/*
 this method is called when group is inserted, or player / group is removed from BG Queue - there is only one player's status changed, so we don't use while(true) cycles to invite whole queue
 it must be called after fully adding the members of a group to ensure group joining
 should be called from BattleGround::RemovePlayer function in some cases
@@ -1007,6 +1063,10 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
                 m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].erase(itr_team[BG_TEAM_HORDE]);
                 itr_team[BG_TEAM_HORDE] = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin();
             }
+
+			//Custom check if two teams can battle
+			if(!CanBattleAgainst((*itr_team[BG_TEAM_ALLIANCE])->ArenaTeamId, (*itr_team[BG_TEAM_HORDE])->ArenaTeamId))
+				return;
 
             InviteGroupToBG(*(itr_team[BG_TEAM_ALLIANCE]), arena, ALLIANCE);
             InviteGroupToBG(*(itr_team[BG_TEAM_HORDE]), arena, HORDE);
