@@ -38,7 +38,7 @@ enum
     SPELL_DARK_SHELL                = 32358,
     SPELL_DARK_SHELL_H              = 38759,
 
-    MAX_VOID_BLASTS                 = 5,
+    MAX_VOID_BLASTS                 = 4,
 };
 
 struct MANGOS_DLL_DECL boss_pandemoniusAI : public ScriptedAI
@@ -89,7 +89,7 @@ struct MANGOS_DLL_DECL boss_pandemoniusAI : public ScriptedAI
 
         if (m_uiVoidBlastTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H, SELECT_FLAG_PLAYER))
                 DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H);
 
             // reset timer and counter when counter has reached the max limit
