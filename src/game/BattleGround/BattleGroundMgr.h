@@ -92,7 +92,6 @@ class BattleGroundQueue
         bool GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo);
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
-
     private:
         // mutex that should not allow changing private data, nor allowing to update Queue during private data change.
         ACE_Recursive_Thread_Mutex  m_Lock;
@@ -121,7 +120,7 @@ class BattleGroundQueue
                 void Init();
                 bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount);
                 bool KickGroup(uint32 size);
-                uint32 GetPlayerCount() const {return PlayerCount;}
+				uint32 GetPlayerCount(){ return PlayerCount; }
             public:
                 GroupsQueueType SelectedGroups;
             private:
@@ -134,7 +133,7 @@ class BattleGroundQueue
         bool InviteGroupToBG(GroupQueueInfo* ginfo, BattleGround* bg, Team side);
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
-        uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
+        uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];		
 };
 
 /*
@@ -222,6 +221,7 @@ class BattleGroundMgr
         void CreateInitialBattleGrounds();
         void DeleteAllBattleGrounds();
 
+
         void SendToBattleGround(Player* pl, uint32 InstanceID, BattleGroundTypeId bgTypeId);
 
         /* Battleground queues */
@@ -277,6 +277,11 @@ class BattleGroundMgr
         static HolidayIds BGTypeToWeekendHolidayId(BattleGroundTypeId bgTypeId);
         static BattleGroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattleGroundTypeId bgTypeId);
+
+		void InitLimitMatches();
+		void SetLimitMaches(uint32 LimitMatches) { m_LimitMatches = LimitMatches; }
+		uint32 GetLimitMatches() const { return m_LimitMatches; }
+
     private:
         ACE_Thread_Mutex    SchedulerLock;
         BattleMastersMap    mBattleMastersMap;
@@ -291,6 +296,7 @@ class BattleGroundMgr
         uint32 m_NextRatingDiscardUpdate;
         time_t m_NextAutoDistributionTime;
         uint32 m_AutoDistributionTimeChecker;
+		uint32 m_LimitMatches;
         bool   m_ArenaTesting;
         bool   m_Testing;
 };

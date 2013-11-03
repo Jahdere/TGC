@@ -1323,6 +1323,8 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
     sBattleGroundMgr.InitAutomaticArenaPointDistribution();
+	sBattleGroundMgr.InitLimitMatches();
+	m_timers[WUPDATE_LIMIT_MATCHES].SetInterval(DAY * IN_MILLISECONDS);
 
     ///- Initialize Outdoor PvP
     sLog.outString("Starting Outdoor PvP System");
@@ -1477,6 +1479,13 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_UPTIME].Reset();
         LoginDatabase.PExecute("UPDATE uptime SET uptime = %u, maxplayers = %u WHERE realmid = %u AND starttime = " UI64FMTD, tmpDiff, maxClientsNum, realmID, uint64(m_startTime));
     }
+
+	///<li> Update Limit Matches
+	if(m_timers[WUPDATE_LIMIT_MATCHES].Passed())
+	{
+		sBattleGroundMgr.InitLimitMatches();
+		m_timers[WUPDATE_LIMIT_MATCHES].Reset();
+	}
 
     /// <li> Handle all other objects
     ///- Update objects (maps, transport, creatures,...)

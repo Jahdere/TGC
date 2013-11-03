@@ -16,9 +16,6 @@
 #Damoiselle de vertue :
 - La cible du boss ne devrait plus pouvoir être sous l'effet de repentir
 
-#Chess event
-- Rescript complet (lorh)
-
 Priest :
 - Le puit de lumière devrait apparaître correctement
 

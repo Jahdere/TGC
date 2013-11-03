@@ -743,36 +743,8 @@ this method check if two teams can battle in arena
 */
 bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 {
-	time_t now = time(0);	//Timestamp now
-	time_t last_week = time((time_t*) now - 604800);//Timestamp now - 7 days
-	uint64 total_team = 0;	// Total activ teams
-	uint8 limit_matches = sWorld.getConfig(CONFIG_INT32_ARENA_LIMIT_MATCHES);	//Limit different matches before team1 can battle again vs team2 (set 3 by default)
-	uint32 temp_team = total_team - (limit_matches * 5); //
 
-	//Query to get total activ teams during the 7 last days (only in rated arena)
-	QueryResult* result_team = CharacterDatabase.PQuery("SELECT DISTINCT COALESCE(winner_tid, loser_tid) FROM character_arena_result WHERE start BETWEEN '%u' AND '%u' AND (w_rate_out != 0 || w_rate_in != 0)", now, last_week);
-
-	//Set total_team
-	if(result_team)
-		total_team = result_team->GetRowCount();
-	delete result_team;
-
-	//Set limit matches (best algo ever)
-	if(total_team)
-	{
-		//Check if limit matches have to be changed
-		if(total_team > (limit_matches * 5))
-		{
-			while((temp_team - 5) >= -4)
-			{
-				++limit_matches;	//Increase limit matches each 5 more teams
-				if(limit_matches == 10)	//limit_matches max 
-					break;
-				temp_team = temp_team - 5;	//Decrease temp_team
-			}
-		}
-	}
-
+	uint32 limit_matches = sBattleGroundMgr.GetLimitMatches();
 	//get the last matchces of team1 (depend of limit_matches)
 	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT * FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') AND (w_rate_out != 0 || w_rate_in != 0) ORDER BY id DESC LIMIT %u", team_id1, team_id1, limit_matches);
 
@@ -1755,6 +1727,45 @@ void BattleGroundMgr::InitAutomaticArenaPointDistribution()
         }
         DEBUG_LOG("Automatic Arena Point Distribution initialized.");
     }
+}
+
+void BattleGroundMgr::InitLimitMatches()
+{
+	if(sWorld.getConfig(CONFIG_INT32_ARENA_LIMIT_MATCHES))
+	{
+		DEBUG_LOG("Initializing Limit Matches");
+		time_t now = sWorld.GetGameTime();
+		time_t last_week = time((time_t*) now - 604800);//Timestamp now - 7 days
+		uint8 limit_matches = sWorld.getConfig(CONFIG_INT32_ARENA_LIMIT_MATCHES);	//Limit different matches before team1 can battle again vs team2 (set 3 by default)
+		uint32 total_team = 0;	// Total activ teams
+
+		QueryResult* result_team = CharacterDatabase.PQuery("SELECT COUNT(DISTINCT COALESCE(winner_tid, loser_tid)) FROM character_arena_result WHERE start BETWEEN '%u' AND '%u' AND (w_rate_out != 0 || w_rate_in != 0)", now, last_week);
+
+		//Set total_team
+		if(result_team)
+		{
+			Field* field = result_team->Fetch();
+			total_team = field[0].GetInt32();
+
+		}
+		delete result_team;
+
+		int32 temp_team = total_team - (limit_matches * 5); // Total team temp
+
+		//Set limit matches (best algo ever)
+		if(total_team)
+		{
+			//Check if limit matches have to be changed
+			while(temp_team >= 5)
+			{
+				++limit_matches;	//Increase limit matches each 5 more teams
+				if(limit_matches == 10)	//limit_matches max 
+					break;
+				temp_team = temp_team - 5;	//Decrease temp_team
+			}
+		}
+		SetLimitMaches(limit_matches);
+	}	
 }
 
 void BattleGroundMgr::DistributeArenaPoints()
