@@ -743,24 +743,42 @@ this method check if two teams can battle in arena
 */
 bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 {
+	// get Teams Objects
+	ArenaTeam* team1 = sObjectMgr.GetArenaTeamById(team_id1);	
+	ArenaTeam* team2 = sObjectMgr.GetArenaTeamById(team_id2);
 
-	uint32 limit_matches = sBattleGroundMgr.GetLimitMatches();
-	//get the last matchces of team1 (depend of limit_matches)
-	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT * FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') AND (w_rate_out != 0 || w_rate_in != 0) ORDER BY id DESC LIMIT %u", team_id1, team_id1, limit_matches);
+	// get limit matches
+	int32 limit_matches = sBattleGroundMgr.GetLimitMatches();
 
-	if(result_matches)
-	{
-		do{
-			Field* fields = result_matches->Fetch();
-			if(fields[2].GetInt32() == team_id2 || fields[3].GetInt32() == team_id2)	//Compare and check if team1 battled team2 during the last limit_matches
-			{
-				delete result_matches;
-				return false;
-			}
-		}while (result_matches->NextRow());
+	//No limit here, always return true
+	if(!limit_matches)
+		return true;
+
+	if(team1->HasFightInArena(team_id2))
+		return false;
+	else{
+		// get global infos
+		ArenaTeam::OldMatchesList oldMatchesListTeam1 = team1->GetOldMatches();
+		ArenaTeam::OldMatchesList oldMatchesListTeam2 = team2->GetOldMatches();
+
+		// Create a new insert for team1
+		ArenaOldMatches oldMatches_team1;
+		oldMatches_team1.team_id = team_id2;
+
+		// Create a new insert for team2
+		ArenaOldMatches oldMatches_team2;
+		oldMatches_team2.team_id = team_id1;
+
+		//Insert in each list
+		oldMatchesListTeam1.push_front(oldMatches_team1);
+		oldMatchesListTeam2.push_front(oldMatches_team2);
+
+		//Erase Check to have a list with the same size as limit matches
+		while(oldMatchesListTeam1.size > limit_matches)
+			oldMatchesListTeam1.erase(oldMatchesListTeam1.end());
+		while(oldMatchesListTeam2.size > limit_matches)
+			oldMatchesListTeam2.erase(oldMatchesListTeam2.end());		
 	}
-
-	delete result_matches;
 	return true;
 }
 
@@ -1146,6 +1164,7 @@ BattleGroundMgr::BattleGroundMgr() : m_AutoDistributionTimeChecker(0), m_ArenaTe
         m_BattleGrounds[i].clear();
     m_NextRatingDiscardUpdate = sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER);
     m_Testing = false;
+	m_LimitMatches = 0;
 }
 
 BattleGroundMgr::~BattleGroundMgr()
@@ -1764,8 +1783,9 @@ void BattleGroundMgr::InitLimitMatches()
 				temp_team = temp_team - 5;	//Decrease temp_team
 			}
 		}
-		SetLimitMaches(limit_matches);
-	}	
+		SetLimitMatches(limit_matches);
+	}
+		
 }
 
 void BattleGroundMgr::DistributeArenaPoints()

@@ -108,6 +108,11 @@ struct ArenaTeamStats
     uint32 rank;
 };
 
+struct ArenaOldMatches
+{
+	uint32 team_id;
+};
+
 #define MAX_ARENA_SLOT 3                                    // 0..2 slots
 
 class ArenaTeam
@@ -120,6 +125,7 @@ class ArenaTeam
         void Disband(WorldSession* session);
 
         typedef std::list<ArenaTeamMember> MemberList;
+		typedef std::list<ArenaOldMatches> OldMatchesList;
 
         uint32 GetId() const              { return m_TeamId; }
         ArenaType GetType() const         { return m_Type; }
@@ -167,6 +173,16 @@ class ArenaTeam
 
             return NULL;
         }
+
+		bool HasFightInArena(uint32 arenaTeamIdOpponent)
+		{
+			for(OldMatchesList::iterator itr = m_OldMatches.begin(); itr != m_OldMatches.end(); ++itr)
+				if(itr->team_id == arenaTeamIdOpponent)
+					return false;
+			return true;
+		}
+
+		OldMatchesList GetOldMatches() const { return m_OldMatches; }
 
         bool IsFighting() const;
 
@@ -219,5 +235,6 @@ class ArenaTeam
 
         MemberList m_members;
         ArenaTeamStats m_stats;
+		OldMatchesList m_OldMatches;
 };
 #endif

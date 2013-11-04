@@ -120,7 +120,7 @@ class BattleGroundQueue
                 void Init();
                 bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount);
                 bool KickGroup(uint32 size);
-				uint32 GetPlayerCount(){ return PlayerCount; }
+				uint32 GetPlayerCount() const { return PlayerCount; }
             public:
                 GroupsQueueType SelectedGroups;
             private:
@@ -279,9 +279,8 @@ class BattleGroundMgr
         static bool IsBGWeekend(BattleGroundTypeId bgTypeId);
 
 		void InitLimitMatches();
-		void SetLimitMaches(uint32 LimitMatches) { m_LimitMatches = LimitMatches; }
+		void SetLimitMatches(uint32 LimitMatches){ m_LimitMatches = LimitMatches;}
 		uint32 GetLimitMatches() const { return m_LimitMatches; }
-
     private:
         ACE_Thread_Mutex    SchedulerLock;
         BattleMastersMap    mBattleMastersMap;
@@ -298,7 +297,7 @@ class BattleGroundMgr
         uint32 m_AutoDistributionTimeChecker;
 		uint32 m_LimitMatches;
         bool   m_ArenaTesting;
-        bool   m_Testing;
+        bool   m_Testing;		
 };
 
 #define sBattleGroundMgr MaNGOS::Singleton<BattleGroundMgr>::Instance()
