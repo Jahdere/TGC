@@ -55,6 +55,16 @@ enum YellType
 	DEATH        = 6,                                       // Used on death
 };
 
+enum MovePoint
+{
+	POINT_ID_ALLY = 0,
+	POINT_ID_ALLY1 = 1,
+	POINT_ID_ALLY2 = 2,
+	POINT_ID_ALLY3 = 3,
+	POINT_ID_HORDE = 4,
+	POINT_ID_HORDE1 = 5,
+};
+
 struct MANGOS_DLL_DECL hyjalAI : public ScriptedAI
 {
 	hyjalAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -93,6 +103,8 @@ struct MANGOS_DLL_DECL hyjalAI : public ScriptedAI
 	void JustSummoned(Creature*) override;
 
 	void SummonedCreatureJustDied(Creature* pSummoned) override;
+
+	void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override;
 
 	// Summons the next wave, calls SummonCreature
 	void SummonNextWave();

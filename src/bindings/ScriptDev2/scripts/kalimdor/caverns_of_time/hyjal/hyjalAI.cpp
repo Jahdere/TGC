@@ -28,10 +28,12 @@ struct HyjalLocation
 {
 	eBaseArea m_pBaseArea;
 	float m_fX, m_fY, m_fZ;
+	MovePoint MovePoint;
 };
 
 // Locations for summoning waves
 // Must be even number
+/*
 static const HyjalLocation aHyjalSpawnLoc[] =
 {
 	{BASE_ALLY,  4979.010f, -1709.134f, 1339.674f},
@@ -42,13 +44,27 @@ static const HyjalLocation aHyjalSpawnLoc[] =
 	{BASE_HORDE, 5545.901f, -2582.246f, 1479.256f},
 	{BASE_HORDE, 5565.642f, -2565.666f, 1481.635f},
 	{BASE_HORDE, 5547.218f, -2574.589f, 1479.194f}
+};*/
+
+static const HyjalLocation aHyjalSpawnLoc[] =
+{
+	{BASE_ALLY,  4895.535f, -1570.689f, 1334.465f, POINT_ID_ALLY},
+	{BASE_ALLY,  4902.871f, -1574.724f, 1332.589f, POINT_ID_ALLY},
+	{BASE_ALLY,  4895.535f, -1570.689f, 1334.465f, POINT_ID_ALLY},
+	{BASE_ALLY,  4902.871f, -1574.724f, 1332.589f, POINT_ID_ALLY},
+	{BASE_HORDE, 5557.582f, -2587.159f, 1481.644f, POINT_ID_HORDE},
+	{BASE_HORDE, 5545.901f, -2582.246f, 1479.256f, POINT_ID_HORDE},
+	{BASE_HORDE, 5565.642f, -2565.666f, 1481.635f, POINT_ID_HORDE},
+	{BASE_HORDE, 5547.218f, -2574.589f, 1479.194f, POINT_ID_HORDE}
 };
 
-// used to inform the wave where to move
+// used to inform the wave where to move after spawn
 static const HyjalLocation aHyjalWaveMoveTo[] =
 {
-	{BASE_ALLY,  5018.654f, -1752.074f, 1322.203f},
-	{BASE_HORDE, 5504.569f, -2688.489f, 1479.991f}
+	{BASE_ALLY,  4901.451f, -1663.070f, 1320.038f, POINT_ID_ALLY1},
+	{BASE_ALLY,  4969.123f, -1705.904f, 1341.363f, POINT_ID_ALLY2},
+	{BASE_ALLY,  4966.911f, -1697.741f, 1340.223f, POINT_ID_ALLY3},
+	{BASE_HORDE, 5504.569f, -2688.489f, 1479.991f, POINT_ID_HORDE1}
 };
 
 struct HyjalYells
@@ -109,7 +125,7 @@ static const HyjalWave aHyjalWavesAlliance[] =
 	{{NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_BANSH, NPC_BANSH, 0, 0, 0, 0, 0, 0}, 125000, false},
 	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0, 0, 0}, 125000, false},
 	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_ABOMI, NPC_ABOMI, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0, 0, 0}, 125000, false},
-	{{NPC_GHOUL, NPC_GHOUL, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_BANSH, NPC_BANSH, 0, 0, 0, 0, 0, 0}, 125000, false},
+	{{NPC_GHOUL, NPC_GHOUL, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, 0, 0, 0, 0}, 125000, false}, // Ajout 2 bansh
 	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_BANSH, NPC_BANSH, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0}, 140000, false},
 	// All 8 Waves are summoned, summon Anatheron
 	{{NPC_ANETHERON, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, true}
@@ -132,15 +148,16 @@ static const HyjalWave aHyjalWavesHorde[] =
 	// Azgalor Wave 1-8
 	{{NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0, 0, 0}, 135000, false},
 	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_FROST, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, 0, 0, 0, 0}, 165000, false},
-	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, 0, 0, 0, 0, 0, 0}, 160000, false},
-	{{NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, 0, 0, 0, 0}, 165000, false},
+	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, 0, 0, 0, 0}, 160000, false}, // Ajout de 2gouhl
+	{{NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, 0, 0, 0, 0}, 165000, false}, // Remplace 2 STALK par 2 GIANT
 	{{NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0}, 135000, false},
 	{{NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, 0, 0, 0, 0, 0, 0}, 135000, false},
 	{{NPC_GHOUL, NPC_GHOUL, NPC_CRYPT, NPC_CRYPT, NPC_STALK, NPC_STALK, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, 0, 0, 0, 0}, 195000, false},
-	{{NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_STALK, NPC_STALK, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_BANSH, NPC_BANSH, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0}, 225000, false},
+	{{NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_STALK, NPC_STALK, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_NECRO, NPC_NECRO, 0, 0}, 225000, false}, //Ajout de 2 bansh
 	// All 8 Waves are summoned, summon Azgalor
 	{{NPC_AZGALOR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, true}
 };
+
 
 void hyjalAI::Reset()
 {
@@ -276,7 +293,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 	for (uint32 i = 0; i < countof(aHyjalWaveMoveTo); ++i)
 	{
-		if (aHyjalWaveMoveTo[i].m_pBaseArea != (eBaseArea)m_uiBase)
+		if (aHyjalWaveMoveTo[i].m_pBaseArea != (eBaseArea)m_uiBase && (aHyjalWaveMoveTo[i].MovePoint != POINT_ID_ALLY1 || aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE1))
 			continue;
 
 		pMove = &aHyjalWaveMoveTo[i];
@@ -289,7 +306,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
 
 		pSummoned->SetWalk(false);
-		pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
 	}
 
 	// Check if creature is a boss.
@@ -297,6 +314,24 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 		m_aBossGuid[!m_bIsFirstBossDead ? 0 : 1] = pSummoned->GetObjectGuid();
 	else
 		lWaveMobGUIDList.push_back(pSummoned->GetObjectGuid());
+}
+
+void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId)
+{
+	if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->isDead())
+		return;
+
+	HyjalLocation const* pMove = NULL;
+	switch(uiPointId)
+	{
+	case POINT_ID_ALLY1:
+	case POINT_ID_ALLY2:
+		pMove = &aHyjalWaveMoveTo[uiPointId];
+		float fX, fY, fZ;
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
+		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		break;
+	}
 }
 
 void hyjalAI::SummonedCreatureJustDied(Creature* pSummoned)
@@ -467,6 +502,34 @@ void hyjalAI::JustDied(Unit* pKiller)
 	m_creature->SetActiveObjectState(false);
 
 	// TODO: in case they die during boss encounter, then what? despawn boss?
+	if(m_pInstance)
+	{
+		for(uint8 i = 0; i < MAX_ENCOUNTER; i++)
+		{
+			if(m_pInstance->GetData(i) == IN_PROGRESS)
+			{
+				switch(i)
+				{
+				case TYPE_WINTERCHILL:
+					m_pInstance->GetSingleCreatureFromStorage(NPC_WINTERCHILL)->ForcedDespawn();
+					m_pInstance->SetData(i, FAIL);
+					break;
+				case TYPE_ANETHERON:
+					m_pInstance->GetSingleCreatureFromStorage(NPC_ANETHERON)->ForcedDespawn();
+					m_pInstance->SetData(i, FAIL);
+					break;
+				case TYPE_KAZROGAL:
+					m_pInstance->GetSingleCreatureFromStorage(NPC_KAZROGAL)->ForcedDespawn();
+					m_pInstance->SetData(i, FAIL);
+					break;
+				case TYPE_AZGALOR:
+					m_pInstance->GetSingleCreatureFromStorage(NPC_AZGALOR)->ForcedDespawn();
+					m_pInstance->SetData(i, FAIL);
+					break;
+				}
+			}
+		}
+	}
 }
 
 void hyjalAI::UpdateAI(const uint32 uiDiff)

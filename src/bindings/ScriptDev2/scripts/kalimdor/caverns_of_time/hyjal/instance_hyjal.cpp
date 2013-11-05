@@ -59,8 +59,16 @@ void instance_mount_hyjal::OnPlayerEnter(Player* /*pPlayer*/)
 
 void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 {
-	if (pCreature->GetEntry() == NPC_ARCHIMONDE)
-		m_mNpcEntryGuidStore[NPC_ARCHIMONDE] = pCreature->GetObjectGuid();
+	switch(pCreature->GetEntry())
+	{
+	case NPC_ARCHIMONDE:
+	case NPC_WINTERCHILL:
+	case NPC_ANETHERON:
+	case NPC_KAZROGAL:
+	case NPC_AZGALOR:
+		m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+		break;
+	}
 }
 
 void instance_mount_hyjal::OnObjectCreate(GameObject* pGo)
