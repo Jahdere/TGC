@@ -220,7 +220,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
 	&Aura::HandleAuraPowerBurn,                             //162 SPELL_AURA_POWER_BURN_MANA
 	&Aura::HandleNoImmediateEffect,                         //163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS      implemented in Unit::CalculateMeleeDamage and Unit::SpellCriticalDamageBonus
 	&Aura::HandleUnused,                                    //164 useless, only one test spell
-	&Aura::HandleNoImmediateEffect,                         //165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS implemented in Unit::MeleeDamageBonusDone
+	&Aura::HandleModMeleeAttackPowerAttackerBonus,          //165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS implemented in Unit::MeleeDamageBonusDone
 	&Aura::HandleAuraModAttackPowerPercent,                 //166 SPELL_AURA_MOD_ATTACK_POWER_PCT
 	&Aura::HandleAuraModRangedAttackPowerPercent,           //167 SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT
 	&Aura::HandleNoImmediateEffect,                         //168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS            implemented in Unit::SpellDamageBonusDone, Unit::MeleeDamageBonusDone
@@ -4605,29 +4605,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 				}
 				break;
 			}
-		case SPELLFAMILY_HUNTER:
-			{
-				// Remove Stack Misdirection Serpent Sting and Traps @Kordbc
-				if(spellProto->SpellFamilyFlags & UI64LIT(0X000000000000004000) || spellProto->SpellFamilyFlags & UI64LIT(0X000000000000000004))
-				{
-					if (caster->GetTypeId() != TYPEID_PLAYER)
-						break;
-
-					Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-					for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
-					{
-						if ((*itr)->GetId() == 34477)
-						{
-							if((*itr)->GetHolder()->GetAuraCharges() > 1)
-								(*itr)->GetHolder()->SetAuraCharges((*itr)->GetHolder()->GetAuraCharges() - 1);
-							else
-								caster->RemoveAurasDueToSpell(34477);
-							break;
-						}
-					}
-				}
-				break;
-			}
 		default:
 			break;
 		}
@@ -5330,6 +5307,41 @@ void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool /*Real*/)
 
 	// UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
 	GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
+}
+
+void Aura::HandleModMeleeAttackPowerAttackerBonus(bool apply, bool /*Real*/)
+{
+    if (!apply)
+        return;
+
+    switch(GetId())
+    {
+        case 1130:
+        case 14323:
+        case 14324:
+        case 14325:
+            if(Unit* caster = GetCaster())
+            {
+                Unit::AuraList const& mclassScritAuras = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for (Unit::AuraList::const_iterator j = mclassScritAuras.begin(); j != mclassScritAuras.end(); ++j)
+                {
+                    switch((*j)->GetModifier()->m_miscvalue)
+                    {
+                        case 5240:
+                        case 5237:
+                        case 5238:
+                        case 5236:
+                        case 5239:
+                            m_modifier.m_amount = (*j)->GetModifier()->m_amount;
+                            break;
+                        default : break;
+                    }
+                }
+            }
+            break;
+        default : break;
+    }
+
 }
 
 void Aura::HandleAuraModRangedAttackPowerOfStatPercent(bool /*apply*/, bool Real)

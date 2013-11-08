@@ -370,6 +370,7 @@ public:
 	void HandleAuraAllowFlight(bool Apply, bool Real);
 	void HandleModRating(bool apply, bool Real);
 	void HandleModTargetResistance(bool apply, bool Real);
+	void HandleModMeleeAttackPowerAttackerBonus(bool apply, bool Real);
 	void HandleAuraModAttackPowerPercent(bool apply, bool Real);
 	void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
 	void HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real);
@@ -389,7 +390,7 @@ public:
 	void HandleAuraModExpertise(bool apply, bool Real);
 	void HandleForceMoveForward(bool apply, bool Real);
 	void HandleAuraModResistenceOfStatPercent(bool apply, bool Real);
-	void HandleAuraPowerBurn(bool apply, bool Real);
+	void HandleAuraPowerBurn(bool apply, bool Real);	
 	void HandleSchoolAbsorb(bool apply, bool Real);
 	void HandlePreventFleeing(bool apply, bool Real);
 	void HandleManaShield(bool apply, bool Real);
