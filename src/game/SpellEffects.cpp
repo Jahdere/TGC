@@ -2880,6 +2880,9 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 			unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
 
 			addhealth += tickheal * tickcount;
+		// Cannibalize Ghoul (Hyjal)
+		}else if(m_spellInfo->Id == 31538){
+			addhealth = m_caster->GetMaxHealth() * 0.07;
 		}
 
 		addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
