@@ -243,9 +243,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 	uint8 m_uiCountBoule;
 	uint8 m_uiCountBeamer;
 
-
-
 	bool m_uiSwitchAdd; // Sauvegarde l'add en cours de fight
+
 
 	void Reset()
 	{
@@ -279,11 +278,11 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 		m_uiCountBoule              = 0;
 		m_uiFullPowerTimer          = 0;
 		m_uiCountBeamer             = 0;
-		m_uiFlyTimer                = 0;                
+		m_uiFlyTimer                = 0;
 
 		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 		m_creature->SetObjectScale(float(1));
-		SetCombatMovement(true);		
+		SetCombatMovement(true);	
 	}
 
 	void clearWeapon()
@@ -707,7 +706,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 					{
 						if(!m_creature->HasAura(SPELL_SHOCK_BARRIER))
 						{
-							if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER) == CAST_OK)
+							if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED) == CAST_OK)
 							{
 								m_uiFireballTimer = 7000;
 								m_uiShockBarrierTimer = 2000;
@@ -719,19 +718,19 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 					//Check if Player is on the ground and bump him
 					if(m_uiCheckSol <= uiDiff)
 					{
-						std::vector<Unit*> suitableTargets;
-						ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-						ThreatList::const_iterator itr = threatList.begin();
-
-						for (itr; itr != threatList.end(); ++itr)
+						Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
+						if (!lPlayers.isEmpty())
 						{
-							if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+							for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
 							{
-								if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsLevitating())
+								if (Unit* pTarget = m_creature->GetMap()->GetUnit((itr->getSource())->GetObjectGuid()))
 								{
-									pTarget->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_AURA);
-									pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_KNOCKBACK, true, NULL, NULL, m_creature->GetObjectGuid());
-									pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_AURA, true, NULL, NULL, m_creature->GetObjectGuid());
+									if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->isAlive() && (pTarget->GetPositionZ() - m_creature->GetMap()->GetHeight(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ()) < 0.1f ))
+									{
+										pTarget->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_AURA);
+										pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_KNOCKBACK, true, NULL, NULL, m_creature->GetObjectGuid());
+										pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_AURA, true, NULL, NULL, m_creature->GetObjectGuid());
+									}
 								}
 							}
 						}
@@ -1012,18 +1011,6 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		m_creature->GetMotionMaster()->Clear();
 		SetCombatMovement(true);
-	}
-
-	void JustReachedHome() override
-	{
-		// Reset Kael if needed
-		if (m_pInstance)
-		{
-			if (Creature* pKael = m_pInstance->GetSingleCreatureFromStorage(NPC_KAELTHAS))
-				pKael->AI()->EnterEvadeMode();
-
-			m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
-		}
 	}
 
 	void DamageTaken(Unit* pDoneby, uint32 &uiDamage)

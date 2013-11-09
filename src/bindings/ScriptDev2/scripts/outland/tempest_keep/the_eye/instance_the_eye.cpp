@@ -54,7 +54,12 @@ void instance_the_eye::OnCreatureEvade(Creature* pCreature)
         case NPC_TELONICUS:
         case NPC_CAPERNIAN:
         case NPC_SANGUINAR:
-			pCreature->AI()->JustReachedHome();
+			// Reset Kael if needed
+			if (Creature* pKael = GetSingleCreatureFromStorage(NPC_KAELTHAS))
+			{
+				pKael->AI()->EnterEvadeMode();
+				SetData(TYPE_KAELTHAS, FAIL);
+			}
 			break;
 
     }
