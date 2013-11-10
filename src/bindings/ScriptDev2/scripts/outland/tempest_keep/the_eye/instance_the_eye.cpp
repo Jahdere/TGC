@@ -45,24 +45,6 @@ bool instance_the_eye::IsEncounterInProgress() const
 
     return false;
 }
-
-void instance_the_eye::OnCreatureEvade(Creature* pCreature)
-{
-	switch (pCreature->GetEntry())
-    {
-        case NPC_THALADRED:
-        case NPC_TELONICUS:
-        case NPC_CAPERNIAN:
-        case NPC_SANGUINAR:
-			// Reset Kael if needed
-			if (Creature* pKael = GetSingleCreatureFromStorage(NPC_KAELTHAS))
-			{
-				pKael->AI()->EnterEvadeMode();
-				SetData(TYPE_KAELTHAS, FAIL);
-			}
-			break;
-
-    }
 }
 
 void instance_the_eye::OnCreatureCreate(Creature* pCreature)
@@ -124,8 +106,6 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
                     {
                         if (!pTemp->isAlive())
                             pTemp->Respawn();
-                        else
-                            pTemp->AI()->EnterEvadeMode();
                     }
                 }
             }

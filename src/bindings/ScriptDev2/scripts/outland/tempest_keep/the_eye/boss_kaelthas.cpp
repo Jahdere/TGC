@@ -245,7 +245,6 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
 	bool m_uiSwitchAdd; // Sauvegarde l'add en cours de fight
 
-
 	void Reset()
 	{
 		// Phases
@@ -359,7 +358,6 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 			m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
 			clearWeapon();          // @Lorh : Delete Weapon if Whipe
 		}
-
 	}
 
 	void JustSummoned(Creature* pSummoned)
@@ -1011,6 +1009,19 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
 		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		m_creature->GetMotionMaster()->Clear();
 		SetCombatMovement(true);
+	}
+
+	void EnterEvadeMode() override
+	{
+		if(m_pInstance)
+		{
+			if (Creature* pKael = m_pInstance->GetSingleCreatureFromStorage(NPC_KAELTHAS))
+			{
+				m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
+				pKael->AI()->EnterEvadeMode();				
+			}
+		}
+		ScriptedAI::EnterEvadeMode();
 	}
 
 	void DamageTaken(Unit* pDoneby, uint32 &uiDamage)
