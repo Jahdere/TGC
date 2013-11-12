@@ -2081,6 +2081,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 		if (spellInfo_1->SpellIconID == 125 && spellInfo_2->Id == 18820)
 			return false;
 
+		//Bonus T5 mage (4p) vs Tresse de l'anneau du serpent @Kordbc
+		if ((spellInfo_1->Id == 37444  && spellInfo_2->Id == 37445 ) ||  
+			(spellInfo_2->Id == 37444  && spellInfo_1->Id == 37445 ))
+			return false;
+
 		//Evocation vs Condensateur de foudre @Kordbc
 		if ((spellInfo_1->Id == 12051  && spellInfo_2->Id == 37658 ) ||  
 			(spellInfo_2->Id == 12051  && spellInfo_1->Id == 37658 ))
