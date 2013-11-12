@@ -1,33 +1,34 @@
 #Kael'thas:
 - Fix d'un bug qui empêchait les adds de bouger après un wipe
-- Capernian ne devrait plus bouger lorsqu'elle est morte
-- Capernian devrait avoir une gestion d'aggro plus logique
+- Le cadavre de Capernian ne devrait plus bouger
 - L'arc devrait être tankable à distance
-- Amélioration du processus de reset des adds
+- Amélioration du processus de reset des adds (Lorh)
 - Les armes légendaires devraient être correctement détruites dans les slots et sacs des joueurs au pull
 - Les adds devraient reset leur aggro après leur résurection
 - Telonicius devrait être plus facile à déplacer lorsqu'il est tanké au cac
 - Fix d'un bug qui permettait au jouet de telonicius de s'activer même sous protection du bâton
 - Ajout des animations lorsque Kael'thas s'envole
+- KT ne devrait plus pouvoir bump un joueur déja en lévitation (P5)
+- KT ne devrait plus reset l'aggro de sa cible lors du gravity laps (Lorh)
 
 #Kazzak :
-- Kazzak devrait regagner 150k hp après avoir tué un joueur
+- Kazzak devrait regagner 150k hp après avoir tué un joueur (Lorh)
 
 #Damoiselle de vertue :
 - La cible du boss ne devrait plus pouvoir être sous l'effet de repentir
 
 Priest :
-- Le puit de lumière devrait apparaître correctement
+- Le puit de lumière devrait apparaître correctement (Lorh)
 
 Druide :
-- La modification de la vitesse de déplacement de célérité farouche ne devrait prendre effet qu'en forme de félin
+- La modification de la vitesse de déplacement de célérité farouche ne devrait prendre effet qu'en forme de félin (Lorh)
 
 Shaman :
 - Les gardiens de feu et de terre devraient avoir des stats correctes
 
 Hunter :
 - La marque du chasseur améliorée devrait maintenant fonctionner correctement
-- Fix du 3ieme stack du détournement ainsi que des charges consommées par les pièges et piqure du serpent
+- Fix du 3ieme stack du détournement ainsi que des charges consommées par les pièges et piqure du serpent (Lorh)
 - Coupure d'ailes améliorée ne devrait plus s'enlever prématurément
 
 Mage :
@@ -35,7 +36,7 @@ Mage :
 - Fix d'un bug qui annulait le bonus T5 mage 4pièces
 
 Demoniste :
-- Puit d'ames devrait maintenant prendre en compte le talent d'amélioration
+- Puit d'ames devrait maintenant prendre en compte le talent d'amélioration de la healthstone
 
 General :
 - Fix d'override d'icone 

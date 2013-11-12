@@ -45,7 +45,6 @@ bool instance_the_eye::IsEncounterInProgress() const
 
     return false;
 }
-}
 
 void instance_the_eye::OnCreatureCreate(Creature* pCreature)
 {
@@ -108,7 +107,8 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
                             pTemp->Respawn();
                     }
                 }
-            }
+            }		
+
             m_auiEncounter[uiType] = uiData;
             break;
     }

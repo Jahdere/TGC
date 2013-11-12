@@ -752,7 +752,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 									pTarget->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_AURA);
 							}
 						}
-						SetCombatMovement(true);
+						DoStartMovement(m_creature->getVictim());
 						m_uiGravityExpireTimer = 0;
 					}
 					else
@@ -813,7 +813,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 					{
 						if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_LAPSE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
 						{
-							SetCombatMovement(false);
+							m_creature->GetMotionMaster()->MoveIdle();
 							DoScriptText(urand(0, 1) ? SAY_GRAVITYLAPSE1 : SAY_GRAVITYLAPSE2, m_creature);
 							m_uiGravityIndex       = 0;
 							m_uiNetherBeamTimer    = 7000;

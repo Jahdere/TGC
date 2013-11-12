@@ -1,0 +1,10 @@
+src/bindings/ScriptDev2/scripts/outland/tempest_keep/the_eye/instance_the_eye.cpp View file @ 407385d
+@ -124,8 +106,6 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
+                      {
+                          if (!pTemp->isAlive())
+                              pTemp->Respawn();
+-                         else
+-                             pTemp->AI()->EnterEvadeMode();
+                      }
+                  }
+              }

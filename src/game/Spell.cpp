@@ -6225,6 +6225,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 	case 37029:											// Force immune remote toy (Telonicius) when player have Mental Protection Field @kordbc
 		if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
 			return false;
+		break;
+	case 31306:											// Carrion Swarm (Anetheron) @Kordbc
+		if(!m_caster->HasInArc(M_PI_F, target))
+			return false;
+		break;
 	default: break;
 	}
 

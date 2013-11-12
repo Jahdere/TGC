@@ -743,6 +743,7 @@ this method check if two teams can battle in arena
 */
 bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 {
+	return true;
 	// get Teams Objects
 	ArenaTeam* team1 = sObjectMgr.GetArenaTeamById(team_id1);	
 	ArenaTeam* team2 = sObjectMgr.GetArenaTeamById(team_id2);
@@ -758,7 +759,7 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 		return false;
 	else{
 		// get global infos
-		ArenaTeam::OldMatchesList oldMatchesListTeam1 = team1->GetOldMatches();
+		/*ArenaTeam::OldMatchesList oldMatchesListTeam1 = team1->GetOldMatches();
 		ArenaTeam::OldMatchesList oldMatchesListTeam2 = team2->GetOldMatches();
 
 		// Create a new insert for team1
@@ -777,7 +778,7 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 		while(oldMatchesListTeam1.size > limit_matches)
 			oldMatchesListTeam1.erase(oldMatchesListTeam1.end());
 		while(oldMatchesListTeam2.size > limit_matches)
-			oldMatchesListTeam2.erase(oldMatchesListTeam2.end());		
+			oldMatchesListTeam2.erase(oldMatchesListTeam2.end());		*/
 	}
 	return true;
 }
@@ -1754,7 +1755,7 @@ void BattleGroundMgr::InitLimitMatches()
 	{
 		DEBUG_LOG("Initializing Limit Matches");
 		time_t now = sWorld.GetGameTime();
-		time_t last_week = time((time_t*) now - 604800);//Timestamp now - 7 days
+		time_t last_week = now - 604800;//Timestamp now - 7 days
 		uint8 limit_matches = sWorld.getConfig(CONFIG_INT32_ARENA_LIMIT_MATCHES);	//Limit different matches before team1 can battle again vs team2 (set 3 by default)
 		uint32 total_team = 0;	// Total activ teams
 

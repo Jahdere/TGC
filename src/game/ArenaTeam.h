@@ -178,8 +178,8 @@ class ArenaTeam
 		{
 			for(OldMatchesList::iterator itr = m_OldMatches.begin(); itr != m_OldMatches.end(); ++itr)
 				if(itr->team_id == arenaTeamIdOpponent)
-					return false;
-			return true;
+					return true;
+			return false;
 		}
 
 		OldMatchesList GetOldMatches() const { return m_OldMatches; }
