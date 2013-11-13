@@ -55,7 +55,7 @@ CreatureAI* GetAI_npc_jaina_proudmoore(Creature* pCreature)
 	pTempAI->m_aSpells[0].m_pType = TARGETTYPE_RANDOM;
 
 	pTempAI->m_aSpells[1].m_uiSpellId = SPELL_PYROBLAST;
-	pTempAI->m_aSpells[1].m_uiCooldown = urand(2000, 9000);
+	pTempAI->m_aSpells[1].m_uiCooldown = urand(5500, 9000);
 	pTempAI->m_aSpells[1].m_pType = TARGETTYPE_RANDOM;
 
 	pTempAI->m_aSpells[2].m_uiSpellId = SPELL_SUMMON_ELEMENTALS;
@@ -127,7 +127,7 @@ CreatureAI* GetAI_npc_thrall(Creature* pCreature)
 	hyjalAI* pTempAI = new hyjalAI(pCreature);
 
 	pTempAI->m_aSpells[0].m_uiSpellId = SPELL_CHAIN_LIGHTNING;
-	pTempAI->m_aSpells[0].m_uiCooldown = urand(2000, 7000);
+	pTempAI->m_aSpells[0].m_uiCooldown = urand(3500, 7000);
 	pTempAI->m_aSpells[0].m_pType = TARGETTYPE_VICTIM;
 
 	pTempAI->m_aSpells[1].m_uiSpellId = SPELL_FERAL_SPIRIT;

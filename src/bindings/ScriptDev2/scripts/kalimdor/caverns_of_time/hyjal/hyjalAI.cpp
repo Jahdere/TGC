@@ -36,35 +36,34 @@ struct HyjalLocation
 /*
 static const HyjalLocation aHyjalSpawnLoc[] =
 {
-	{BASE_ALLY,  4979.010f, -1709.134f, 1339.674f},
-	{BASE_ALLY,  4969.123f, -1705.904f, 1341.363f},
-	{BASE_ALLY,  4970.260f, -1698.546f, 1341.200f},
-	{BASE_ALLY,  4975.262f, -1698.239f, 1341.427f},
-	{BASE_HORDE, 5557.582f, -2587.159f, 1481.644f},
-	{BASE_HORDE, 5545.901f, -2582.246f, 1479.256f},
-	{BASE_HORDE, 5565.642f, -2565.666f, 1481.635f},
-	{BASE_HORDE, 5547.218f, -2574.589f, 1479.194f}
+{BASE_ALLY,  4979.010f, -1709.134f, 1339.674f},
+{BASE_ALLY,  4969.123f, -1705.904f, 1341.363f},
+{BASE_ALLY,  4970.260f, -1698.546f, 1341.200f},
+{BASE_ALLY,  4975.262f, -1698.239f, 1341.427f},
+{BASE_HORDE, 5557.582f, -2587.159f, 1481.644f},
+{BASE_HORDE, 5545.901f, -2582.246f, 1479.256f},
+{BASE_HORDE, 5565.642f, -2565.666f, 1481.635f},
+{BASE_HORDE, 5547.218f, -2574.589f, 1479.194f}
 };*/
 
 static const HyjalLocation aHyjalSpawnLoc[] =
 {
-	{BASE_ALLY,  4895.535f, -1570.689f, 1334.465f, POINT_ID_ALLY},
-	{BASE_ALLY,  4902.871f, -1574.724f, 1332.589f, POINT_ID_ALLY},
-	{BASE_ALLY,  4895.535f, -1570.689f, 1334.465f, POINT_ID_ALLY},
-	{BASE_ALLY,  4902.871f, -1574.724f, 1332.589f, POINT_ID_ALLY},
-	{BASE_HORDE, 5557.582f, -2587.159f, 1481.644f, POINT_ID_HORDE},
-	{BASE_HORDE, 5545.901f, -2582.246f, 1479.256f, POINT_ID_HORDE},
-	{BASE_HORDE, 5565.642f, -2565.666f, 1481.635f, POINT_ID_HORDE},
-	{BASE_HORDE, 5547.218f, -2574.589f, 1479.194f, POINT_ID_HORDE}
+	{BASE_ALLY,  4969.819f, -1637.413f, 1343.208f, POINT_ID_ALLY},
+	{BASE_HORDE, 5596.126f, -2531.108f, 1488.468f, POINT_ID_HORDE},
+	{BASE_HORDE, 5567.597f, -2808.696f, 1513.156f, POINT_ID_HORDE_FLY_BACK},
+	{BASE_HORDE, 5510.450f, -2522.790f, 1509.261f, POINT_ID_HORDE_FLY_FRONT},
 };
 
 // used to inform the wave where to move after spawn
 static const HyjalLocation aHyjalWaveMoveTo[] =
 {
 	{BASE_ALLY,  4901.451f, -1663.070f, 1320.038f, POINT_ID_ALLY1},
-	{BASE_ALLY,  4969.123f, -1705.904f, 1341.363f, POINT_ID_ALLY2},
-	{BASE_ALLY,  4966.911f, -1697.741f, 1340.223f, POINT_ID_ALLY3},
-	{BASE_HORDE, 5504.569f, -2688.489f, 1479.991f, POINT_ID_HORDE1}
+	{BASE_ALLY,  4966.911f, -1697.741f, 1340.223f, POINT_ID_ALLY2},
+	{BASE_ALLY,  5083.910f, -1789.040f, 1322.569f, POINT_ID_ALLY_JAINA},
+	{BASE_HORDE, 5553.558f, -2530.243f, 1477.516f, POINT_ID_HORDE1},
+	{BASE_HORDE, 5544.236f, -2635.696f, 1481.903f, POINT_ID_HORDE2},
+	{BASE_HORDE, 5536.866f, -2756.464f, 1500.099f, POINT_ID_HORDE_FLY_BACK1},
+	{BASE_HORDE, 5449.970f, -2723.770f, 1485.670f, POINT_ID_HORDE_TRALL},
 };
 
 struct HyjalYells
@@ -229,8 +228,7 @@ void hyjalAI::EnterEvadeMode()
 	m_creature->DeleteThreatList();
 	m_creature->CombatStop(true);
 
-	if (m_creature->isAlive())
-		m_creature->GetMotionMaster()->MoveTargetedHome();
+	m_creature->GetMotionMaster()->MoveTargetedHome();
 
 	m_creature->SetLootRecipient(NULL);
 }
@@ -258,22 +256,37 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
 	HyjalLocation const* pSpawn = NULL;
 
 	uint32 uiMaxCount = countof(aHyjalSpawnLoc);
-	uint32 uiRandId = urand(1, uiMaxCount / 2);             // unsafe, if array becomes uneven.
 
-	uint32 uiJ = 0;
+	/* 
+	static const HyjalLocation aHyjalSpawnLoc[] =
+{
+	{BASE_ALLY,  4969.819f, -1637.413f, 1343.208f, POINT_ID_ALLY},
+	{BASE_HORDE, 5520.227f, -2490.740f, 1475.902f, POINT_ID_HORDE},
+	{BASE_HORDE, 5675.686f, -2886.051f, 1555.619f, POINT_ID_HORDE_FLY_BACK},
+	{BASE_HORDE, 5675.686f, -2886.051f, 1555.619f, POINT_ID_HORDE_FLY_FRONT},
+};
+	*/
 
 	for (uint32 i = 0; i < uiMaxCount; ++i)
 	{
 		if (aHyjalSpawnLoc[i].m_pBaseArea != (eBaseArea)m_uiBase)
 			continue;
 
-		++uiJ;
-
-		if (uiJ == uiRandId)
+		switch(uiMobEntry)
 		{
-			pSpawn = &aHyjalSpawnLoc[i];
+		case NPC_FROST:
+			if(aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_BACK)
+				continue;
+			break;
+		case NPC_GARGO:
+			if(!m_bIsFirstBossDead && aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_BACK)
+				continue;
+			else if(aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_FRONT)
+				continue;
 			break;
 		}
+		pSpawn = &aHyjalSpawnLoc[i];
+		break;
 	}
 
 	if (pSpawn)
@@ -293,8 +306,31 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 	for (uint32 i = 0; i < countof(aHyjalWaveMoveTo); ++i)
 	{
-		if (aHyjalWaveMoveTo[i].m_pBaseArea != (eBaseArea)m_uiBase && (aHyjalWaveMoveTo[i].MovePoint != POINT_ID_ALLY1 || aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE1))
+		if (aHyjalWaveMoveTo[i].m_pBaseArea != (eBaseArea)m_uiBase)
 			continue;
+
+		switch(pSummoned->GetEntry())
+		{
+		case NPC_FROST:
+			if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE_FLY_BACK1)	// Always flying from the back
+				continue;
+			break;
+		case NPC_GARGO:
+			if(!m_bIsFirstBossDead)	// Flying from the back
+			{
+				if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE_FLY_BACK1)			
+					continue;
+			}else{
+				if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE2)	// Flying from the front
+					continue;
+			}
+			break;
+		default:			
+			if((aHyjalWaveMoveTo[i].MovePoint != POINT_ID_ALLY1 && m_uiBase == BASE_ALLY) || (aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE1 && m_uiBase == BASE_HORDE))
+				continue;
+				
+			break;
+		}
 
 		pMove = &aHyjalWaveMoveTo[i];
 		break;
@@ -318,17 +354,29 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId)
 {
-	if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->isDead())
+	if (!uiPointId)
 		return;
 
+
+	float fX, fY, fZ;
 	HyjalLocation const* pMove = NULL;
+
 	switch(uiPointId)
 	{
-	case POINT_ID_ALLY1:
-	case POINT_ID_ALLY2:
+	case POINT_ID_ALLY1:	// Go next step
+	case POINT_ID_ALLY2:	// Go Jaina
 		pMove = &aHyjalWaveMoveTo[uiPointId];
-		float fX, fY, fZ;
-		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		break;
+	case POINT_ID_HORDE1:	// Go next step
+		pMove = &aHyjalWaveMoveTo[4];
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		break;
+	case POINT_ID_HORDE_FLY_BACK1:	// Go Thrall
+	case POINT_ID_HORDE2:
+		pMove = &aHyjalWaveMoveTo[6];
 		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
 		break;
 	}
@@ -336,6 +384,9 @@ void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, u
 
 void hyjalAI::SummonedCreatureJustDied(Creature* pSummoned)
 {
+	if(pSummoned->GetEntry() == NPC_GIANT)	//Prevent remove aura Immolation
+		pSummoned->RemoveAurasDueToSpell(37059);
+
 	if (!pSummoned->IsWorldBoss())                          // Only do stuff when bosses die
 		return;
 

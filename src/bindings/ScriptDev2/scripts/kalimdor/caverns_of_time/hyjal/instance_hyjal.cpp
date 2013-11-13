@@ -93,11 +93,38 @@ void instance_mount_hyjal::OnCreatureEvade(Creature* pCreature)
 {
 	switch (pCreature->GetEntry())
 	{
-	case NPC_WINTERCHILL: SetData(TYPE_WINTERCHILL, FAIL); break;
-	case NPC_ANETHERON:   SetData(TYPE_ANETHERON, FAIL);   break;
-	case NPC_KAZROGAL:    SetData(TYPE_KAZROGAL, FAIL);    break;
-	case NPC_AZGALOR:     SetData(TYPE_AZGALOR, FAIL);     break;
+	case NPC_WINTERCHILL: 
+		SetData(TYPE_WINTERCHILL, FAIL);
+		pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+		break;
+	case NPC_ANETHERON:   
+		SetData(TYPE_ANETHERON, FAIL);  
+		pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+		break;
+	case NPC_KAZROGAL:    
+		SetData(TYPE_KAZROGAL, FAIL);
+		pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
+		break;
+	case NPC_AZGALOR:     
+		SetData(TYPE_AZGALOR, FAIL);
+		pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
+		break;
+	case NPC_NECRO:
+	case NPC_ABOMI:
+	case NPC_GHOUL:
+	case NPC_BANSH:
+	case NPC_CRYPT:
+	case NPC_GARGO:
+	case NPC_FROST:
+	case NPC_GIANT:
+	case NPC_STALK:
+		if(GetData(TYPE_ANETHERON) == DONE)
+			pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);	// Horde Base
+		else
+			pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);	// Ally Base
+		break;
 	}
+		
 }
 
 void instance_mount_hyjal::OnCreatureDeath(Creature* pCreature)
