@@ -511,7 +511,7 @@ void Spell::FillTargetMap()
 							tmpUnitLists[i /*==effToIndex[i]*/].push_back(m_targets.getUnitTarget());
 					}
 					else
-					{
+					{						
 						SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
 						SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
 					}
@@ -617,6 +617,8 @@ void Spell::FillTargetMap()
 		{
 			if (!CheckTarget(*itr, SpellEffectIndex(i)))
 			{
+				if((*itr) && m_spellInfo->Id == 32053)
+					sLog.outError("CREATURE ENTRY -> %u", (*itr)->GetEntry());
 				itr = tmpUnitLists[effToIndex[i]].erase(itr);
 				continue;
 			}
@@ -625,7 +627,12 @@ void Spell::FillTargetMap()
 		}
 
 		for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
+		{
+			if(m_spellInfo->Id == 32053)
+				sLog.outError("CREATURE ENTRY LIST TARGET -> %s)",(*iunit)->GetName());
 			AddUnitTarget((*iunit), SpellEffectIndex(i));
+
+		}
 	}
 }
 
@@ -1031,13 +1038,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		procEx = createProcExtendMask(&damageInfo, missInfo);
 		procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-		//Fix misredirection @Kordbc
-		bool is_redirect = false;
-		if(caster->getHostileRefManager().GetThreatRedirectionTarget() && caster->HasAura(34477))
-		{
-			caster->DealSpellDamage(&damageInfo, true);
-			is_redirect = true;
-		}
 
 		// Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
 		if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
@@ -1048,8 +1048,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 			!m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
 			((Player*)m_caster)->CastItemCombatSpell(unitTarget, m_attackType);
 
-		if(is_redirect == false)
-			caster->DealSpellDamage(&damageInfo, true);
+		caster->DealSpellDamage(&damageInfo, true);
 
 		// Judgement of Blood
 		if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000800000000) && m_spellInfo->SpellIconID == 153)
@@ -1770,6 +1769,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 	case TARGET_ALL_ENEMY_IN_AREA:
 		FillAreaTargets(targetUnitMap, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
 
+		sLog.outError("Size of Area Target ******* ===  %u", targetUnitMap.size());
+
 		if (m_spellInfo->Id == 42005)                   // Bloodboil (spell hits only the 5 furthest away targets)
 		{
 			if (targetUnitMap.size() > unMaxTargets)
@@ -1791,6 +1792,19 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			case 41376:                             // Spite
 				if (Unit* pVictim = m_caster->getVictim())
 					targetUnitMap.remove(pVictim);
+				break;
+			// Soul Charge (Archimonde) @Kordbc
+			case 32053:
+			case 32054:
+			case 32057:
+				if (WorldObject* castObject = GetCastingObject())
+				{
+					Map::PlayerList const& lPlayers = castObject->GetMap()->GetPlayers();
+					for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+						if(Player* pPlayer = itr->getSource())
+							if(pPlayer->isAlive())
+								targetUnitMap.push_back(pPlayer);												
+				}
 				break;
 			}
 		}
@@ -1996,6 +2010,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 		break;
 	case TARGET_CASTER_COORDINATES:
 		{
+			//tototo
 			// Check original caster is GO - set its coordinates as src cast
 			if (WorldObject* caster = GetCastingObject())
 				m_targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
@@ -6224,10 +6239,6 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		break;
 	case 37029:											// Force immune remote toy (Telonicius) when player have Mental Protection Field @kordbc
 		if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
-			return false;
-		break;
-	case 31306:											// Carrion Swarm (Anetheron) @Kordbc
-		if(!m_caster->HasInArc(M_PI_F, target))
 			return false;
 		break;
 	default: break;
