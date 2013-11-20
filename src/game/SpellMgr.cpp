@@ -1950,6 +1950,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					(spellInfo_2->Id == 42311  && spellInfo_1->Id == 42312))
 					return false;
 
+				//Slow Self vs Charge (Supremus)
+				if ((spellInfo_1->Id == 41581  && spellInfo_2->Id == 41922) ||  
+					(spellInfo_2->Id == 41581  && spellInfo_1->Id == 41922))
+					return false;
+
 				break;
 			}
 		case SPELLFAMILY_MAGE:
