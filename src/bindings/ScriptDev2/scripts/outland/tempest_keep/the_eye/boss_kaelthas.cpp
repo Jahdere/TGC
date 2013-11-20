@@ -411,7 +411,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 							countNetherBeam++;
 						}
 					}
-					if(countNetherBeam == lPlayers.getSize() || countNetherBeam == 5)           // Max 5 Target
+					if(countNetherBeam == 5)           // Max 5 Target
 						break;
 				}
 			}                   
