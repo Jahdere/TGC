@@ -2148,7 +2148,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 		case 32045:                                     // Soul Charge
 			{
 				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32054, true, NULL, this);
+					target->CastSpell(target, 32054, true, NULL, this, target->GetObjectGuid());
 
 				return;
 			}
@@ -2169,7 +2169,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 		case 32286:                                     // Focus Target Visual
 			{
 				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32301, true, NULL, this, target->GetObjectGuid());
+					target->CastSpell(target, 32301, true, NULL, this);
 
 				return;
 			}
