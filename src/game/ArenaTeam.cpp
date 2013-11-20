@@ -22,6 +22,7 @@
 #include "ArenaTeam.h"
 #include "World.h"
 #include "Player.h"
+#include "BattleGround\BattleGroundMgr.h"
 
 void ArenaTeamMember::ModifyPersonalRating(Player* plr, int32 mod, uint32 slot)
 {
@@ -215,6 +216,21 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult* arenaTeamDataResult)
     m_stats.games_season = fields[12].GetUInt32();
     m_stats.wins_season  = fields[13].GetUInt32();
     m_stats.rank         = fields[14].GetUInt32();
+
+	// Set Old Matches List
+    QueryResult* result_matches = CharacterDatabase.PQuery("SELECT loser_tid, winner_tid FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') ORDER BY id DESC LIMIT %u", m_TeamId, m_TeamId, sBattleGroundMgr.GetLimitMatches());
+    if(result_matches)
+    {
+        do{
+            Field* fields = result_matches->Fetch();
+            // Check id team, not add the id of newArenaTeam
+            uint32 opponent = fields[0].GetUInt32() == m_TeamId ? fields[1].GetUInt32() : fields[0].GetUInt32();
+            // Add last matches (rated) in the list
+            m_foughtTeamList.insert(opponent);
+        }while (result_matches->NextRow());
+    }
+    delete result_matches;
+
 
     return true;
 }
@@ -762,4 +778,17 @@ bool ArenaTeam::IsFighting() const
         }
     }
     return false;
+}
+
+void ArenaTeam::SetFoughtAgainst(uint32 opponentTeamId)
+{
+    //Erase one random entry if adding one would go below limit matches
+
+    if ((m_foughtTeamList.size() + 1) > sBattleGroundMgr.GetLimitMatches())
+    {
+        FoughtTeamList::iterator itr = m_foughtTeamList.begin();
+        advance(m_foughtTeamList.begin(), urand(0, m_foughtTeamList.size() - 1));
+        m_foughtTeamList.erase(itr);
+    }
+    m_foughtTeamList.insert(opponentTeamId);
 }

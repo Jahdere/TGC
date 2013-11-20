@@ -743,46 +743,24 @@ this method check if two teams can battle in arena
 */
 bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 {
-	return true;
-	// get Teams Objects
-	ArenaTeam* team1 = sObjectMgr.GetArenaTeamById(team_id1);	
-	ArenaTeam* team2 = sObjectMgr.GetArenaTeamById(team_id2);
+    // get Teams Objects
+    ArenaTeam* team1 = sObjectMgr.GetArenaTeamById(team_id1);  
+    ArenaTeam* team2 = sObjectMgr.GetArenaTeamById(team_id2);
 
-	// get limit matches
-	int32 limit_matches = sBattleGroundMgr.GetLimitMatches();
+    //No limit here, always return true
+    if(!sBattleGroundMgr.GetLimitMatches())
+        return true;
 
-	//No limit here, always return true
-	if(!limit_matches)
-		return true;
-
-	if(team1->HasFightInArena(team_id2))
-		return false;
-	else{
-		// get global infos
-		/*ArenaTeam::OldMatchesList oldMatchesListTeam1 = team1->GetOldMatches();
-		ArenaTeam::OldMatchesList oldMatchesListTeam2 = team2->GetOldMatches();
-
-		// Create a new insert for team1
-		ArenaOldMatches oldMatches_team1;
-		oldMatches_team1.team_id = team_id2;
-
-		// Create a new insert for team2
-		ArenaOldMatches oldMatches_team2;
-		oldMatches_team2.team_id = team_id1;
-
-		//Insert in each list
-		oldMatchesListTeam1.push_front(oldMatches_team1);
-		oldMatchesListTeam2.push_front(oldMatches_team2);
-
-		//Erase Check to have a list with the same size as limit matches
-		while(oldMatchesListTeam1.size > limit_matches)
-			oldMatchesListTeam1.erase(oldMatchesListTeam1.end());
-		while(oldMatchesListTeam2.size > limit_matches)
-			oldMatchesListTeam2.erase(oldMatchesListTeam2.end());		*/
-	}
-	return true;
+    if(team1->HasFoughtAgainst(team_id2))
+        return false;
+    else
+    {
+        //Insert in each list
+        team1->SetFoughtAgainst(team_id2);
+        team2->SetFoughtAgainst(team_id1);
+    }
+   return true;
 }
-
 /*
 this method is called when group is inserted, or player / group is removed from BG Queue - there is only one player's status changed, so we don't use while(true) cycles to invite whole queue
 it must be called after fully adding the members of a group to ensure group joining
@@ -970,57 +948,48 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 
         // optimalization : --- we dont need to use selection_pools - each update we select max 2 groups
 
+		// Gather match eligible teams
+		GroupsQueueType eligibleTeams;
+
         for (uint8 i = BG_QUEUE_PREMADE_ALLIANCE; i < BG_QUEUE_NORMAL_ALLIANCE; ++i)
         {
-            // take the group that joined first
-            itr_team[i] = m_QueuedGroups[bracket_id][i].begin();
-            for (; itr_team[i] != m_QueuedGroups[bracket_id][i].end(); ++(itr_team[i]))
+            for (itr_team[i] = m_QueuedGroups[bracket_id][i].begin(); itr_team[i] != m_QueuedGroups[bracket_id][i].end(); ++(itr_team[i]))
             {
                 // if group match conditions, then add it to pool
                 if (!(*itr_team[i])->IsInvitedToBGInstanceGUID
                         && (((*itr_team[i])->ArenaTeamRating >= arenaMinRating && (*itr_team[i])->ArenaTeamRating <= arenaMaxRating)
                             || (*itr_team[i])->JoinTime < discardTime))
-                {
-                    m_SelectionPools[i].AddGroup((*itr_team[i]), MaxPlayersPerTeam);
-                    // break for cycle to be able to start selecting another group from same faction queue
-                    break;
-                }
+					eligibleTeams.push_back(*itr_team[i]);
             }
         }
-        // now we are done if we have 2 groups - ali vs horde!
-        // if we don't have, we must try to continue search in same queue
-        // tmp variables are correctly set
-        // this code isn't much userfriendly - but it is supposed to continue search for mathing group in HORDE queue
-        if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() == 0 && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount())
-        {
-            itr_team[BG_TEAM_ALLIANCE] = itr_team[BG_TEAM_HORDE];
-            ++itr_team[BG_TEAM_ALLIANCE];
-            for (; itr_team[BG_TEAM_ALLIANCE] != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end(); ++(itr_team[BG_TEAM_ALLIANCE]))
-            {
-                if (!(*itr_team[BG_TEAM_ALLIANCE])->IsInvitedToBGInstanceGUID
-                        && (((*itr_team[BG_TEAM_ALLIANCE])->ArenaTeamRating >= arenaMinRating && (*itr_team[BG_TEAM_ALLIANCE])->ArenaTeamRating <= arenaMaxRating)
-                            || (*itr_team[BG_TEAM_ALLIANCE])->JoinTime < discardTime))
+
+        // Now we have a list of all team the could potentially engage in a match
+        // it's ordered by faction, let's order it by JoinTime (see operator< in struct GroupQueueInfo)
+        eligibleTeams.sort();
+		// Then, for every team ordered by joinTime, find the first team it can battle against. If none, try with next team
+
+        GroupQueueInfo* group1 = NULL;
+        GroupQueueInfo* group2 = NULL;
+
+        for (GroupsQueueType::iterator itr = eligibleTeams.begin(); itr != eligibleTeams.end();)
+		{
+			group1 = *(itr++);
+            for (GroupsQueueType::iterator itr2 = itr; itr2 != eligibleTeams.end(); ++itr2)
+			{
+                if (CanBattleAgainst(group1->ArenaTeamId, (*itr2)->ArenaTeamId))
                 {
-                    m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup((*itr_team[BG_TEAM_ALLIANCE]), MaxPlayersPerTeam);
+					group2 = *itr;
                     break;
                 }
             }
+			if (group2)
+				break;
         }
-        // this code isn't much userfriendly - but it is supposed to continue search for mathing group in ALLIANCE queue
-        if (m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() == 0 && m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount())
-        {
-            itr_team[BG_TEAM_HORDE] = itr_team[BG_TEAM_ALLIANCE];
-            ++itr_team[BG_TEAM_HORDE];
-            for (; itr_team[BG_TEAM_HORDE] != m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end(); ++(itr_team[BG_TEAM_HORDE]))
-            {
-                if (!(*itr_team[BG_TEAM_HORDE])->IsInvitedToBGInstanceGUID
-                        && (((*itr_team[BG_TEAM_HORDE])->ArenaTeamRating >= arenaMinRating && (*itr_team[BG_TEAM_HORDE])->ArenaTeamRating <= arenaMaxRating)
-                            || (*itr_team[BG_TEAM_HORDE])->JoinTime < discardTime))
-                {
-                    m_SelectionPools[BG_TEAM_HORDE].AddGroup((*itr_team[BG_TEAM_HORDE]), MaxPlayersPerTeam);
-                    break;
-                }
-            }
+
+		if (group1 && group2)
+		{
+            m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup(group1, MaxPlayersPerTeam);
+            m_SelectionPools[BG_TEAM_HORDE].AddGroup(group2, MaxPlayersPerTeam);
         }
 
         // if we have 2 teams, then start new arena and invite players!
@@ -1052,10 +1021,6 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
                 m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].erase(itr_team[BG_TEAM_HORDE]);
                 itr_team[BG_TEAM_HORDE] = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin();
             }
-
-			//Custom check if two teams can battle
-			if(!CanBattleAgainst((*itr_team[BG_TEAM_ALLIANCE])->ArenaTeamId, (*itr_team[BG_TEAM_HORDE])->ArenaTeamId))
-				return;
 
             InviteGroupToBG(*(itr_team[BG_TEAM_ALLIANCE]), arena, ALLIANCE);
             InviteGroupToBG(*(itr_team[BG_TEAM_HORDE]), arena, HORDE);

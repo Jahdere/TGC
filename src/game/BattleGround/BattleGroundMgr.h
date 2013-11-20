@@ -50,6 +50,10 @@ typedef std::map<ObjectGuid, PlayerQueueInfo*> GroupQueueInfoPlayers;
 
 struct GroupQueueInfo                                       // stores information about the group in queue (also used when joined as solo!)
 {
+	bool operator<(const GroupQueueInfo& val) const
+    {
+        return JoinTime < val.JoinTime;
+    }
     GroupQueueInfoPlayers Players;                          // player queue info map
     Team  GroupTeam;                                        // Player team (ALLIANCE/HORDE)
     BattleGroundTypeId BgTypeId;                            // battleground type id
@@ -295,7 +299,7 @@ class BattleGroundMgr
         uint32 m_NextRatingDiscardUpdate;
         time_t m_NextAutoDistributionTime;
         uint32 m_AutoDistributionTimeChecker;
-		uint32 m_LimitMatches;
+		int32  m_LimitMatches;
         bool   m_ArenaTesting;
         bool   m_Testing;		
 };

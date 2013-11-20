@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
+#include "BattleGround/BattleGroundMgr.h"
 
 class QueryResult;
 class WorldPacket;
@@ -123,6 +124,7 @@ class ArenaTeam
 
         bool Create(ObjectGuid captainGuid, ArenaType type, std::string arenaTeamName);
         void Disband(WorldSession* session);
+		typedef std::set<uint32> FoughtTeamList;
 
         typedef std::list<ArenaTeamMember> MemberList;
 		typedef std::list<ArenaOldMatches> OldMatchesList;
@@ -174,15 +176,9 @@ class ArenaTeam
             return NULL;
         }
 
-		bool HasFightInArena(uint32 arenaTeamIdOpponent)
-		{
-			for(OldMatchesList::iterator itr = m_OldMatches.begin(); itr != m_OldMatches.end(); ++itr)
-				if(itr->team_id == arenaTeamIdOpponent)
-					return true;
-			return false;
-		}
-
-		OldMatchesList GetOldMatches() const { return m_OldMatches; }
+		bool HasFoughtAgainst(uint32 arenaTeamIdOpponent) { return m_foughtTeamList.find(arenaTeamIdOpponent) != m_foughtTeamList.end(); }
+        FoughtTeamList GetFoughtTeamList() const { return m_foughtTeamList; }
+        void SetFoughtAgainst(uint32 opponentTeamId);
 
         bool IsFighting() const;
 
@@ -235,6 +231,6 @@ class ArenaTeam
 
         MemberList m_members;
         ArenaTeamStats m_stats;
-		OldMatchesList m_OldMatches;
+		FoughtTeamList m_foughtTeamList;
 };
 #endif

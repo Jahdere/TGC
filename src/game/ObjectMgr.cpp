@@ -3126,24 +3126,6 @@ void ObjectMgr::LoadArenaTeams()
 			continue;
 		}
 		AddArenaTeam(newArenaTeam);
-
-		// Set Old Matches List
-		QueryResult* result_matches = CharacterDatabase.PQuery("SELECT * FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') AND (w_rate_out != 0 || w_rate_in != 0) ORDER BY id DESC LIMIT %u", newArenaTeam->GetId(), newArenaTeam->GetId(), limit_matches);
-		if(result_matches)
-		{
-			do{
-				Field* fields = result_matches->Fetch();
-				ArenaOldMatches oldMatches;
-				// Check id team, not add the id of newArenaTeam
-				if(fields[2].GetUInt32() == newArenaTeam->GetId())
-					oldMatches.team_id = fields[3].GetUInt32();
-				else if (fields[3].GetUInt32() == newArenaTeam->GetId())
-					oldMatches.team_id = fields[2].GetUInt32();
-				// Add last matches (rated) in the list
-				newArenaTeam->GetOldMatches().push_back(oldMatches);
-			}while (result_matches->NextRow());
-		}
-		delete result_matches;
 	}
 	while (result->NextRow());
 
