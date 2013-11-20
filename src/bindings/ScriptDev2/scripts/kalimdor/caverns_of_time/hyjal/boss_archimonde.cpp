@@ -206,7 +206,6 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		else if (pSummoned->GetEntry() == NPC_DOOMFIRE)
 		{
 			pSummoned->setFaction(m_creature->getFaction());
-			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 			pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE_SPAWN, true);
 			pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE, true, NULL, NULL, m_creature->GetObjectGuid());
 		}
@@ -231,7 +230,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				{
 					if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
 					{
-						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && m_creature->CanReachWithMeleeAttack(pNewTarget))
+						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pTarget, ATTACK_DISTANCE))
 						{
 							AttackStart(pNewTarget);
 							return true;
@@ -322,7 +321,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				m_uiEnrageTimer -= uiDiff;
 		}
 
-/*		if (m_uiGripOfTheLegionTimer < uiDiff)
+		if (m_uiGripOfTheLegionTimer < uiDiff)
 		{
 			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 			{
@@ -335,10 +334,13 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 		if (m_uiAirBurstTimer < uiDiff)
 		{
-			if (DoCastSpellIfCan(m_creature, SPELL_AIR_BURST) == CAST_OK)
+			if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_AIR_BURST, SELECT_FLAG_PLAYER))
 			{
-				DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
-				m_uiAirBurstTimer = urand(20000, 30000);
+				if (DoCastSpellIfCan(pTarget, SPELL_AIR_BURST) == CAST_OK)
+				{
+					DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
+					m_uiAirBurstTimer = urand(20000, 30000);
+				}
 			}
 		}
 		else
@@ -377,6 +379,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		else
 			m_uiFearTimer -= uiDiff;
 
+
 		if (m_uiDoomfireTimer < uiDiff)
 		{
 			if (DoCastSpellIfCan(m_creature, SPELL_DOOMFIRE_STRIKE) == CAST_OK)
@@ -399,7 +402,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			}else
 				m_uiCheckRangeTimer = 3000;
 		}else
-			m_uiCheckRangeTimer -= uiDiff;*/
+			m_uiCheckRangeTimer -= uiDiff;
 
 		DoMeleeAttackIfReady();
 	}

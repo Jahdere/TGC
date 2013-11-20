@@ -33,18 +33,6 @@ struct HyjalLocation
 
 // Locations for summoning waves
 // Must be even number
-/*
-static const HyjalLocation aHyjalSpawnLoc[] =
-{
-{BASE_ALLY,  4979.010f, -1709.134f, 1339.674f},
-{BASE_ALLY,  4969.123f, -1705.904f, 1341.363f},
-{BASE_ALLY,  4970.260f, -1698.546f, 1341.200f},
-{BASE_ALLY,  4975.262f, -1698.239f, 1341.427f},
-{BASE_HORDE, 5557.582f, -2587.159f, 1481.644f},
-{BASE_HORDE, 5545.901f, -2582.246f, 1479.256f},
-{BASE_HORDE, 5565.642f, -2565.666f, 1481.635f},
-{BASE_HORDE, 5547.218f, -2574.589f, 1479.194f}
-};*/
 
 static const HyjalLocation aHyjalSpawnLoc[] =
 {
