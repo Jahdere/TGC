@@ -99,15 +99,16 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 	uint32 m_uiGripOfTheLegionTimer;
 	uint32 m_uiDoomfireTimer;
 	uint32 m_uiFingerOfDeathTimer;
-	uint32 m_uiHandOfDeathTimer;
 	uint32 m_uiSummonWispTimer;
 	uint32 m_uiWispCount;
+	uint32 m_uiCheckRangeTimer;
 	uint32 m_uiEnrageTimer;
 
 	bool m_bHasIntro;
 	bool m_bIsEnraged;
 	bool m_bIsEpilogue;
 	bool m_bStartEpilogue;
+	bool m_bCanFear;
 
 	void Reset() override
 	{
@@ -117,13 +118,14 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		m_uiGripOfTheLegionTimer = urand(5000, 25000);
 		m_uiDoomfireTimer        = 15000;
 		m_uiFingerOfDeathTimer   = 15000;
-		m_uiHandOfDeathTimer     = 2000;
 		m_uiWispCount            = 0;
+		m_uiCheckRangeTimer		 = 5000;
 		m_uiEnrageTimer          = 10 * MINUTE * IN_MILLISECONDS;
 
 		m_bIsEnraged             = false;
 		m_bIsEpilogue            = false;
 		m_bStartEpilogue         = false;
+		m_bCanFear				 = true;
 	}
 
 	void Aggro(Unit* /*pWho*/) override
@@ -203,9 +205,44 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		}
 		else if (pSummoned->GetEntry() == NPC_DOOMFIRE)
 		{
+			pSummoned->setFaction(m_creature->getFaction());
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 			pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE_SPAWN, true);
 			pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE, true, NULL, NULL, m_creature->GetObjectGuid());
 		}
+	}
+
+	// Custom threat management
+	bool SelectHostileTarget()
+	{
+		Unit* pTarget = NULL;
+
+		// No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
+		if (!m_creature->getThreatManager().isThreatListEmpty())
+			pTarget = m_creature->getThreatManager().getHostileTarget();
+
+		if (pTarget)
+		{
+			if (!m_creature->IsWithinDistInMap(pTarget, ATTACK_DISTANCE))
+			{
+				std::vector<Unit*> suitableTargets;
+				ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+				for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+				{
+					if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+					{
+						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && m_creature->CanReachWithMeleeAttack(pNewTarget))
+						{
+							AttackStart(pNewTarget);
+							return true;
+						}                                        
+					}
+				}
+			}                
+		}
+
+		// Will call EnterEvadeMode if fit
+		return m_creature->SelectHostileTarget();
 	}
 
 	void UpdateAI(const uint32 uiDiff) override
@@ -229,7 +266,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				m_uiDrainNordrassilTimer -= uiDiff;
 		}
 
-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+		if (!SelectHostileTarget() || !m_creature->getVictim())
 			return;
 
 		// Start epilogue - fight was won!
@@ -285,7 +322,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				m_uiEnrageTimer -= uiDiff;
 		}
 
-		if (m_uiGripOfTheLegionTimer < uiDiff)
+/*		if (m_uiGripOfTheLegionTimer < uiDiff)
 		{
 			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 			{
@@ -298,10 +335,10 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 		if (m_uiAirBurstTimer < uiDiff)
 		{
-			if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_AIR_BURST) == CAST_OK)
+			if (DoCastSpellIfCan(m_creature, SPELL_AIR_BURST) == CAST_OK)
 			{
 				DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
-				m_uiAirBurstTimer = urand(25000, 40000);
+				m_uiAirBurstTimer = urand(20000, 30000);
 			}
 		}
 		else
@@ -309,8 +346,33 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 		if (m_uiFearTimer < uiDiff)
 		{
-			if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
-				m_uiFearTimer = 42000;
+			// Set CanFear by default
+			m_bCanFear = true;
+			//Check if nobody in the air
+			std::vector<Unit*> suitableTargets;
+			ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+			for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+			{
+				if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+				{
+					if (pTarget->GetTypeId() == TYPEID_PLAYER && (pTarget->GetPositionZ() - m_creature->GetMap()->GetHeight(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ()) > 0.1f ))
+					{
+						m_bCanFear = false;
+						break;
+					}
+				}
+			}
+
+			//Can fear? just do it !
+			if(m_bCanFear)
+			{
+				if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
+				{
+					m_uiFearTimer = 40000;
+					m_uiCheckRangeTimer = 3000;
+				}
+			}else
+				m_uiFearTimer = 1000;
 		}
 		else
 			m_uiFearTimer -= uiDiff;
@@ -326,18 +388,20 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		else
 			m_uiDoomfireTimer -= uiDiff;
 
-		// If we are within range melee the target
-		if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-			DoMeleeAttackIfReady();
-		// Else spam Finger of Death
-		else
+		if(m_uiCheckRangeTimer < uiDiff)
 		{
-			if (!m_creature->IsNonMeleeSpellCasted(false))
+			if (!m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
 			{
-				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-					DoCastSpellIfCan(pTarget, SPELL_FINGER_DEATH);
-			}
-		}
+				if (!m_creature->IsNonMeleeSpellCasted(false))
+					if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FINGER_DEATH, SELECT_FLAG_PLAYER))
+						if(DoCastSpellIfCan(pTarget, SPELL_FINGER_DEATH) == CAST_OK)
+							m_uiCheckRangeTimer = 1000;
+			}else
+				m_uiCheckRangeTimer = 3000;
+		}else
+			m_uiCheckRangeTimer -= uiDiff;*/
+
+		DoMeleeAttackIfReady();
 	}
 };
 
