@@ -914,31 +914,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 			// prevent expire spell mods with (charges > 0 && m_stackAmount > 1)
 			// all this spell expected expire not at use but at spell proc event check
 			spellProto->StackAmount > 1 ? 0 : GetHolder()->GetAuraCharges());
-	}else{	
-
-		//Fixe bonus T5 Mage (4pieces) @Kordbc
-		if(GetSpellProto()->Id == 37441 && GetTarget()->GetTypeId() == TYPEID_PLAYER)
-		{
-			uint8 countSet = 0;
-			for(uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-			{
-				if(((Player*)GetTarget())->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-				{
-					switch(((Player*)GetTarget())->GetItemByPos(INVENTORY_SLOT_BAG_0, i)->GetEntry())
-					{
-					case 30206:
-					case 30205:
-					case 30207:
-					case 30210:
-					case 30196:
-						countSet++;
-						break;
-					}
-				}
-			}
-			if(countSet >= 4)
-				GetTarget()->SetObjectScale(2.0f);
-		}
 	}
 
 	((Player*)GetTarget())->AddSpellMod(m_spellmod, apply);
@@ -1956,6 +1931,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
 						return;
 					}
+				case 32014:
+					{
+						// Air Burst (Archimonde) Prevent remove fear @Kordbc
+						if(target->HasAura(31970))
+							target->RemoveAurasDueToSpell(31970);
+						return;
+					}
 				case 32045:                             // Soul Charge
 				case 32051:
 				case 32052:
@@ -1963,7 +1945,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 						// max duration is 2 minutes, but expected to be random duration
 						// real time randomness is unclear, using max 30 seconds here
 						// see further down for expire of this aura
-						GetHolder()->SetAuraDuration(urand(1, 30)*IN_MILLISECONDS);
+						GetHolder()->SetAuraDuration(urand(4, 30)*IN_MILLISECONDS);
 						return;
 					}
 				case 33326:                             // Stolen Soul Dispel
@@ -2173,21 +2155,21 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 		case 32051:                                     // Soul Charge
 			{
 				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32057, true, NULL, this);
+					target->CastSpell(target, 32057, true, NULL, this, target->GetObjectGuid());
 
 				return;
 			}
 		case 32052:                                     // Soul Charge
 			{
 				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32053, true, NULL, this);
+					target->CastSpell(target, 32053, true, NULL, this, target->GetObjectGuid());
 
 				return;
 			}
 		case 32286:                                     // Focus Target Visual
 			{
 				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32301, true, NULL, this);
+					target->CastSpell(target, 32301, true, NULL, this, target->GetObjectGuid());
 
 				return;
 			}

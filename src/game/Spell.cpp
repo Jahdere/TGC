@@ -1793,19 +1793,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 				if (Unit* pVictim = m_caster->getVictim())
 					targetUnitMap.remove(pVictim);
 				break;
-			// Soul Charge (Archimonde) @Kordbc
-			case 32053:
-			case 32054:
-			case 32057:
-				if (WorldObject* castObject = GetCastingObject())
-				{
-					Map::PlayerList const& lPlayers = castObject->GetMap()->GetPlayers();
-					for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-						if(Player* pPlayer = itr->getSource())
-							if(pPlayer->isAlive())
-								targetUnitMap.push_back(pPlayer);												
-				}
-				break;
 			}
 		}
 		break;
