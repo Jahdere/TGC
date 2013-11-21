@@ -2069,6 +2069,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 				}
 				break;
 			}
+		case SPELLFAMILY_PALADIN:
+			{
+				// Bonus 2p T4 Paladin
+				if((GetSpellProto()->SpellFamilyFlags & UI64LIT(0x8000000)))
+				{
+					if(Aura* aura = GetCaster()->GetDummyAura(37182))
+					{
+						m_modifier.m_amount += aura->GetModifier()->m_amount;
+					}
+				}
+				break;
+			}
 		}
 	}
 	// AT REMOVE
@@ -5293,36 +5305,36 @@ void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool /*Real*/)
 
 void Aura::HandleModMeleeAttackPowerAttackerBonus(bool apply, bool /*Real*/)
 {
-    if (!apply)
-        return;
+	if (!apply)
+		return;
 
-    switch(GetId())
-    {
-        case 1130:
-        case 14323:
-        case 14324:
-        case 14325:
-            if(Unit* caster = GetCaster())
-            {
-                Unit::AuraList const& mclassScritAuras = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (Unit::AuraList::const_iterator j = mclassScritAuras.begin(); j != mclassScritAuras.end(); ++j)
-                {
-                    switch((*j)->GetModifier()->m_miscvalue)
-                    {
-                        case 5240:
-                        case 5237:
-                        case 5238:
-                        case 5236:
-                        case 5239:
-                            m_modifier.m_amount = (*j)->GetModifier()->m_amount;
-                            break;
-                        default : break;
-                    }
-                }
-            }
-            break;
-        default : break;
-    }
+	switch(GetId())
+	{
+	case 1130:
+	case 14323:
+	case 14324:
+	case 14325:
+		if(Unit* caster = GetCaster())
+		{
+			Unit::AuraList const& mclassScritAuras = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+			for (Unit::AuraList::const_iterator j = mclassScritAuras.begin(); j != mclassScritAuras.end(); ++j)
+			{
+				switch((*j)->GetModifier()->m_miscvalue)
+				{
+				case 5240:
+				case 5237:
+				case 5238:
+				case 5236:
+				case 5239:
+					m_modifier.m_amount = (*j)->GetModifier()->m_amount;
+					break;
+				default : break;
+				}
+			}
+		}
+		break;
+	default : break;
+	}
 
 }
 
@@ -5766,6 +5778,11 @@ void Aura::HandleModTargetResistance(bool apply, bool Real)
 	if (!Real)
 		return;
 	Unit* target = GetTarget();
+
+	// Warp-Spring Coil (item 30450) @Kordbc
+	if(GetId() == 37174)
+		GetHolder()->SetAuraCharges(0);
+
 	// applied to damage as HandleNoImmediateEffect in Unit::CalculateAbsorbAndResist and Unit::CalcArmorReducedDamage
 	// show armor penetration
 	if (target->GetTypeId() == TYPEID_PLAYER && (m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL))
