@@ -2096,6 +2096,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 			(spellInfo_2->Id == 12051  && spellInfo_1->Id == 37658 ))
 			return false;
 
+		//Arcane Brilliance vs Perceived Weakness @Kordbc
+		if ((spellInfo_1->Id == 27127  && spellInfo_2->Id == 37174 ) ||  
+			(spellInfo_2->Id == 27127  && spellInfo_1->Id == 37174 ))
+			return false;
+
 		break;
 	case SPELLFAMILY_WARLOCK:
 		if (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK)
@@ -2217,6 +2222,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 				(spellId_1 == 31666 && spellId_2 == 31665))
 				return false;
 		}
+
+		//Arcane Brilliance vs Perceived Weakness @Kordbc
+		if ((spellInfo_1->Id == 27127  && spellInfo_2->Id == 37174 ) ||  
+			(spellInfo_2->Id == 27127  && spellInfo_1->Id == 37174 ))
+			return false;
 
 		// Garrote -> Garrote-Silence (multi-family check)
 		if (spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && spellInfo_2->SpellVisual == 0)
