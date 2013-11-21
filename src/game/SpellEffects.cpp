@@ -1271,6 +1271,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 41466, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
+			case 39992:									// Needle Spine (Najentus) @Kordbc
+				{
+					if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+						return;
+
+					unitTarget->CastSpell(unitTarget, 39835, true, NULL, NULL, m_caster->GetObjectGuid());
+					return;
+				}
 			case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
 				{
 					// selecting one from Bloodstained Fortune item
