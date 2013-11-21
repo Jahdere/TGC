@@ -1,0 +1,10 @@
+src/game/SpellAuras.cpp View file @ 644931a
+@@ -5766,6 +5778,11 @@ void Aura::HandleModTargetResistance(bool apply, bool Real)
+    if (!Real)
+      return;
+    Unit* target = GetTarget();
++
++   // Warp-Spring Coil (item 30450) @Kordbc
++   if(GetId() == 37174)
++     GetHolder()->SetAuraCharges(0);
++

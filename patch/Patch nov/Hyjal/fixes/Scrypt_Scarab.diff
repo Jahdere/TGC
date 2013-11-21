@@ -1,0 +1,26 @@
+src/game/SpellEffects.cpp View file @ 4d07b2a
+@@ -3850,6 +3850,8 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
+  
+    int32 amount = damage > 0 ? damage : 1;
+  
++  Unit* pTarget = NULL;
++
+    for (int32 count = 0; count < amount; ++count)
+    {
+      float px, py, pz;
+@@ -3895,6 +3897,15 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
+        if (forceFaction)
+          summon->setFaction(forceFaction);
+  
++	      // Crypt Scarab @Kordbc
++       if(m_caster->GetTypeId() != TYPEID_PLAYER && summon->GetEntry() == 17967)
++       {
++         if(!pTarget)
++           pTarget = summon->SelectRandomUnfriendlyTarget((Unit*) 0 , 30.0f);
++         if(pTarget)
++           summon->FixateTarget(pTarget);
++       }
++
+        // Notify original caster if not done already
+        if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+          ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);

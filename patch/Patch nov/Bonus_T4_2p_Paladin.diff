@@ -1,0 +1,71 @@
+src/game/SpellEffects.cpp View file @ 2bcd84c
+@@ -2838,22 +2838,8 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
+  
+      int32 addhealth = damage;
+  
+-     // Vessel of the Naaru (Vial of the Sunwell trinket)
+-     if (m_spellInfo->Id == 45064)
+-     {
+-       // Amount of heal - depends from stacked Holy Energy
+-       int damageAmount = 0;
+-       Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+-       for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+-         if ((*i)->GetId() == 45062)
+-           damageAmount += (*i)->GetModifier()->m_amount;
+-       if (damageAmount)
+-         m_caster->RemoveAurasDueToSpell(45062);
+-
+-       addhealth += damageAmount;
+-     }
+      // Swiftmend - consumes Regrowth or Rejuvenation
+-     else if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
++     if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
+      {
+        Unit::AuraList const& RejorRegr = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
+        // find most short by duration
+@@ -2888,11 +2874,44 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
+        unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
+  
+        addhealth += tickheal * tickcount;
+-     // Cannibalize Ghoul (Hyjal)
+-     }else if(m_spellInfo->Id == 31538){
+-       addhealth = m_caster->GetMaxHealth() * 0.07;
++     }else{
++       switch(m_spellInfo->Id)
++       {
++       // Bonus T4 p2 Paladin @Kordbc
++       case 20267:
++       case 20341:
++       case 20342:
++       case 20343:
++       case 27163:
++         {
++           if(Aura* dummyAura = caster->GetDummyAura(37182))
++             addhealth += dummyAura->GetModifier()->m_amount;
++           break;
++         }
++       // Cannibalize Ghoul (Hyjal)
++       case 31538:
++         {          
++           addhealth = m_caster->GetMaxHealth() * 0.07;
++           break;
++         }
++       // Vessel of the Naaru (Vial of the Sunwell trinket)
++       case 45064:
++         {
++           // Amount of heal - depends from stacked Holy Energy
++           int damageAmount = 0;
++           Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
++           for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
++             if ((*i)->GetId() == 45062)
++               damageAmount += (*i)->GetModifier()->m_amount;
++           if (damageAmount)
++             m_caster->RemoveAurasDueToSpell(45062);
++
++           addhealth += damageAmount;
++         }
++       }
+      }
+  
+      addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+      addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);

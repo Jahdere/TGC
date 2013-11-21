@@ -1,0 +1,15 @@
+src/game/SpellAuras.cpp View file @ 3d74f39
+@@ -1956,6 +1931,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
+  
+              return;
+            }
++         case 32014:
++           {
++             // Air Burst (Archimonde) Prevent remove fear @Kordbc
++             if(target->HasAura(31970))
++               target->RemoveAurasDueToSpell(31970);
++             return;
++           }
+          case 32045:                             // Soul Charge
+          case 32051:
+          case 32052:
