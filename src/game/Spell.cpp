@@ -988,9 +988,37 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		}
 	}
 
+	bool isHot = false;
+	bool isDot = false;
+	//Check if is HOT and proc flag on first cast
+	if(real_caster->GetTypeId() == TYPEID_PLAYER)
+	{
+		bool isHot = false;
+		for (int i = 0; i < 3; ++i)
+		{
+			// Periodic Heals
+			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)
+			{
+				isHot = true;
+				break;
+			}
+		}
+		//Check if is DOT and proc flag on first cast
+		
+		for (int i = 0; i < 3; ++i)
+		{
+			// Periodic Heals
+			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
+			{
+				isDot = true;
+				break;
+			}
+		}
+	}
+
 	// All calculated do it!
 	// Do healing and triggers
-	if (m_healing)
+	if (m_healing || isHot)
 	{
 		bool crit = real_caster && real_caster->IsSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
 		uint32 addhealth = m_healing;
@@ -1014,7 +1042,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 			unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo);
 	}
 	// Do damage and triggers
-	else if (m_damage)
+	else if (m_damage || isDot)
 	{
 		// Fill base damage struct (unitTarget - is real spell target)
 		SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
@@ -6226,6 +6254,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		break;
 	case 37029:											// Force immune remote toy (Telonicius) when player have Mental Protection Field @kordbc
 		if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
+			return false;
+		break;
+	case 15269:											// Blackout (Shadow priest) , cant stun original caster
+		if(target->GetTypeId() == TYPEID_PLAYER && target == m_caster)
 			return false;
 		break;
 	default: break;
