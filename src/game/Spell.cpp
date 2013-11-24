@@ -1003,13 +1003,13 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 				break;
 			}
 		}
-		//Check if is DOT and proc flag on first cast
-		
+		//Check if is DOT and proc flag on first cast		
 		for (int i = 0; i < 3; ++i)
 		{
-			// Periodic Heals
+			// Periodic Dmg
 			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
 			{
+				procAttacker = uint32(PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT);
 				isDot = true;
 				break;
 			}
@@ -1069,8 +1069,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
 		// Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
 		if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
+		{
 			caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo);
-
+		}
 		// trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
 		if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON &&
 			!m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
@@ -6248,6 +6249,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
 			return false;
 		break;
+	case 31298:											// Sleep (Anetheron)
 	case 29511:											// Repentance (Maiden of Virtue) , can't hit current target @Kordbc
 		if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->getVictim())
 			return false;

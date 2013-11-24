@@ -25,6 +25,8 @@ INSERT INTO `creature_ai_scripts` (`id`, `creature_id`, `event_type`, `event_inv
 (1780806, 17808, 0, 0, 100, 3, 600000, 600000, 300000, 300000, 11, 26662, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Anetheron - Enrage After 10 Minutes'),
 (1780807, 17808, 5, 0, 100, 3, 5000, 5000, 0, 0, 1, -218, -219, -220, 0, 0, 0, 0, 0, 0, 0, 0, 'Anetheron - Yell on Player Kill'),
 (1780808, 17808, 6, 0, 100, 2, 0, 0, 0, 0, 1, -221, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Anetheron - Yell on Death');
+#SLEEP
+UPDATE creature_ai_scripts SET action1_param2 = 0 WHERE id =1780803;
 
 
 #Kaz'Rogal
