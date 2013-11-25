@@ -6263,6 +6263,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
 			return false;
 		break;
+	case 39968:											// Needle Spine aoe (Naj'entus) @Kordbc
 	case 15269:											// Blackout (Shadow priest) , cant stun original caster
 		if(target->GetTypeId() == TYPEID_PLAYER && target == m_caster)
 			return false;

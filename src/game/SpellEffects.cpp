@@ -1271,12 +1271,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 41466, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
-			case 39992:									// Needle Spine (Najentus) @Kordbc
+			case 39992:									// Needle Spine (Naj'entus) @Kordbc
 				{
 					if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
 						return;
 
-					unitTarget->CastSpell(unitTarget, 39835, true, NULL, NULL, m_caster->GetObjectGuid());
+					m_caster->CastSpell(unitTarget, 39835, true);
 					return;
 				}
 			case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
@@ -5328,6 +5328,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
 					unitTarget->CastSpell(unitTarget, 38353, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
+				}
+			case 39835:									// Nidle Spine aoe (Naj'entus) @Kordbc
+				{
+					if(!unitTarget)
+						return;
+
+					unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
 				}
 			case 41055:                                 // Copy Weapon
 				{
