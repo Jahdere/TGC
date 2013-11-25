@@ -6230,6 +6230,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 
 		// all ok by some way or another, skip normal check
 		break;
+	case SPELL_EFFECT_HEAL_MAX_HEALTH:
+		// Kael'thas Resurrect
+		if(m_spellInfo->Id == 36450 && target != m_caster)
+			return true;
+		break;
 	default:                                            // normal case
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)
