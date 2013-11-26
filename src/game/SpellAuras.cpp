@@ -1480,8 +1480,10 @@ void Aura::TriggerSpell()
 						triggerTarget->SummonCreature(22408, fX, fY, fZ, triggerTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
 						return;
 					}
-					//                    // Drain World Tree Visual
-					//                    case 39140: break;
+				// Drain World Tree Visual @Kordbc
+				case 39140: 
+					trigger_spell_id = 39141;
+					break;
 					//                    // Quest - Dustin's Undead Dragon Visual aura
 					//                    case 39259: break;
 					//                    // Hellfire - The Exorcism, Jules releases darkness, aura
