@@ -5335,6 +5335,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 						return;
 
 					unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
+					return;
 				}
 			case 41055:                                 // Copy Weapon
 				{
@@ -5544,6 +5545,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 				}
 			}
 			break;
+		}
+	case SPELLFAMILY_PRIEST:
+		{
+			// Summon Shadowfiends @Kordbc
+			if(m_spellInfo->Id == 39649)
+			{
+				if(!unitTarget)
+					return;
+
+				unitTarget->CastSpell(unitTarget, 41159, true);
+				return;
+			}
 		}
 	case SPELLFAMILY_PALADIN:
 		{
@@ -6386,7 +6399,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 	// TODO: research more ContactPoint/attack distance.
 	// 3.666666 instead of ATTACK_DISTANCE(5.0f) in below seem to give more accurate result.
 	float x, y, z;
-	unitTarget->GetContactPoint(m_caster, x, y, z, 0.0f);
+	unitTarget->GetContactPoint(m_caster, x, y, z, 0.5f);
 
 	if (unitTarget->GetTypeId() != TYPEID_PLAYER)
 		((Creature*)unitTarget)->StopMoving();
