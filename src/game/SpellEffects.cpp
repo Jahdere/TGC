@@ -352,6 +352,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 						damage = damage * unitTarget->GetMaxHealth() / 100;
 						break;
 					}
+					// Shadow Inferno @Kordbc
+				case 39646:
+					{
+						damage = 1000;
+						break;
+					}
 					// Cataclysmic Bolt
 				case 38441:
 					damage = unitTarget->GetMaxHealth() / 2;
@@ -2877,7 +2883,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 		}else{
 			switch(m_spellInfo->Id)
 			{
-			// Bonus T4 p2 Paladin @Kordbc
+				// Bonus T4 p2 Paladin @Kordbc
 			case 20267:
 			case 20341:
 			case 20342:
@@ -2888,13 +2894,13 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 						addhealth += dummyAura->GetModifier()->m_amount;
 					break;
 				}
-			// Cannibalize Ghoul (Hyjal)
+				// Cannibalize Ghoul (Hyjal)
 			case 31538:
 				{					
 					addhealth = m_caster->GetMaxHealth() * 0.07;
 					break;
 				}
-			// Vessel of the Naaru (Vial of the Sunwell trinket)
+				// Vessel of the Naaru (Vial of the Sunwell trinket)
 			case 45064:
 				{
 					// Amount of heal - depends from stacked Holy Energy

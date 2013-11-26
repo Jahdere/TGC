@@ -1494,8 +1494,10 @@ void Aura::TriggerSpell()
 					//                    case 39630: break;
 					//                    // Shadow Bolt Whirl
 					//                    case 39634: break;
-					//                    // Shadow Inferno
-					//                    case 39645: break;
+                // Shadow Inferno @Kordbc
+				case 39645: 
+					trigger_spell_id = 39646;
+					break;
 				case 39857:                             // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
 					trigger_spell_id = 39856;
 					break;
