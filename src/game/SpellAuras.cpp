@@ -4622,6 +4622,12 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 		// Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
 		if (spellProto->Id == 41917)
 			target->CastSpell(target, 41915, true);
+		// Skeleton Shot - Summoning Skeleton if target die
+		else if (spellProto->Id == 41171)
+		{
+			if(m_removeMode == AURA_REMOVE_BY_DEATH)
+				target->CastSpell(target, 41174, true);
+		}
 	}
 }
 
