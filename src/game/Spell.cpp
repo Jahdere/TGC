@@ -994,27 +994,27 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 	//Check if is HOT and proc flag on first cast
 	if(real_caster->GetTypeId() == TYPEID_PLAYER)
 	{
-		bool isHot = false;
-		for (int i = 0; i < 3; ++i)
-		{
-			// Periodic Heals
-			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)
-			{
-				isHot = true;
-				break;
-			}
-		}
-		//Check if is DOT and proc flag on first cast		
-		for (int i = 0; i < 3; ++i)
-		{
-			// Periodic Dmg
-			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
-			{
-				procAttacker = uint32(PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT);
-				isDot = true;
-				break;
-			}
-		}
+	bool isHot = false;
+	for (int i = 0; i < 3; ++i)
+	{
+	// Periodic Heals
+	if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)
+	{
+	isHot = true;
+	break;
+	}
+	}
+	//Check if is DOT and proc flag on first cast		
+	for (int i = 0; i < 3; ++i)
+	{
+	// Periodic Dmg
+	if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
+	{
+	procAttacker = uint32(PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT);
+	isDot = true;
+	break;
+	}
+	}
 	}*/
 
 	// All calculated do it!
@@ -3295,6 +3295,11 @@ void Spell::finish(bool ok)
 				{
 					SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
 					SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
+
+					// Shadow Weaving can't proc on caster via Shadow Word Death kickback @Kordbc
+					if(unit == m_caster && m_spellInfo->Id == 32409)
+						continue;
+
 					// Calculate chance at that moment (can be depend for example from combo points)
 					int32 auraBasePoints = (*i)->GetBasePoints();
 					int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
@@ -5523,6 +5528,13 @@ SpellCastResult Spell::CheckRange(bool strict)
 	SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
 	float max_range = GetSpellMaxRange(srange) + range_mod;
 	float min_range = GetSpellMinRange(srange);
+
+	//Custom Range for Aimed Shot @Kordbc
+	if(m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & UI64LIT(0X20000))
+	{
+		max_range = 35.0f + range_mod;
+		min_range = 5.0f;
+	}
 
 	if (Player* modOwner = m_caster->GetSpellModOwner())
 		modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
