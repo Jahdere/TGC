@@ -219,6 +219,65 @@ bool GossipSelect_npc_tyrande_whisperwind(Player* pPlayer, Creature* /*pCreature
 	return true;
 }
 
+// This script is for helper who summon NPC_GIANT from the air
+struct MANGOS_DLL_DECL npc_helper_giantAI : public ScriptedAI
+{
+	npc_helper_giantAI(Creature* pCreature) : ScriptedAI(pCreature) 
+	{ 
+		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		Reset(); 
+	}
+	ScriptedInstance* m_pInstance;
+	uint32 m_uiSummonTargetTimer;
+
+	void Reset() override
+	{
+		m_uiSummonTargetTimer = 500;
+	}
+
+	void JustSummoned(Creature* pSummoned)
+	{
+		if(pSummoned->GetEntry() == NPC_GIANT_TARGET)
+		{
+			DoCastSpellIfCan(pSummoned, SPELL_SUMMON_GIANT, CAST_TRIGGERED);
+		}
+	}
+
+	void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
+	{
+		if(pTarget->GetTypeId() != TYPEID_PLAYER && pTarget->GetEntry() == NPC_GIANT_TARGET && pSpell->Id == SPELL_SUMMON_GIANT)
+		{
+			if(Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(NPC_THRALL))
+			{
+				pTemp->SummonCreature(NPC_GIANT, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+				// Then despawn trigger
+				((Creature*)pTarget)->ForcedDespawn();
+				m_creature->ForcedDespawn();				
+			}
+		}
+	}
+
+	void UpdateAI(const uint32 uiDiff) override
+	{
+		if (m_uiSummonTargetTimer)
+		{
+			if (m_uiSummonTargetTimer <= uiDiff)
+			{
+				m_creature->SummonCreature(NPC_GIANT_TARGET, m_creature->GetPositionX() - 20.0f, m_creature->GetPositionY(), m_creature->GetPositionZ() - 30.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+				m_uiSummonTargetTimer = 0;
+			}
+			else
+				m_uiSummonTargetTimer -= uiDiff;
+		}
+	}
+};
+
+
+CreatureAI* GetAI_npc_helper_giant(Creature* pCreature)
+{
+	return new npc_helper_giantAI(pCreature);
+}
+
 void AddSC_hyjal()
 {
 	Script* pNewScript;
@@ -241,5 +300,10 @@ void AddSC_hyjal()
 	pNewScript->Name = "npc_tyrande_whisperwind";
 	pNewScript->pGossipHello = &GossipHello_npc_tyrande_whisperwind;
 	pNewScript->pGossipSelect = &GossipSelect_npc_tyrande_whisperwind;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "npc_helper_giant";
+	pNewScript->GetAI = &GetAI_npc_helper_giant;
 	pNewScript->RegisterSelf();
 }

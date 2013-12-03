@@ -34,7 +34,10 @@ enum eSpell
 
 	// Thrall spells
 	SPELL_CHAIN_LIGHTNING   = 31330,
-	SPELL_FERAL_SPIRIT      = 31331
+	SPELL_FERAL_SPIRIT      = 31331,
+
+	// Trigger Infernal spells
+	SPELL_SUMMON_GIANT	= 32148,
 };
 
 enum TargetType                                             // Used in the spell cast system for the AI
@@ -68,6 +71,7 @@ enum MovePoint
 	POINT_ID_HORDE_FLY_BACK = 8,
 	POINT_ID_HORDE_FLY_BACK1 = 9,
 	POINT_ID_HORDE_FLY_FRONT = 10,
+	POINT_ID_HORDE_TRIGGER_GIANT = 11
 };
 
 struct MANGOS_DLL_DECL hyjalAI : public ScriptedAI
