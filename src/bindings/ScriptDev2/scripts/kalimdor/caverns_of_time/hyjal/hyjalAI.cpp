@@ -28,22 +28,23 @@ struct HyjalLocation
 {
 	eBaseArea m_pBaseArea;
 	float m_fX, m_fY, m_fZ;
-	MovePoint MovePoint;
+	MovePoint m_movePoint;
 };
 
 // Locations for summoning waves
 // Must be even number
 
-static const HyjalLocation aHyjalSpawnLoc[] =
+static const HyjalLocation aHyjalSpawnLoc[5] =
 {
 	{BASE_ALLY,  4969.819f, -1637.413f, 1343.208f, POINT_ID_ALLY},
-	{BASE_HORDE, 5596.126f, -2531.108f, 1488.468f, POINT_ID_HORDE},
+	{BASE_HORDE, 5557.804f, -2553.847f, 1479.771f, POINT_ID_HORDE},
 	{BASE_HORDE, 5567.597f, -2808.696f, 1513.156f, POINT_ID_HORDE_FLY_BACK},
-	{BASE_HORDE, 5510.450f, -2522.790f, 1509.261f, POINT_ID_HORDE_FLY_FRONT},
+	{BASE_HORDE, 5441.202f, -2604.294f, 1545.218f, POINT_ID_HORDE_FLY_FRONT},
+	{BASE_HORDE, 5500.456f, -2675.986f, 1481.114f, POINT_ID_HORDE_TRIGGER_GIANT},
 };
 
 // used to inform the wave where to move after spawn
-static const HyjalLocation aHyjalWaveMoveTo[] =
+static const HyjalLocation aHyjalWaveMoveTo[7] =
 {
 	{BASE_ALLY,  4901.451f, -1663.070f, 1320.038f, POINT_ID_ALLY1},
 	{BASE_ALLY,  4966.911f, -1697.741f, 1340.223f, POINT_ID_ALLY2},
@@ -135,11 +136,11 @@ static const HyjalWave aHyjalWavesHorde[] =
 	// Azgalor Wave 1-8
 	{{NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0, 0, 0}, 135000, false},
 	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_FROST, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, NPC_GARGO, 0, 0, 0, 0}, 165000, false},
-	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, 0, 0, 0, 0}, 160000, false}, // Ajout de 2gouhl
-	{{NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, 0, 0, 0, 0}, 165000, false}, // Remplace 2 STALK par 2 GIANT
+	{{NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GHOUL, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, 0, 0, 0, 0}, 160000, false}, // Ajout de 2gouhl
+	{{NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, 0, 0, 0, 0}, 165000, false}, // Remplace 2 STALK par 2 GIANT
 	{{NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_STALK, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, 0, 0, 0, 0}, 135000, false},
 	{{NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_NECRO, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, 0, 0, 0, 0, 0, 0}, 135000, false},
-	{{NPC_GHOUL, NPC_GHOUL, NPC_CRYPT, NPC_CRYPT, NPC_STALK, NPC_STALK, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, NPC_GIANT, 0, 0, 0, 0}, 195000, false},
+	{{NPC_GHOUL, NPC_GHOUL, NPC_CRYPT, NPC_CRYPT, NPC_STALK, NPC_STALK, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, NPC_GIANT_HELPER, 0, 0, 0, 0}, 195000, false},
 	{{NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_CRYPT, NPC_STALK, NPC_STALK, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_ABOMI, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_BANSH, NPC_NECRO, NPC_NECRO, 0, 0}, 225000, false}, //Ajout de 2 bansh
 	// All 8 Waves are summoned, summon Azgalor
 	{{NPC_AZGALOR, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0, true}
@@ -162,7 +163,7 @@ void hyjalAI::Reset()
 	{
 	case NPC_JAINA:
 		m_uiBase = BASE_ALLY;
-		DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
+	//	DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
 		break;
 	case NPC_THRALL:
 		m_uiBase = BASE_HORDE;
@@ -244,53 +245,58 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
 	HyjalLocation const* pSpawn = NULL;
 
 	uint32 uiMaxCount = countof(aHyjalSpawnLoc);
-
-	/* 
-	static const HyjalLocation aHyjalSpawnLoc[] =
-{
-	{BASE_ALLY,  4969.819f, -1637.413f, 1343.208f, POINT_ID_ALLY},
-	{BASE_HORDE, 5520.227f, -2490.740f, 1475.902f, POINT_ID_HORDE},
-	{BASE_HORDE, 5675.686f, -2886.051f, 1555.619f, POINT_ID_HORDE_FLY_BACK},
-	{BASE_HORDE, 5675.686f, -2886.051f, 1555.619f, POINT_ID_HORDE_FLY_FRONT},
-};
-	*/
-
 	for (uint32 i = 0; i < uiMaxCount; ++i)
 	{
 		if (aHyjalSpawnLoc[i].m_pBaseArea != (eBaseArea)m_uiBase)
 			continue;
 
-		switch(uiMobEntry)
+		if(uiMobEntry == NPC_GARGO || uiMobEntry == NPC_FROST)
 		{
-		case NPC_FROST:
-			if(aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_BACK)
-				continue;
-			break;
-		case NPC_GARGO:
-			if(!m_bIsFirstBossDead && aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_BACK)
-				continue;
-			else if(aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_FRONT)
-				continue;
-			break;
+			if(!m_bIsFirstBossDead)
+			{
+				if(aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_FLY_BACK)
+					continue;
+			}else
+				if(aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_FLY_FRONT)
+					continue;
 		}
+		else if(uiMobEntry == NPC_GIANT_HELPER)
+		{
+			if(aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_TRIGGER_GIANT)
+				continue;
+		}
+
 		pSpawn = &aHyjalSpawnLoc[i];
 		break;
 	}
 
 	if (pSpawn)
-		m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+	{
+		if(uiMobEntry == NPC_GIANT_HELPER)
+		{
+			float fX, fY, fZ;
+			m_creature->GetRandomPoint(pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 40.0f, fX, fY, fZ);
+			m_creature->SummonCreature(uiMobEntry, fX, fY, fZ + 30.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
+		}else
+			m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+	}
 }
 
 void hyjalAI::JustSummoned(Creature* pSummoned)
 {
 	// not interesting for us
-	if (pSummoned->GetEntry() == NPC_WATER_ELEMENTAL || pSummoned->GetEntry() == NPC_DIRE_WOLF)
+	if (pSummoned->GetEntry() == NPC_WATER_ELEMENTAL || pSummoned->GetEntry() == NPC_DIRE_WOLF || pSummoned->GetEntry() == NPC_GIANT_TARGET)
 		return;
 
-	// Increment Enemy Count to be used in World States and instance script
-	++m_uiEnemyCount;
-
 	HyjalLocation const* pMove = NULL;
+
+	// Increment Enemy Count to be used in World States and instance script
+	if(pSummoned->GetEntry() != NPC_GIANT)	// Dont count twice
+		++m_uiEnemyCount;
+
+	// Just count
+	if(pSummoned->GetEntry() == NPC_GIANT_HELPER)
+		return;
 
 	for (uint32 i = 0; i < countof(aHyjalWaveMoveTo); ++i)
 	{
@@ -299,24 +305,30 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 		switch(pSummoned->GetEntry())
 		{
-		case NPC_FROST:
-			if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE_FLY_BACK1)	// Always flying from the back
-				continue;
-			break;
 		case NPC_GARGO:
-			if(!m_bIsFirstBossDead)	// Flying from the back
+		case NPC_FROST:
 			{
-				if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE_FLY_BACK1)			
-					continue;
-			}else{
-				if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE2)	// Flying from the front
-					continue;
-			}
+				if(!m_bIsFirstBossDead)	// Flying from the back
+				{
+					if(aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE_FLY_BACK1)			
+						continue;
+				}else{
+					if(aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE2)	// Flying from the front
+						continue;
+				}
 			break;
-		default:			
-			if((aHyjalWaveMoveTo[i].MovePoint != POINT_ID_ALLY1 && m_uiBase == BASE_ALLY) || (aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE1 && m_uiBase == BASE_HORDE))
+			}
+		case NPC_GIANT:	//Just Set Target
+			{
+				pSummoned->SetInCombatWithZone();
+				if (Unit* pTarget = pSummoned->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+					pSummoned->AI()->AttackStart(pTarget);
 				continue;
-				
+				break;
+			}
+		default:			
+			if((aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_ALLY1 && m_uiBase == BASE_ALLY) || (aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE1 && m_uiBase == BASE_HORDE))
+				continue;
 			break;
 		}
 
@@ -330,7 +342,10 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
 
 		pSummoned->SetWalk(false);
-		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		if(pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO)
+			pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ + 15.0f);
+		else
+			pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
 	}
 
 	// Check if creature is a boss.
@@ -342,7 +357,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId)
 {
-	if (!uiPointId)
+	if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->isDead())
 		return;
 
 
@@ -355,17 +370,23 @@ void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, u
 	case POINT_ID_ALLY2:	// Go Jaina
 		pMove = &aHyjalWaveMoveTo[uiPointId];
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
-		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
 		break;
 	case POINT_ID_HORDE1:	// Go next step
 		pMove = &aHyjalWaveMoveTo[4];
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
-		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		if(pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO)
+			pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ + 15.0f);
+		else
+			pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ);
 		break;
 	case POINT_ID_HORDE_FLY_BACK1:	// Go Thrall
 	case POINT_ID_HORDE2:
-		pMove = &aHyjalWaveMoveTo[6];
-		pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
+		if(pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO)
+			break;
+		pMove = &aHyjalWaveMoveTo[6];		
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+		pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ);
 		break;
 	}
 }
@@ -515,13 +536,15 @@ void hyjalAI::DoTalk(YellType pYellType)
 		DoScriptText(pYell->m_iTextId, m_creature);
 }
 
-void hyjalAI::SpellHitTarget(Unit* /*pTarget*/, const SpellEntry* /*pSpell*/)
+void hyjalAI::SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
 {
+	debug_log("**************HIT TARGET TELEPORTATION*****************");
 	// TODO: this spell should cause misc mobs to despawn
-	// if (pSpell->Id == SPELL_MASS_TELEPORT && pTarget->GetTypeId() != TYPEID_PLAYER)
-	//{
-	// despawn;
-	//}
+	 if (pSpell->Id == SPELL_MASS_TELEPORT && pTarget->GetTypeId() != TYPEID_PLAYER)
+	 {
+		 debug_log("**************HIT TARGET PNJ TELEPORTATION*****************");
+		 ((Creature*)pTarget)->ForcedDespawn();
+	 }
 }
 
 void hyjalAI::Retreat()
@@ -543,6 +566,7 @@ void hyjalAI::JustDied(Unit* pKiller)
 	// TODO: in case they die during boss encounter, then what? despawn boss?
 	if(m_pInstance)
 	{
+
 		for(uint8 i = 0; i < MAX_ENCOUNTER; i++)
 		{
 			if(m_pInstance->GetData(i) == IN_PROGRESS)
@@ -568,6 +592,13 @@ void hyjalAI::JustDied(Unit* pKiller)
 				}
 			}
 		}
+
+		// Despawn current wave
+		for (GuidList::const_iterator itr = lWaveMobGUIDList.begin(); itr != lWaveMobGUIDList.end(); ++itr)
+		{
+			if (Creature* pTemp = m_pInstance->instance->GetCreature(*itr))
+				pTemp->ForcedDespawn();
+		}
 	}
 }
 
@@ -587,17 +618,6 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
 				m_uiNextWaveTimer = std::min(m_uiNextWaveTimer, (uint32)5000);
 			}
 
-			for (GuidList::const_iterator itr = lWaveMobGUIDList.begin(); itr != lWaveMobGUIDList.end(); ++itr)
-			{
-				if (Creature* pTemp = m_pInstance->instance->GetCreature(*itr))
-				{
-					if (!pTemp->isAlive() || pTemp->getVictim())
-						continue;
-
-					pTemp->SetWalk(false);
-					pTemp->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-				}
-			}
 			m_uiWaveMoveTimer = 10000;
 		}
 		else

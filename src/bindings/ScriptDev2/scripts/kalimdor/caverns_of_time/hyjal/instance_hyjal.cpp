@@ -66,8 +66,15 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 	case NPC_ANETHERON:
 	case NPC_KAZROGAL:
 	case NPC_AZGALOR:
+	case NPC_THRALL:
 		m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 		break;
+	case NPC_TYRANDE:	// Spawn Archimonde if needed when players come back another day
+		{
+			if(GetData(TYPE_ANETHERON) == DONE && GetData(TYPE_AZGALOR) == DONE)
+				DoSpawnArchimonde();
+			break;
+		}
 	}
 }
 
@@ -93,38 +100,51 @@ void instance_mount_hyjal::OnCreatureEvade(Creature* pCreature)
 {
 	switch (pCreature->GetEntry())
 	{
-	case NPC_WINTERCHILL: 
-		SetData(TYPE_WINTERCHILL, FAIL);
-		pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+	case NPC_WINTERCHILL:
+		{
+			SetData(TYPE_WINTERCHILL, FAIL);
+			pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+		}
 		break;
-	case NPC_ANETHERON:   
-		SetData(TYPE_ANETHERON, FAIL);  
-		pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
-		break;
-	case NPC_KAZROGAL:    
-		SetData(TYPE_KAZROGAL, FAIL);
-		pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
-		break;
-	case NPC_AZGALOR:     
-		SetData(TYPE_AZGALOR, FAIL);
-		pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
-		break;
+	case NPC_ANETHERON:
+		{
+			SetData(TYPE_ANETHERON, FAIL);  
+			pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+			break;
+		}
+	case NPC_KAZROGAL:
+		{
+			SetData(TYPE_KAZROGAL, FAIL);
+			pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
+			break;
+		}
+	case NPC_AZGALOR:
+		{    
+			SetData(TYPE_AZGALOR, FAIL);
+			pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
+			break;
+		}
 	case NPC_NECRO:
 	case NPC_ABOMI:
 	case NPC_GHOUL:
 	case NPC_BANSH:
 	case NPC_CRYPT:
-	case NPC_GARGO:
-	case NPC_FROST:
 	case NPC_GIANT:
 	case NPC_STALK:
-		if(GetData(TYPE_ANETHERON) == DONE)
-			pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);	// Horde Base
-		else
-			pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);	// Ally Base
+		{
+			if(GetData(TYPE_ANETHERON) == DONE)
+				pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);	// Horde Base
+			else
+				pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);	// Ally Base
+			break;
+		}
+	case NPC_GARGO:
+	case NPC_FROST:
+		pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1500.670f);	// Horde Base
 		break;
+
 	}
-		
+
 }
 
 void instance_mount_hyjal::OnCreatureDeath(Creature* pCreature)
