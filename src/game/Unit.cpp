@@ -2107,7 +2107,11 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 	// Cast back reflect damage spell
 	if (canReflect && reflectSpell)
 	{
-		CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
+		SpellEntry const* m_spellInfoReflect = sSpellStore.LookupEntry(reflectSpell);
+		//Check for Trap Spell and Physical Spell @Kordbc
+		if(m_spellInfoReflect && m_spellInfoReflect->IsFitToFamilyMask(UI64LIT(0x0000200000000014)) && m_spellInfoReflect->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+			CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
+
 		reflectTriggeredBy->SetInUse(false);                // free lock from deletion
 	}
 
@@ -2315,6 +2319,10 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 	SendAttackStateUpdate(&damageInfo);
 	ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType);
 	DealMeleeDamage(&damageInfo, true);
+
+	// FIXME totem gleb have to despawn @Kordbc
+	if(((Totem*)pVictim)->isAlive() && ((Totem*)pVictim)->GetEntry() == 5925)
+		((Totem*)pVictim)->DealDamage(((Totem*)pVictim), ((Totem*)pVictim)->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
 	if (GetTypeId() == TYPEID_PLAYER)
 		DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
@@ -4865,6 +4873,10 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
 
 void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* procSpell)
 {
+	// Shadow Word Death kickback can't proc @Kordbc
+	if(pVictim == this && procSpell->Id == 32409)
+		return;
+
 	// Not much to do if no flags are set.
 	if (procAttacker)
 		ProcDamageAndSpellFor(false, pVictim, procAttacker, procExtra, attType, procSpell, amount);
@@ -5708,8 +5720,8 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
 	if (!victim)
 		return NULL;
 
-	// Magic case
-	if (spell && (spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
+	// Magic case ---- Fix Via schoolMask ? @Kordbc 
+	if (spell && (spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC) && spell->m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
 	{
 		Unit::AuraList const& magnetAuras = victim->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
 		for (Unit::AuraList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
