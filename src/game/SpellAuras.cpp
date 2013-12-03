@@ -1480,8 +1480,10 @@ void Aura::TriggerSpell()
 						triggerTarget->SummonCreature(22408, fX, fY, fZ, triggerTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
 						return;
 					}
-					//                    // Drain World Tree Visual
-					//                    case 39140: break;
+				// Drain World Tree Visual @Kordbc
+				case 39140: 
+					trigger_spell_id = 39141;
+					break;
 					//                    // Quest - Dustin's Undead Dragon Visual aura
 					//                    case 39259: break;
 					//                    // Hellfire - The Exorcism, Jules releases darkness, aura
@@ -1494,8 +1496,10 @@ void Aura::TriggerSpell()
 					//                    case 39630: break;
 					//                    // Shadow Bolt Whirl
 					//                    case 39634: break;
-					//                    // Shadow Inferno
-					//                    case 39645: break;
+                // Shadow Inferno @Kordbc
+				case 39645: 
+					trigger_spell_id = 39646;
+					break;
 				case 39857:                             // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
 					trigger_spell_id = 39856;
 					break;
@@ -4622,6 +4626,12 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 		// Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
 		if (spellProto->Id == 41917)
 			target->CastSpell(target, 41915, true);
+		// Skeleton Shot - Summoning Skeleton if target die
+		else if (spellProto->Id == 41171)
+		{
+			if(m_removeMode == AURA_REMOVE_BY_DEATH)
+				target->CastSpell(target, 41174, true);
+		}
 	}
 }
 
