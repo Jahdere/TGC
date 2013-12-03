@@ -44,6 +44,10 @@ enum
 	NPC_GIANT                   = 17908,
 	NPC_STALK                   = 17916,
 
+	// Helpers for summon NPC_GIANT
+	NPC_GIANT_HELPER			= 18242,
+	NPC_GIANT_TARGET			= 21075,
+
 	NPC_WATER_ELEMENTAL         = 18001,
 	NPC_DIRE_WOLF               = 17854,
 
@@ -82,6 +86,8 @@ private:
 	std::string m_strSaveData;
 
 	GuidList lAncientGemGUIDList;
+
+	GuidList lGardsGUIDList;
 
 	uint32 m_uiTrashCount;
 };
