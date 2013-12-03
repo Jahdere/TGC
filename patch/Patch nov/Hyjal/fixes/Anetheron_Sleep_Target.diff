@@ -1,0 +1,9 @@
+src/game/Spell.cpp View file @ 95ab751
+@@ -6248,6 +6249,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+      if (target->GetTypeId() != TYPEID_PLAYER || target->IsInWater())
+        return false;
+      break;
++  case 31298:                      // Sleep (Anetheron)
+   case 29511:                      // Repentance (Maiden of Virtue) , can't hit current target @Kordbc
+      if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->getVictim())
+        return false;

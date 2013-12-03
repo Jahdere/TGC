@@ -1,0 +1,26 @@
+src/game/Spell.cpp View file @ 603af48
+@@ -3295,6 +3295,11 @@ void Spell::finish(bool ok)
+          {
+            SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
+            SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
++ 
++           // Shadow Weaving can't proc on caster via Shadow Word Death kickback @Kordbc
++           if(unit == m_caster && m_spellInfo->Id == 32409)
++             continue;
++
+            // Calculate chance at that moment (can be depend for example from combo points)
+            int32 auraBasePoints = (*i)->GetBasePoints();
+            int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
+
+src/game/Unit.cpp View file @ 603af48
+ @@ -4865,6 +4873,10 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
+  
+  void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVictim, uint32 procExtra, uint32 amount, WeaponAttackType attType, SpellEntry const* procSpell)
+  {
++   // Shadow Word Death kickback can't proc @Kordbc
++   if(pVictim == this && procSpell->Id == 32409)
++     return;
++
+    // Not much to do if no flags are set.
+    if (procAttacker)
+      ProcDamageAndSpellFor(false, pVictim, procAttacker, procExtra, attType, procSpell, amount);

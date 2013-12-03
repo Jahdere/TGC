@@ -1,0 +1,98 @@
+src/game/LootMgr.cpp View file @ ccfc068
+@@ -66,7 +66,7 @@ class LootTemplate::LootGroup                               // A set of loot def
+    LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
+    LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
+  
+-   LootStoreItem const* Roll() const;                  // Rolls an item from the group, returns NULL if all miss their chances
++   LootStoreItem const* Roll(Loot* loot) const;                  // Rolls an item from the group, returns NULL if all miss their chances
+  };
+  
+  // Remove all data and free all memory
+@@ -842,7 +842,7 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem& item)
+  }
+  
+  // Rolls an item from the group, returns NULL if all miss their chances
+ -LootStoreItem const* LootTemplate::LootGroup::Roll() const
+ +LootStoreItem const* LootTemplate::LootGroup::Roll(Loot* loot) const
+  {
+    if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
+    {
+@@ -858,8 +858,68 @@ LootStoreItem const* LootTemplate::LootGroup::Roll() const
+          return &ExplicitlyChanced[i];
+      }
+    }
++   // Maousse
+    if (!EqualChanced.empty())                              // If nothing selected yet - an item is taken from equal-chanced part
+-     return &EqualChanced[irand(0, EqualChanced.size() - 1)];
++   {
++     int roll = -1; // le roll qui permettra de "piocher" le loot dans le tableau des "loot a chance egal" (EqualChanced")
++
++     if( EqualChanced.size() <=3 ) // si le groupe de loot est <=3 on a affaire a des TOKEN ou un groupe de loot n'ayant pas r�ellement besoin 
++     {                       // d'une v�rification de loot d�ja tomber
++       roll = irand(0, EqualChanced.size() - 1); // on applique l'ancien syst�me
++     }
++     else
++     {
++       //declare un vecteur d'intervale de chance : exemple 0-12-24-36-48 => 4 item a X = 12% de chances de loot
++       std::vector<int> _chanceInterval = std::vector<int>(EqualChanced.size()); // chang� pour passer par un tableau (vector pour test )
++       float _interval = 100.0 / (float)EqualChanced.size(); // permet de d�finir l'intervale de chance �gale (X%) 
++
++       for( unsigned int i = 0; i < EqualChanced.size() ; ++i)
++       {
++         float modificateur = 0.0f; // modifie l'intervale de chance pour un item d�ja looter (0.80 - 1.0) 
++         // un item a 12% de chance d�ja tomber verra ses chances de tomber diminuer de 80%,
++         // ce qui a pour cons�quence de r�duire l'intervale de chance 
++         // exemple par rapport au d�but. le 3�me item est d�ja tomb� (intervale 2)
++         // les intervalles seront => 0-12-24-26,4-38,4. seul le troisi�me item aura un intervale de 2.4% les autres items auront un intervale de 12%
++         for(unsigned int j =0 ; j < loot->items.size() ; ++j)
++         {
++           //si l'objet a d�ja �tait looter on diminue/annule ses chances (permettra de diminuer l'intervalle)
++           if( EqualChanced[i].itemid == loot->items[j].itemid ) 
++             modificateur += 0.80f; // possible d'augmenter cette valeur  (inf�rieur a 0.50, Triple loot possible, pour remanier un peu pour un meilleur syst�me)
++           if( modificateur>= 1.0f)
++           {
++             modificateur = 1.0f;
++             break; // objet d�ja tomber 2 fois, inutile de tester plus = chance diminuer a 0%
++             // les intervales sera alors  de 0-12-24-24-36 => impossibiliter de tomber sur le 3�me loot
++           }
++         }
++
++         // calcul de l'interval actuel
++         int addLastPurcent = 0; 
++         if( i !=0) // si on est sur le premier item, le premier interval se situe entre 0 et _interval% 
++           addLastPurcent = _chanceInterval[i-1]; // sinon on rajoute la valeur du pr�c�dent interval
++         // intervaleActuel = intervalePr�c�dent + ( intervaleRefence - (intervaleReference * modificateur)
++         _chanceInterval[i] = addLastPurcent +  (_interval - (_interval * modificateur)); 
++       }
++
++       // rand entre 0 et l'intervalle maximum
++       float _frand = frand(0 , _chanceInterval[ _chanceInterval.size()-1 ] );
++
++       for( unsigned int i = 0; i < _chanceInterval.size() ; ++i)
++       {
++         // on v�rifie dans qu'elle intervalle le rand se trouve
++         if( _frand <= _chanceInterval[i] )
++         {
++           roll = i; // roll = num�ro de l'intervalle choisie
++           break; // inutile de faire des boucle supl�mentaire
++         }
++       }
++     }
++ 
++     if( roll < 0 ) // si quelque chose c'est mal pass�, on return null (tant pis, pas de loot) = ERREUR
++       return NULL;
++ 
++     return &EqualChanced[roll]; // on retourne l'item
++   }
+  
+    return NULL;                                            // Empty drop from the group
+  }
+@@ -891,7 +951,7 @@ bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
+  // Rolls an item from the group (if any takes its chance) and adds the item to the loot
+  void LootTemplate::LootGroup::Process(Loot& loot) const
+  {
+-   LootStoreItem const* item = Roll();
++   LootStoreItem const* item = Roll(&loot);
+    if (item != NULL)
+      loot.AddItem(*item);
+  }

@@ -1,0 +1,111 @@
+src/bindings/ScriptDev2/scripts/kalimdor/caverns_of_time/hyjal/hyjalAI.cpp View file @ 0d4c2cf
+@@ -28,7 +28,7 @@ struct HyjalLocation
+  {
+    eBaseArea m_pBaseArea;
+    float m_fX, m_fY, m_fZ;
+-   MovePoint MovePoint;
++   MovePoint m_movePoint;
+  };
+  
+  // Locations for summoning waves
+@@ -245,16 +245,6 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
+  
+    uint32 uiMaxCount = countof(aHyjalSpawnLoc);
+  
+-   /* 
+-   static const HyjalLocation aHyjalSpawnLoc[] =
+- {
+-   {BASE_ALLY,  4969.819f, -1637.413f, 1343.208f, POINT_ID_ALLY},
+-   {BASE_HORDE, 5520.227f, -2490.740f, 1475.902f, POINT_ID_HORDE},
+-   {BASE_HORDE, 5675.686f, -2886.051f, 1555.619f, POINT_ID_HORDE_FLY_BACK},
+-   {BASE_HORDE, 5675.686f, -2886.051f, 1555.619f, POINT_ID_HORDE_FLY_FRONT},
+- };
+-   */
+-
+    for (uint32 i = 0; i < uiMaxCount; ++i)
+    {
+      if (aHyjalSpawnLoc[i].m_pBaseArea != (eBaseArea)m_uiBase)
+@@ -263,13 +253,13 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
+      switch(uiMobEntry)
+      {
+      case NPC_FROST:
+-       if(aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_BACK)
++       if(aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_FLY_BACK)
+          continue;
+        break;
+      case NPC_GARGO:
+-       if(!m_bIsFirstBossDead && aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_BACK)
++       if(!m_bIsFirstBossDead && aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_FLY_BACK)
+          continue;
+-       else if(aHyjalSpawnLoc[i].MovePoint != POINT_ID_HORDE_FLY_FRONT)
++       else if(aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_FLY_FRONT)
+          continue;
+        break;
+      }
+@@ -300,23 +290,23 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
+      switch(pSummoned->GetEntry())
+      {
+      case NPC_FROST:
+-       if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE_FLY_BACK1)  // Always flying from the back
++       if(aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE_FLY_BACK1)  // Always flying from the back
+          continue;
+        break;
+      case NPC_GARGO:
+        if(!m_bIsFirstBossDead)  // Flying from the back
+        {
+-         if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE_FLY_BACK1)      
++         if(aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE_FLY_BACK1)      
+            continue;
+        }else{
+-         if(aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE2)  // Flying from the front
++         if(aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE2)  // Flying from the front
+            continue;
+        }
+        break;
+      default:      
+-       if((aHyjalWaveMoveTo[i].MovePoint != POINT_ID_ALLY1 && m_uiBase == BASE_ALLY) || (aHyjalWaveMoveTo[i].MovePoint != POINT_ID_HORDE1 && m_uiBase == BASE_HORDE))
++       if((aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_ALLY1 && m_uiBase == BASE_ALLY) || (aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE1 && m_uiBase == BASE_HORDE))
+          continue;
+        break;
+      }
+  
+@@ -330,7 +320,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
+      pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
+  
+      pSummoned->SetWalk(false);
+-     pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
++     pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
+    }
+  
+    // Check if creature is a boss.
+@@ -342,7 +332,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
+  
+  void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId)
+  {
+-   if (!uiPointId)
++   if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+      return;
+  
+  
+@@ -355,17 +345,18 @@ void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, u
+    case POINT_ID_ALLY2:  // Go Jaina
+      pMove = &aHyjalWaveMoveTo[uiPointId];
+      pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+-     pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
++     pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
+      break;
+    case POINT_ID_HORDE1:  // Go next step
+      pMove = &aHyjalWaveMoveTo[4];
+      pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+-     pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
++     pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
+      break;
+    case POINT_ID_HORDE_FLY_BACK1:  // Go Thrall
+    case POINT_ID_HORDE2:
+      pMove = &aHyjalWaveMoveTo[6];
+-     pSummoned->GetMotionMaster()->MovePoint(pMove->MovePoint, fX, fY, fZ);
++     pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
++     pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ);
+      break;
+    }
+  }
