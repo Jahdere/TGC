@@ -628,8 +628,8 @@ void Spell::FillTargetMap()
 
 		for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
 		{
-			if(m_spellInfo->Id == 32053)
-				sLog.outError("CREATURE ENTRY LIST TARGET -> %s)",(*iunit)->GetName());
+			if((m_spellInfo->Id == 32053 || m_spellInfo->Id == 16807) && (*iunit)->GetTypeId() == TYPEID_UNIT)
+				sLog.outError("************CREATURE ENTRY : %u ****************)",(*iunit)->GetEntry());
 			AddUnitTarget((*iunit), SpellEffectIndex(i));
 
 		}
@@ -988,37 +988,38 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		}
 	}
 
-	bool isHot = false;
-	bool isDot = false;
+	bool isHot = true;
+	bool isDot = true;
+	/*
 	//Check if is HOT and proc flag on first cast
 	if(real_caster->GetTypeId() == TYPEID_PLAYER)
 	{
-		bool isHot = false;
-		for (int i = 0; i < 3; ++i)
-		{
-			// Periodic Heals
-			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)
-			{
-				isHot = true;
-				break;
-			}
-		}
-		//Check if is DOT and proc flag on first cast		
-		for (int i = 0; i < 3; ++i)
-		{
-			// Periodic Dmg
-			if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
-			{
-				procAttacker = uint32(PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT);
-				isDot = true;
-				break;
-			}
-		}
+	bool isHot = false;
+	for (int i = 0; i < 3; ++i)
+	{
+	// Periodic Heals
+	if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)
+	{
+	isHot = true;
+	break;
 	}
+	}
+	//Check if is DOT and proc flag on first cast		
+	for (int i = 0; i < 3; ++i)
+	{
+	// Periodic Dmg
+	if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
+	{
+	procAttacker = uint32(PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT);
+	isDot = true;
+	break;
+	}
+	}
+	}*/
 
 	// All calculated do it!
 	// Do healing and triggers
-	if (m_healing || isHot)
+	if (m_healing)
 	{
 		bool crit = real_caster && real_caster->IsSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
 		uint32 addhealth = m_healing;
@@ -1042,7 +1043,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 			unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo);
 	}
 	// Do damage and triggers
-	else if (m_damage || isDot)
+	else if (m_damage)
 	{
 		// Fill base damage struct (unitTarget - is real spell target)
 		SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
@@ -3294,6 +3295,11 @@ void Spell::finish(bool ok)
 				{
 					SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
 					SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
+
+					// Shadow Weaving can't proc on caster via Shadow Word Death kickback @Kordbc
+					if(unit == m_caster && m_spellInfo->Id == 32409)
+						continue;
+
 					// Calculate chance at that moment (can be depend for example from combo points)
 					int32 auraBasePoints = (*i)->GetBasePoints();
 					int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
@@ -5523,6 +5529,13 @@ SpellCastResult Spell::CheckRange(bool strict)
 	float max_range = GetSpellMaxRange(srange) + range_mod;
 	float min_range = GetSpellMinRange(srange);
 
+	//Custom Range for Aimed Shot @Kordbc
+	if(m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & UI64LIT(0X20000))
+	{
+		max_range = 35.0f + range_mod;
+		min_range = 5.0f;
+	}
+
 	if (Player* modOwner = m_caster->GetSpellModOwner())
 		modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
 
@@ -6230,6 +6243,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 
 		// all ok by some way or another, skip normal check
 		break;
+	case SPELL_EFFECT_HEAL_MAX_HEALTH:
+		// Kael'thas Resurrect
+		if(m_spellInfo->Id == 36450 && target != m_caster)
+			return true;
+		break;
 	default:                                            // normal case
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)
@@ -6258,7 +6276,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
 			return false;
 		break;
-	case 15269:											// Blackout (Shadow priest) , cant stun original caster
+	case 39968:											// Needle Spine aoe (Naj'entus) @Kordbc
 		if(target->GetTypeId() == TYPEID_PLAYER && target == m_caster)
 			return false;
 		break;
@@ -6730,6 +6748,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
 			case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
 			case 45976:                                 // Open Portal (SWP, M'uru)
 			case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
+			case 41150:									// Fear Illidari Nightlord (Black temple)
 				unMaxTargets = 1;
 				break;
 			case 10258:                                 // Awaken Vault Warder (Uldaman)
