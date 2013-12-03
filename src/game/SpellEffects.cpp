@@ -352,6 +352,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 						damage = damage * unitTarget->GetMaxHealth() / 100;
 						break;
 					}
+					// Shadow Inferno @Kordbc
+				case 39646:
+					{
+						damage = 1000;
+						break;
+					}
 					// Cataclysmic Bolt
 				case 38441:
 					damage = unitTarget->GetMaxHealth() / 2;
@@ -1271,12 +1277,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 41466, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
-			case 39992:									// Needle Spine (Najentus) @Kordbc
+			case 39992:									// Needle Spine (Naj'entus) @Kordbc
 				{
 					if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
 						return;
 
-					unitTarget->CastSpell(unitTarget, 39835, true, NULL, NULL, m_caster->GetObjectGuid());
+					m_caster->CastSpell(unitTarget, 39835, true);
 					return;
 				}
 			case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
@@ -2877,7 +2883,9 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 		}else{
 			switch(m_spellInfo->Id)
 			{
-			// Bonus T4 p2 Paladin @Kordbc
+			case 15290:
+				break;
+				// Bonus T4 p2 Paladin @Kordbc
 			case 20267:
 			case 20341:
 			case 20342:
@@ -2888,13 +2896,13 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 						addhealth += dummyAura->GetModifier()->m_amount;
 					break;
 				}
-			// Cannibalize Ghoul (Hyjal)
+				// Cannibalize Ghoul (Hyjal)
 			case 31538:
 				{					
 					addhealth = m_caster->GetMaxHealth() * 0.07;
 					break;
 				}
-			// Vessel of the Naaru (Vial of the Sunwell trinket)
+				// Vessel of the Naaru (Vial of the Sunwell trinket)
 			case 45064:
 				{
 					// Amount of heal - depends from stacked Holy Energy
@@ -5329,6 +5337,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 38353, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
+			case 39835:									// Nidle Spine aoe (Naj'entus) @Kordbc
+				{
+					if(!unitTarget)
+						return;
+
+					unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
+					return;
+				}
 			case 41055:                                 // Copy Weapon
 				{
 					if (m_caster->GetTypeId() != TYPEID_UNIT || !unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -5537,6 +5553,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 				}
 			}
 			break;
+		}
+	case SPELLFAMILY_PRIEST:
+		{
+			// Summon Shadowfiends @Kordbc
+			if(m_spellInfo->Id == 39649)
+			{
+				if(!unitTarget)
+					return;
+
+				unitTarget->CastSpell(unitTarget, 41159, true);
+				return;
+			}
 		}
 	case SPELLFAMILY_PALADIN:
 		{
@@ -6379,7 +6407,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 	// TODO: research more ContactPoint/attack distance.
 	// 3.666666 instead of ATTACK_DISTANCE(5.0f) in below seem to give more accurate result.
 	float x, y, z;
-	unitTarget->GetContactPoint(m_caster, x, y, z, 3.666666f);
+	unitTarget->GetContactPoint(m_caster, x, y, z, 0.5f);
 
 	if (unitTarget->GetTypeId() != TYPEID_PLAYER)
 		((Creature*)unitTarget)->StopMoving();
