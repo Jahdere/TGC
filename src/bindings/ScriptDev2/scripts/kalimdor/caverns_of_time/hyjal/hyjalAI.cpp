@@ -163,7 +163,7 @@ void hyjalAI::Reset()
 	{
 	case NPC_JAINA:
 		m_uiBase = BASE_ALLY;
-	//	DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
+		//	DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
 		break;
 	case NPC_THRALL:
 		m_uiBase = BASE_HORDE;
@@ -252,6 +252,7 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
 
 		if(uiMobEntry == NPC_GARGO || uiMobEntry == NPC_FROST)
 		{
+
 			if(!m_bIsFirstBossDead)
 			{
 				if(aHyjalSpawnLoc[i].m_movePoint != POINT_ID_HORDE_FLY_BACK)
@@ -316,7 +317,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 					if(aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE2)	// Flying from the front
 						continue;
 				}
-			break;
+				break;
 			}
 		case NPC_GIANT:	//Just Set Target
 			{
@@ -357,6 +358,7 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId)
 {
+
 	if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->isDead())
 		return;
 
@@ -540,11 +542,11 @@ void hyjalAI::SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
 {
 	debug_log("**************HIT TARGET TELEPORTATION*****************");
 	// TODO: this spell should cause misc mobs to despawn
-	 if (pSpell->Id == SPELL_MASS_TELEPORT && pTarget->GetTypeId() != TYPEID_PLAYER)
-	 {
-		 debug_log("**************HIT TARGET PNJ TELEPORTATION*****************");
-		 ((Creature*)pTarget)->ForcedDespawn();
-	 }
+	if (pSpell->Id == SPELL_MASS_TELEPORT && pTarget->GetTypeId() != TYPEID_PLAYER)
+	{
+		debug_log("**************HIT TARGET PNJ TELEPORTATION*****************");
+		((Creature*)pTarget)->ForcedDespawn();
+	}
 }
 
 void hyjalAI::Retreat()

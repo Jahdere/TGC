@@ -394,7 +394,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 				DoCastSpellIfCan(m_creature, m_auiSpellSummonWeapon[i], CAST_TRIGGERED);
 
 			m_uiPhase      = PHASE_2_WEAPON;
-			m_uiPhaseTimer = 120000; //real timer 120000
+			m_uiPhaseTimer = 20000; //real timer 120000
 		}else if(pSpell->Id == SPELL_NETHER_BEAM)
 		{
 			uint32 countNetherBeam = 0;

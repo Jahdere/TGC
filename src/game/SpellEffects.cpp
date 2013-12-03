@@ -2883,8 +2883,6 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 		}else{
 			switch(m_spellInfo->Id)
 			{
-			case 15290:
-				break;
 				// Bonus T4 p2 Paladin @Kordbc
 			case 20267:
 			case 20341:
