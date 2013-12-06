@@ -1822,6 +1822,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 	if (!spellInfo_1 || !spellInfo_2)
 		return false;
 
+
 	if (spellId_1 == spellId_2)
 		return false;
 
@@ -1953,6 +1954,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 				//Slow Self vs Charge (Supremus)
 				if ((spellInfo_1->Id == 41581  && spellInfo_2->Id == 41922) ||  
 					(spellInfo_2->Id == 41581  && spellInfo_1->Id == 41922))
+					return false;
+
+				//Love Struck vs Deep Meditation
+				if ((spellInfo_1->Id == 40402  && spellInfo_2->Id == 34585) ||  
+					(spellInfo_2->Id == 40402  && spellInfo_1->Id == 34585))
 					return false;
 
 				break;
