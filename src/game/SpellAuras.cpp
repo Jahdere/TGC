@@ -370,7 +370,13 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
 
 	DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], spellproto->EffectImplicitTargetA[eff], damage);
 
-	SetModifier(AuraType(spellproto->EffectApplyAuraName[eff]), damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff]);
+	
+	// Apply haste for aura triggered by channeled cast @Kordbc
+	uint32 pt = spellproto->EffectAmplitude[eff];
+	if(spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_2))
+		pt = int32(float(pt) * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+
+	SetModifier(AuraType(spellproto->EffectApplyAuraName[eff]), damage, pt, spellproto->EffectMiscValue[eff]);
 
 	Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 

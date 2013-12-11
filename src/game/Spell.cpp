@@ -2744,6 +2744,10 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 	m_casttime = GetSpellCastTime(m_spellInfo, this);
 	m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
+	// Apply haste calcul duration for channeled cast @Kordbc
+	if(IsChanneledSpell(m_spellInfo))
+		m_duration = int32(float(m_duration) * m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+
 	// set timer base at cast time
 	ReSetTimer();
 
