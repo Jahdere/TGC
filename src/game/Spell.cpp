@@ -5540,13 +5540,6 @@ SpellCastResult Spell::CheckRange(bool strict)
 	float max_range = GetSpellMaxRange(srange) + range_mod;
 	float min_range = GetSpellMinRange(srange);
 
-	//Custom Range for Aimed Shot @Kordbc
-	if(m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & UI64LIT(0X20000))
-	{
-		max_range = 35.0f + range_mod;
-		min_range = 5.0f;
-	}
-
 	if (Player* modOwner = m_caster->GetSpellModOwner())
 		modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
 
