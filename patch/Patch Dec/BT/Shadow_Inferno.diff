@@ -1,0 +1,29 @@
+src/game/SpellAuras.cpp View file @ 9906cb7
+ @@ -1494,8 +1494,10 @@ void Aura::TriggerSpell()
+            //                    case 39630: break;
+            //                    // Shadow Bolt Whirl
+            //                    case 39634: break;
+-           //                    // Shadow Inferno
+-           //                    case 39645: break;
++                 // Shadow Inferno @Kordbc
++         case 39645: 
++           trigger_spell_id = 39646;
++           break;
+          case 39857:                             // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
+            trigger_spell_id = 39856;
+            break;
+
+src/game/SpellEffects.cpp View file @ 9906cb7
+ @@ -352,6 +352,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
+              damage = damage * unitTarget->GetMaxHealth() / 100;
+              break;
+            }
++           // Shadow Inferno @Kordbc
++         case 39646:
++           {
++             damage = 1000;
++             break;
++           }
+            // Cataclysmic Bolt
+          case 38441:
+            damage = unitTarget->GetMaxHealth() / 2;

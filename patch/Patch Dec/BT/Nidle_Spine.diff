@@ -1,0 +1,41 @@
+src/game/SpellEffects.cpp View file @ 464df10
+@@ -1271,12 +1271,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
+            unitTarget->CastSpell(unitTarget, 41466, true, NULL, NULL, m_caster->GetObjectGuid());
+            return;
+          }
++       case 39992:                  // Needle Spine (Najentus) @Kordbc
++         {
++           if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
++             return;
++
++           m_caster->CastSpell(unitTarget, 39835, true);
++           return;
++         }
+        case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
+          {
+            // selecting one from Bloodstained Fortune item
+
+@@ -5329,6 +5329,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
+            unitTarget->CastSpell(unitTarget, 38353, true, NULL, NULL, m_caster->GetObjectGuid());
+            return;
+          }
++        case 39835:                  // Nidle Spine aoe (Naj'entus) @Kordbc
++         {
++           if(!unitTarget)
++             return;
++
++           unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
++         }
+        case 41055:                                 // Copy Weapon
+          {
+            if (m_caster->GetTypeId() != TYPEID_UNIT || !unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+
+src/game/Spell.cpp View file @ 464df10
+@@ -6263,6 +6263,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+      if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(36480))
+        return false;
+      break;
++  case 39968:                      // Needle Spine aoe (Naj'entus) @Kordbc
++     if(target->GetTypeId() == TYPEID_PLAYER && target == m_caster)
++       return false;
++     break;

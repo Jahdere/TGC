@@ -1,0 +1,20 @@
+src/game/SpellEffects.cpp View file @ 1531a71
+@@ -5545,6 +5546,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
+        }
+        break;
+      }
++  case SPELLFAMILY_PRIEST:
++     {
++       // Summon Shadowfiends @Kordbc
++       if(m_spellInfo->Id == 39649)
++       {
++         if(!unitTarget)
++           return;
++
++         unitTarget->CastSpell(unitTarget, 41159, true);
++         return;
++       }
++     }
+    case SPELLFAMILY_PALADIN:
+      {
+        if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))

@@ -1,0 +1,12 @@
+src/game/Spell.cpp View file @ 35ade7f
+void Spell::SendCastResult(SpellCastResult result)
+@@ -6280,6 +6289,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+      if(target->GetTypeId() == TYPEID_PLAYER && target == m_caster)
+        return false;
+      break;
++   case 31306:                      // Anetheron Carrion Swarm (1.22 = 70�) @Kordbc
++     if(!m_caster->HasInArc(1.22f, target))
++       return false;
++     break;
+    default: break;
+    }

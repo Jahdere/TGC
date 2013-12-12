@@ -1,0 +1,27 @@
+src/game/Spell.cpp View file @ 77ecac4
+@@ -2744,6 +2744,10 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
+    m_casttime = GetSpellCastTime(m_spellInfo, this);
+    m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
+  
++   // Apply haste calcul duration for channeled cast @Kordbc
++   if(IsChanneledSpell(m_spellInfo))
++     m_duration = int32(float(m_duration) * m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
++
+    // set timer base at cast time
+    ReSetTimer();
+
+src/game/SpellAuras.cpp View file @ 77ecac4
+@@ -370,7 +370,13 @@
+  
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], spellproto->EffectImplicitTargetA[eff], damage);
+  
+-   SetModifier(AuraType(spellproto->EffectApplyAuraName[eff]), damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff]);
++  
++   // Apply haste for aura triggered by channeled cast @Kordbc
++   uint32 pt = spellproto->EffectAmplitude[eff];
++   if(spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_2))
++     pt = int32(float(pt) * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
++
++   SetModifier(AuraType(spellproto->EffectApplyAuraName[eff]), damage, pt, spellproto->EffectMiscValue[eff]);
+  
+    Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;

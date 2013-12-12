@@ -1,0 +1,12 @@
+src/game/UnitAuraProcHandler.cpp View file @ 95419ea
+@@ -2143,6 +2143,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
+    case 14189: // Seal Fate (Netherblade set)
+    case 14157: // Ruthlessness
+      {
++       // Seal Fate can't proc on Deadly Throw
++       if(trigger_spell_id == 14189 && procSpell->Id == 26679)
++         return SPELL_AURA_PROC_FAILED;
++
+        // Need add combopoint AFTER finishing move (or they get dropped in finish phase)
+        if (Spell* spell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
+        {
