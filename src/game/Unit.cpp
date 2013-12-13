@@ -5977,7 +5977,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
 		DoneAdvertisedBenefit += ((Pet*)this)->GetBonusDamage();
 
 	// apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
-	DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
+	// Fixe Consecration don't use AP Bonus @Kordbc
+	if(spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && spellProto->SpellFamilyFlags & UI64LIT(0X0000000000000020))
+		DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, false);
+	else
+		DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
 
 	float tmpDamage = (int32(pdamage) + DoneTotal * int32(stack)) * DoneTotalMod;
 	// apply spellmod to Done damage (flat and pct)
