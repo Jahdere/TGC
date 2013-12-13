@@ -38,11 +38,25 @@ float ThreatCalcHelper::CalcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 
 	if (pThreatSpell)
 	{
-		if (pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
-			return 0.0f;
+		// Keep exception to calculate the real threat for SPELL_AURA_MOD_TOTAL_THREAT @Kordbc
+		bool ExceptNoThreat = false;
+		for(int i = 0; i < MAX_EFFECT_INDEX; i++)
+		{
+			if(pThreatSpell->EffectApplyAuraName[i] == SPELL_AURA_MOD_TOTAL_THREAT)
+			{
+				ExceptNoThreat = true;
+				break;
+			}
+		}
 
-		if (Player* modOwner = pHatedUnit->GetSpellModOwner())
-			modOwner->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, threat);
+		if(!ExceptNoThreat)
+		{
+			if (pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+				return 0.0f;
+
+			if (Player* modOwner = pHatedUnit->GetSpellModOwner())
+				modOwner->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, threat);
+		}
 
 		if (crit)
 			threat *= pHatedUnit->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRITICAL_THREAT, schoolMask);
