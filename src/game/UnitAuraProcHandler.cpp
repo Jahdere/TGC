@@ -2276,6 +2276,9 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit* pVictim, uint3
 	case 4537:                                          // Dreamwalker Raiment 6 pieces bonus
 		triggered_spell_id = 28750;                     // Blessing of the Claw
 		break;
+	case 5510:											// Remove Flexibility on greater cast Priest T4 4 pieces bonus
+		RemoveAurasDueToSpell(37565);
+		break;
 	case 5497:                                          // Improved Mana Gems (Serpent-Coil Braid)
 		triggered_spell_id = 37445;                     // Mana Surge
 		break;
