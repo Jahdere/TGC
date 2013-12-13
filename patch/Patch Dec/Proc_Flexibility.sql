@@ -1,0 +1,2 @@
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES
+(37565, 2, 6, 4096, 4096, 4096, 16384, 0, 0, 0, 0);
