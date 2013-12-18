@@ -10671,6 +10671,24 @@ void Player::VisualizeItem(uint8 slot, Item* pItem)
         SetVisibleItemSlot(slot, pItem);
 
     pItem->SetState(ITEM_CHANGED, this);
+
+	// reset Attack timer after switch weapon @Kordbc
+	switch(slot)
+	{
+	case EQUIPMENT_SLOT_MAINHAND:
+		resetAttackTimer(BASE_ATTACK);
+		setAttackTimer(BASE_ATTACK, uint32(GetAttackTime(BASE_ATTACK)));		
+		sLog.outError("************** TEMP ATTACK BASE : %u ****************" , getAttackTimer(BASE_ATTACK));
+		break;
+	case EQUIPMENT_SLOT_OFFHAND:
+		resetAttackTimer(OFF_ATTACK);
+		break;
+	case EQUIPMENT_SLOT_RANGED:
+		resetAttackTimer(RANGED_ATTACK);
+		break;
+	default:
+		break;
+	}		
 }
 
 void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
@@ -20903,7 +20921,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
     if (map && map->IsDungeon())
     {
         // cannot enter if the instance is full (player cap), GMs don't count
-        if (((DungeonMap*)map)->GetPlayersCountExceptGMs() >= ((DungeonMap*)map)->GetMaxPlayers())
+		if (((DungeonMap*)map)->GetPlayersCountExceptGMs() >= ((DungeonMap*)map)->GetMaxPlayers() && ((DungeonMap*)map)->GetId() != GetMapId())
             return AREA_LOCKSTATUS_INSTANCE_IS_FULL;
 
         // In Combat check
