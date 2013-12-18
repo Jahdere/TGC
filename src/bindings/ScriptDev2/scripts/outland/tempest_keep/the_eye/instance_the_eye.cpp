@@ -104,7 +104,11 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pTemp = GetSingleCreatureFromStorage(aAdvisors[i]))
                     {
                         if (!pTemp->isAlive())
+						{
                             pTemp->Respawn();
+							pTemp->AI()->EnterEvadeMode();
+						}
+
                     }
                 }
             }		
