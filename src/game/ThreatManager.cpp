@@ -42,7 +42,7 @@ float ThreatCalcHelper::CalcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 		bool ExceptNoThreat = false;
 		for(int i = 0; i < MAX_EFFECT_INDEX; i++)
 		{
-			if(pThreatSpell->EffectApplyAuraName[i] == SPELL_AURA_MOD_TOTAL_THREAT)
+			if(pThreatSpell->EffectApplyAuraName[i] == SPELL_AURA_MOD_TOTAL_THREAT && pThreatSpell->EffectBasePoints[i] < 0)
 			{
 				ExceptNoThreat = true;
 				break;
