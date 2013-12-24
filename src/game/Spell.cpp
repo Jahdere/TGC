@@ -1522,6 +1522,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 	if(m_spellInfo->Id == 724 || m_spellInfo->Id == 27870 || m_spellInfo->Id == 27871 || m_spellInfo->Id == 28275)
 		targetMode = TARGET_INFRONT_OF_VICTIM;
 
+	// Hack Remove Spine
+	if(m_spellInfo->Id == 39977)
+		targetMode = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;
+
 	switch (targetMode)
 	{
 	case TARGET_RANDOM_NEARBY_LOC:

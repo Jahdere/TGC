@@ -1850,6 +1850,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
 				return;
 			}
+
+			if(m_spellInfo->Id == 39977)									// Remove Empaling Spine (Naj'entus) @Kordbc 
+			{
+				if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+					return;
+
+				unitTarget->RemoveAurasDueToSpell(39837);
+				return;
+			}
 			break;
 		}
 	case SPELLFAMILY_PRIEST:
@@ -3103,6 +3112,10 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
 
 void Spell::EffectCreateItem(SpellEffectIndex eff_idx)
 {
+	// Remove Spine @Kordbc
+	if(m_spellInfo->Id == 39956)
+		GetCaster()->CastSpell(GetCaster(), 39977, true);
+
 	DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx]);
 }
 
