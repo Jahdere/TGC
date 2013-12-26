@@ -1338,8 +1338,13 @@ void Aura::TriggerSpell()
 					}
 					//                    // Teleport Test
 					//                    case 32236: break;
-					//                    // Earthquake
-					//                    case 32686: break;
+				case 32686:				  // Earthquake
+					{
+						sLog.outError("*************** WOLOLO************");
+						triggerTarget->SetObjectScale(2.0f);
+						triggerTarget->CastSpell(triggerTarget, 13360, true);	// Not sure it's the right spell, but the effect is the same.
+						return;
+					}
 					//                    // Possess
 					//                    case 33401: break;
 					//                    // Draw Shadows
@@ -1486,7 +1491,7 @@ void Aura::TriggerSpell()
 						triggerTarget->SummonCreature(22408, fX, fY, fZ, triggerTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
 						return;
 					}
-				// Drain World Tree Visual @Kordbc
+					// Drain World Tree Visual @Kordbc
 				case 39140: 
 					trigger_spell_id = 39141;
 					break;
@@ -1502,7 +1507,7 @@ void Aura::TriggerSpell()
 					//                    case 39630: break;
 					//                    // Shadow Bolt Whirl
 					//                    case 39634: break;
-                // Shadow Inferno @Kordbc
+					// Shadow Inferno @Kordbc
 				case 39645: 
 					trigger_spell_id = 39646;
 					break;
@@ -4125,15 +4130,6 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
 	if (!Real)
 		return;
 
-	//Fix celerite farouche @Kordbc
-	if(apply)
-	{
-		if(GetId() == 24866 && !GetTarget()->HasAura(768))
-			return;
-		if(GetId() == 17002 && !GetTarget()->HasAura(768))
-			return;
-	}
-
 	GetTarget()->UpdateSpeed(MOVE_RUN, true);
 }
 
@@ -4423,7 +4419,20 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
 
 	Unit* target = GetTarget();
 
-	if (!apply)
+	if (apply)
+	{
+		switch(GetId())
+		{
+			//Totem shaman Effect apply effect when summoned
+		case 10612:		// WF totem
+		case 8167:		// Poison totem
+		case 8145:		// Seisme totem
+		case 6474:		// Earthbind Totem
+			TriggerSpell();
+			break;
+		}
+	}
+	else
 	{
 		switch (GetId())
 		{
