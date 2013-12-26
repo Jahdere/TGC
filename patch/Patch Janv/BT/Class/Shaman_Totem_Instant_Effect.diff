@@ -1,0 +1,23 @@
+src/game/SpellAuras.cpp View file @ ce63580
+@@ -4423,7 +4419,20 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
+  
+    Unit* target = GetTarget();
+  
+-   if (!apply)
++   if (apply)
++   {
++     switch(GetId())
++     {
++     //Totem shaman Effect apply effect when summoned
++     case 10612:    // WF totem
++     // case 8167:  // Poison totem (need more source)
++     case 8145:     // Seisme totem
++     case 6474:     // Earthbind Totem
++       TriggerSpell();
++       break;
++     }
++   }
++   else
+    {
+      switch (GetId())
+      {

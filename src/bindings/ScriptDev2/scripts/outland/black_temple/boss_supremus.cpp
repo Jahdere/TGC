@@ -155,7 +155,10 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
         }
 
         else if (pSummoned->GetEntry() == NPC_VOLCANO)
+		{
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, false, NULL, NULL, m_creature->GetObjectGuid());
+		}
     }
 
     Unit* GetHatefulStrikeTarget()
@@ -252,7 +255,7 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
         {
             if (m_uiSwitchTargetTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, (const SpellEntry*) 0, SELECT_FLAG_PLAYER))
                 {
                     m_creature->FixateTarget(pTarget);
                     DoScriptText(EMOTE_NEW_TARGET, m_creature);

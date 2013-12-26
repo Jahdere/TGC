@@ -1,4 +1,7 @@
 src/game/SpellEffects.cpp View file @ 464df10
+@@ before applying this patch
+@@ Remove case 39992 in Spell::EffectDummy
+@@ Remove case 39968 and 39992 in Spell:CheckTarget
 @@ -1271,12 +1271,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             unitTarget->CastSpell(unitTarget, 41466, true, NULL, NULL, m_caster->GetObjectGuid());
             return;
