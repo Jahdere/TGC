@@ -4750,8 +4750,20 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 		bonus = int32(bonus * weapon_total_pct);
 	}
 
+	// Exception check
+	bool weaponPercent = true;
+
+	switch(m_spellInfo->Id)
+	{
+	case 37036:			// Telonicius Bomb
+	case 31480:			// Kaz'rogal War Stomp
+	case 31408:			// Lesser Doomguard War Stomp
+		weaponPercent = false;
+		break;
+	}
+
 	// + weapon damage with applied weapon% dmg to base weapon damage in call
-	if(!m_caster->GetEntry() == 20063 && !m_spellInfo->Id == 37036) // Exception Telonicius bomb
+	if(weaponPercent)
 		bonus += int32(m_caster->CalculateDamage(m_attackType, normalized) * weaponDamagePercentMod);
 
 	// total damage
