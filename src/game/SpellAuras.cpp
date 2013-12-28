@@ -1332,7 +1332,7 @@ void Aura::TriggerSpell()
 					//                    case 31611: break;
 				case 31944:                             // Doomfire
 					{
-						int32 damage = m_modifier.m_amount * ((GetAuraDuration() + m_modifier.periodictime) / GetAuraMaxDuration());
+						int32 damage = m_modifier.m_amount * (float(GetAuraDuration()) + float(m_modifier.periodictime)) / float(GetAuraMaxDuration());
 						triggerTarget->CastCustomSpell(triggerTarget, 31969, &damage, NULL, NULL, true, NULL, this, casterGUID);
 						return;
 					}
