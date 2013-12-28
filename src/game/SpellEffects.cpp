@@ -4751,7 +4751,8 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 	}
 
 	// + weapon damage with applied weapon% dmg to base weapon damage in call
-	bonus += int32(m_caster->CalculateDamage(m_attackType, normalized) * weaponDamagePercentMod);
+	if(GetCaster()->GetTypeId() == TYPEID_PLAYER)
+		bonus += int32(m_caster->CalculateDamage(m_attackType, normalized) * weaponDamagePercentMod);
 
 	// total damage
 	bonus = int32(bonus * totalDamagePercentMod);
