@@ -1340,9 +1340,7 @@ void Aura::TriggerSpell()
 					//                    case 32236: break;
 				case 32686:				  // Earthquake
 					{
-						sLog.outError("*************** WOLOLO************");
-						triggerTarget->SetObjectScale(2.0f);
-						triggerTarget->CastSpell(triggerTarget, 13360, true);	// Not sure it's the right spell, but the effect is the same.
+						target->CastSpell(target, 13360, true, NULL, this, casterGUID);
 						return;
 					}
 					//                    // Possess

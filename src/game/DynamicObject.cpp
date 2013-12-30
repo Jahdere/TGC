@@ -89,6 +89,10 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
 	*/
 	SetByteValue(DYNAMICOBJECT_BYTES, 0, type);
 
+	// Earthquake Doomwalker (Knockdown effect)
+	if(GetSpellId() == 32686 && effIndex == 1)
+		radius = 100.0f;
+
 	SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);
 	SetFloatValue(DYNAMICOBJECT_RADIUS, radius);
 	SetFloatValue(DYNAMICOBJECT_POS_X, x);
