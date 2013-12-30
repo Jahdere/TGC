@@ -1,0 +1,41 @@
+src/game/Spell.cpp View file @ 9d243a0
+@@ -1522,6 +1522,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
+    if(m_spellInfo->Id == 724 || m_spellInfo->Id == 27870 || m_spellInfo->Id == 27871 || m_spellInfo->Id == 28275)
+      targetMode = TARGET_INFRONT_OF_VICTIM;
+  
++   // Hack Remove Spine
++   if(m_spellInfo->Id == 39977)
++     targetMode = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;
++
+    switch (targetMode)
+    {
+    case TARGET_RANDOM_NEARBY_LOC:
+
+src/game/SpellEffects.cpp View file @ 9d243a0
+@@ -1850,6 +1850,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
+  
+          return;
+        }
++
++       if(m_spellInfo->Id == 39977)                  // Remove Empaling Spine (Naj'entus) @Kordbc 
++       {
++         if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
++           return;
++
++         unitTarget->RemoveAurasDueToSpell(39837);
++         return;
++       }
+        break;
+      }
+    case SPELLFAMILY_PRIEST:
+@@ -3103,6 +3112,10 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
+  
+  void Spell::EffectCreateItem(SpellEffectIndex eff_idx)
+  {
++   // Remove Spine @Kordbc
++   if(m_spellInfo->Id == 39956)
++     GetCaster()->CastSpell(GetCaster(), 39977, true);
++ 
+    DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx]);
+  }
+  
