@@ -52,6 +52,7 @@ struct MANGOS_DLL_DECL boss_doomwalkerAI : public ScriptedAI
     uint32 m_uiOverrunTimer;
     uint32 m_uiQuakeTimer;
     uint32 m_uiArmorTimer;
+	uint32 m_uiStopOverrunTimer;
 
     bool m_bHasEnrage;
 
@@ -61,6 +62,7 @@ struct MANGOS_DLL_DECL boss_doomwalkerAI : public ScriptedAI
         m_uiChainTimer     = urand(10000, 30000);
         m_uiQuakeTimer     = urand(25000, 35000);
         m_uiOverrunTimer   = urand(30000, 45000);
+		m_uiStopOverrunTimer   = 0;
 
         m_bHasEnrage       = false;
     }
@@ -111,12 +113,26 @@ struct MANGOS_DLL_DECL boss_doomwalkerAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_OVERRUN) == CAST_OK)
             {
+				DoResetThreat();
                 DoScriptText(urand(0, 1) ? SAY_OVERRUN_1 : SAY_OVERRUN_2, m_creature);
                 m_uiOverrunTimer = urand(25000, 40000);
+				m_uiStopOverrunTimer = 5000;
             }
         }
         else
             m_uiOverrunTimer -= uiDiff;
+
+		// Stop Overrun
+		if(m_uiStopOverrunTimer)
+		{
+			if (m_uiStopOverrunTimer <= uiDiff)
+			{
+				m_creature->RemoveAurasDueToSpell(SPELL_OVERRUN);
+				m_uiStopOverrunTimer = 0;
+			}
+			else
+				m_uiStopOverrunTimer -= uiDiff;
+		}
 
         // Spell Earthquake
         if (m_uiQuakeTimer < uiDiff)
