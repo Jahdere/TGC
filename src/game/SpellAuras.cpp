@@ -5046,6 +5046,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 	case 28726:                                         // Nightmare Seed
 	case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
 	case 44055:                                         // Tremendous Fortitude (Battlemaster's Alacrity)
+	case 40604:											// Fel Rage( Gurtogg )
 		{
 			if (Real)
 			{

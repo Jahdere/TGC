@@ -1962,6 +1962,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					(spellInfo_2->Id == 40402  && spellInfo_1->Id == 34585))
 					return false;
 
+				//Fel rage Gurtogg
+				if ((spellInfo_1->Id == 40604  && spellInfo_2->Id == 40616) ||  
+					(spellInfo_2->Id == 40604  && spellInfo_1->Id == 40616))
+					return false;
+
 				break;
 			}
 		case SPELLFAMILY_MAGE:
