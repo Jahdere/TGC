@@ -370,7 +370,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
 
 	DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], spellproto->EffectImplicitTargetA[eff], damage);
 
-	
+
 	// Apply haste for aura triggered by channeled cast @Kordbc
 	uint32 pt = spellproto->EffectAmplitude[eff];
 	if(spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_2))
@@ -1547,8 +1547,9 @@ void Aura::TriggerSpell()
 					//                    case 40867: break;
 					//                    // Prismatic Shield
 					//                    case 40879: break;
-					//                    // Aura of Desire
-					//                    case 41350: break;
+				case 41350:				  // Aura of Desire
+					trigger_spell_id = 41352;
+					break;
 					//                    // Dementia
 					//                    case 41404: break;
 					//                    // Chaos Form
