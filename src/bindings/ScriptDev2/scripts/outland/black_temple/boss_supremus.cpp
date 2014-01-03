@@ -156,8 +156,8 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
 
         else if (pSummoned->GetEntry() == NPC_VOLCANO)
 		{
-			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, false, NULL, NULL, m_creature->GetObjectGuid());
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		}
     }
 
