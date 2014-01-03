@@ -1119,6 +1119,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading spell pet auras...");
     sSpellMgr.LoadSpellPetAuras();
 
+	sLog.outString("Loading spell extra attributes...");
+	sSpellMgr.LoadSpellCustomAttr();
+
     sLog.outString("Loading Player Create Info & Level Stats...");
     sLog.outString();
     sObjectMgr.LoadPlayerInfo();

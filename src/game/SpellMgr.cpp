@@ -3258,6 +3258,31 @@ void SpellMgr::LoadSpellPetAuras()
 	sLog.outString(">> Loaded %u spell pet auras", count);
 }
 
+// set data in core for now
+void SpellMgr::LoadSpellCustomAttr()
+{
+	SpellEntry* spellInfo;
+	for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
+	{
+		spellInfo = (SpellEntry*)GetSpellStore()->LookupEntry(i);
+		if (!spellInfo)
+			continue;
+
+		switch(i)
+		{
+		case 29214:             // Curse of the Plague Bringer
+			spellInfo->EffectImplicitTargetB[0] = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;
+			spellInfo->EffectImplicitTargetB[1] = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;
+			break;
+		case 32686:             // Earthquake - triggered spell must have radius
+			spellInfo->EffectRadiusIndex[1] = 12;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 /// Some checks for spells, to prevent adding deprecated/broken spells for trainers, spell book, etc
 bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 {

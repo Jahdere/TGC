@@ -1340,7 +1340,7 @@ void Aura::TriggerSpell()
 					//                    case 32236: break;
 				case 32686:				  // Earthquake
 					{
-						target->CastSpell(target, 13360, true, NULL, this, casterGUID);
+						triggerCaster->CastSpell(triggerTarget, 15753, true);
 						return;
 					}
 					//                    // Possess
@@ -1969,6 +1969,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 				case 36587:                             // Vision Guide
 					{
 						target->CastSpell(target, 36573, true, NULL, this);
+						return;
+					}
+				case 36636:								// Doomwalker Temple Attack Visual
+					{
+						target->CastSpell(target, 46345, true);
 						return;
 					}
 					// Gender spells

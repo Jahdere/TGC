@@ -1125,6 +1125,7 @@ class SpellMgr
         void LoadSkillRaceClassInfoMap();
         void LoadSpellPetAuras();
         void LoadSpellAreas();
+		void LoadSpellCustomAttr();
 
     private:
         SpellChainMap      mSpellChains;
