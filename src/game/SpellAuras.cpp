@@ -143,7 +143,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
 	&Aura::HandleModPowerRegen,                             // 85 SPELL_AURA_MOD_POWER_REGEN
 	&Aura::HandleChannelDeathItem,                          // 86 SPELL_AURA_CHANNEL_DEATH_ITEM
 	&Aura::HandleNoImmediateEffect,                         // 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN implemented in Unit::MeleeDamageBonusTaken and Unit::SpellDamageBonusTaken
-	&Aura::HandleNoImmediateEffect,                         // 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT implemented in Player::RegenerateHealth
+	&Aura::HandleModHealthRegenPCT,                         // 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT implemented in Player::RegenerateHealth
 	&Aura::HandlePeriodicDamagePCT,                         // 89 SPELL_AURA_PERIODIC_DAMAGE_PERCENT
 	&Aura::HandleUnused,                                    // 90 SPELL_AURA_MOD_RESIST_CHANCE  Useless
 	&Aura::HandleNoImmediateEffect,                         // 91 SPELL_AURA_MOD_DETECT_RANGE implemented in Creature::GetAttackDistance
@@ -3233,6 +3233,19 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
 		Item* newitem = ((Player*)caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], true);
 		((Player*)caster)->SendNewItem(newitem, count, true, true);
 	}
+}
+
+void Aura::HandleModHealthRegenPCT(bool apply, bool /*Real*/)
+{
+    Unit* target = GetTarget();
+
+    if(GetId() == 41292 && target && target->GetTypeId() == TYPEID_PLAYER)
+    {
+        if(apply)
+            target->CastSpell(target, 42017, true);// Proc Suffering aura ROS
+        else
+            target->RemoveAurasDueToSpell(42017);// Remove aura suffering ROS
+    }
 }
 
 void Aura::HandleBindSight(bool apply, bool /*Real*/)
