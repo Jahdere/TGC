@@ -3237,15 +3237,15 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
 
 void Aura::HandleModHealthRegenPCT(bool apply, bool /*Real*/)
 {
-    Unit* target = GetTarget();
+	Unit* target = GetTarget();
 
-    if(GetId() == 41292 && target && target->GetTypeId() == TYPEID_PLAYER)
-    {
-        if(apply)
-            target->CastSpell(target, 42017, true);// Proc Suffering aura ROS
-        else
-            target->RemoveAurasDueToSpell(42017);// Remove aura suffering ROS
-    }
+	if(GetId() == 41292 && target && target->GetTypeId() == TYPEID_PLAYER)
+	{
+		if(apply)
+			target->CastSpell(target, 42017, true);// Proc Suffering aura ROS
+		else
+			target->RemoveAurasDueToSpell(42017);// Remove aura suffering ROS
+	}
 }
 
 void Aura::HandleBindSight(bool apply, bool /*Real*/)
