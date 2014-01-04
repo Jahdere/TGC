@@ -89,16 +89,19 @@ struct MANGOS_DLL_DECL boss_hungarfenAI : public ScriptedAI
 		else
 			m_uiMushroomTimer -= uiDiff;
 
-		if (m_uiAcidGeyserTimer < uiDiff)
+		if(!m_bIsRegularMode)
 		{
-			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+			if (m_uiAcidGeyserTimer < uiDiff)
 			{
-				if (DoCastSpellIfCan(pTarget, SPELL_ACID_GEYSER) == CAST_OK)
-					m_uiAcidGeyserTimer = urand(10000, 17500);
+				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+				{
+					if (DoCastSpellIfCan(pTarget, SPELL_ACID_GEYSER) == CAST_OK)
+						m_uiAcidGeyserTimer = urand(10000, 17500);
+				}
 			}
+			else
+				m_uiAcidGeyserTimer -= uiDiff;
 		}
-		else
-			m_uiAcidGeyserTimer -= uiDiff;
 
 		DoMeleeAttackIfReady();
 	}
