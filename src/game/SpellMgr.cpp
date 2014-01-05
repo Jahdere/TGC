@@ -894,6 +894,12 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
 						return false;
 					break;
 				}
+			case SPELL_AURA_MOD_FEAR:
+				{
+					if(spellproto->Id == 30500)				// Death Coil
+						return false;
+					break;
+				}
 			default:
 				break;
 			}
@@ -1962,7 +1968,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					(spellInfo_2->Id == 40402  && spellInfo_1->Id == 34585))
 					return false;
 
-				//Fel rage Gurtogg
+				//Gangrerage Gurtogg
 				if ((spellInfo_1->Id == 40604  && spellInfo_2->Id == 40616) ||  
 					(spellInfo_2->Id == 40604  && spellInfo_1->Id == 40616))
 					return false;
