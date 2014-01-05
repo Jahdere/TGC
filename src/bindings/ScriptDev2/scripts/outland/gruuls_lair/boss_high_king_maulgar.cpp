@@ -335,7 +335,7 @@ struct MANGOS_DLL_DECL boss_kiggler_the_crazedAI : public Council_Base_AI
 
         if (m_uiGreatherPolymorphTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->getVictim())
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_GREATER_POLYMORPH) == CAST_OK)
                     m_uiGreatherPolymorphTimer = urand(15000, 20000);
