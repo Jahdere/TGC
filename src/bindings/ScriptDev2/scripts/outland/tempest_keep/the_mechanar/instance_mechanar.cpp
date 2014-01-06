@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 - 2013 ScriptDev2 <http://www.scriptdev2.com/>
+/* Copyright (C) 2006 - 2011 ScriptDev2 <http://www.scriptdev2.com/>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Instance_Mechanar
-SD%Complete: 70
-SDComment: Elevator needs core support
+SD%Complete: 20
+SDComment:
 SDCategory: Mechanar
 EndScriptData */
 
@@ -25,9 +25,8 @@ EndScriptData */
 #include "mechanar.h"
 
 instance_mechanar::instance_mechanar(Map* pMap) : ScriptedInstance(pMap),
-    m_uiBridgeEventTimer(0),
-    m_uiBridgeEventPhase(0)
-{
+	m_uiEventDeathCount(0)
+{ 
     Initialize();
 }
 
@@ -36,64 +35,121 @@ void instance_mechanar::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
-void instance_mechanar::OnPlayerEnter(Player* pPlayer)
-{
-    // Check encounter states
-    if (GetData(TYPE_SEPETHREA) != DONE || GetData(TYPE_PATHALEON) == DONE)
-        return;
-
-    // Check if already summoned
-    if (GetSingleCreatureFromStorage(NPC_PATHALEON, true))
-        return;
-
-    pPlayer->SummonCreature(aBridgeEventLocs[6][0].m_uiSpawnEntry, aBridgeEventLocs[6][0].m_fX, aBridgeEventLocs[6][0].m_fY, aBridgeEventLocs[6][0].m_fZ, aBridgeEventLocs[6][0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
-}
-
-void instance_mechanar::OnCreatureCreate(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
-    {
-        case NPC_PATHALEON:
-            m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            break;
-        case NPC_ASTROMAGE:
-        case NPC_PHYSICIAN:
-        case NPC_CENTURION:
-        case NPC_ENGINEER:
-        case NPC_NETHERBINDER:
-        case NPC_FORGE_DESTROYER:
-            if (pCreature->IsTemporarySummon())
-                m_sBridgeTrashGuidSet.insert(pCreature->GetObjectGuid());
-            break;
-    }
-}
-
 void instance_mechanar::OnObjectCreate(GameObject* pGo)
 {
-    if (pGo->GetEntry() == GO_FACTORY_ELEVATOR)
-    {
-        // ToDo: activate elevator if TYPE_GYRO_KILL && TYPE_IRON_HAND && TYPE_CAPACITUS are DONE
-        m_mGoEntryGuidStore[GO_FACTORY_ELEVATOR] = pGo->GetObjectGuid();
-    }
+	switch(pGo->GetEntry())
+	{
+        case GO_MOARG_DOOR1:
+            if (GetData(TYPE_GYROKILL) == DONE)
+				pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_MOARG_DOOR2:
+            if (GetData(TYPE_IRONHAND) == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+		default: return;
+	}
+    m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_mechanar::OnCreatureCreate(Creature * pCreature)
+{
+    if(pCreature->GetEntry() == NPC_PATHALEON)
+        m_mNpcEntryGuidStore[NPC_PATHALEON] = pCreature->GetObjectGuid();
+}
+
+void instance_mechanar::OnCreatureDeath(Creature * pCreature)
+{
+	switch(pCreature->GetEntry())
+	{
+		case NPC_GYROKILL: SetData(TYPE_GYROKILL, DONE); break;
+		case NPC_IRONHAND: SetData(TYPE_IRONHAND, DONE); break;
+        case NPC_SUNSEEKER_ASTROMAGE:
+        case NPC_BLOODWARDER_CENTURION:
+        case NPC_BLOODWARDER_PHYSICIAN:
+        case NPC_TEMPEST_DESTROYER:
+        case NPC_SUNSEEKER_ENGINEER:
+        case NPC_SUNSEEKER_NETHERBINDER:
+            if (m_auiEncounter[TYPE_EVENT1] == DONE)
+            {
+                ++m_uiEventDeathCount;
+                HandleEvent();
+            }
+            break;
+		default : return;
+	}
+}
+
+void instance_mechanar::HandleEvent(uint8 uiPhase)
+{
+    if(Creature* pPathaleon = GetSingleCreatureFromStorage(NPC_PATHALEON))
+        switch(uiPhase)
+        {
+            case 1:
+                for(uint8 i = 0; i < 4; ++i)
+                    pPathaleon->SummonCreature(sPathLoc[i].m_uiEntry, sPathLoc[i].m_fX, sPathLoc[i].m_fY, sPathLoc[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN,0);
+                break;
+            case 2:
+                for(uint8 i = 7; i < 10; ++i)
+                    pPathaleon->SummonCreature(sPathLoc[i].m_uiEntry, sPathLoc[i].m_fX, sPathLoc[i].m_fY, sPathLoc[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN,0);
+                break;
+            default:
+            {
+                switch(m_uiEventDeathCount)
+                {
+                    case 4:
+                        pPathaleon->SummonCreature(sPathLoc[4].m_uiEntry, sPathLoc[4].m_fX, sPathLoc[4].m_fY, sPathLoc[4].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN,0);                        
+                        break;
+                    case 5:
+                        for(uint8 i = 5; i < 7; ++i)
+                            pPathaleon->SummonCreature(sPathLoc[i].m_uiEntry, sPathLoc[i].m_fX, sPathLoc[i].m_fY, sPathLoc[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN,0);
+                        break;
+                    case 10:
+                        pPathaleon->SummonCreature(sPathLoc[10].m_uiEntry, sPathLoc[10].m_fX, sPathLoc[10].m_fY, sPathLoc[10].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN,0);                        
+                        break;
+                    case 11:
+                        for(uint8 i = 11; i < 15; ++i)
+                            pPathaleon->SummonCreature(sPathLoc[i].m_uiEntry, sPathLoc[i].m_fX, sPathLoc[i].m_fY, sPathLoc[i].m_fZ, 0, TEMPSUMMON_DEAD_DESPAWN,0);
+                        break;
+                    case 15:
+                        pPathaleon->NearTeleportTo( 137.988f, 90.994f, 26.3734f, 0.0f );
+                        if(Player* pTarget = GetPlayerInMap(true, false))
+                            pPathaleon->AI()->AttackStart(pTarget);
+                        break;
+                    default: return;
+                }
+            }
+        }
 }
 
 void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
 {
-    switch (uiType)
+    switch(uiType)
     {
-        case TYPE_GYRO_KILL:
-        case TYPE_IRON_HAND:
-        case TYPE_CAPACITUS:
-            m_auiEncounter[uiType] = uiData;
-            // ToDo: Activate the Elevator when all these 3 are done
-            break;
-        case TYPE_SEPETHREA:
-            m_auiEncounter[uiType] = uiData;
+		case TYPE_GYROKILL:
+            m_auiEncounter[TYPE_GYROKILL] = uiData;
             if (uiData == DONE)
-                m_uiBridgeEventTimer = 10000;
+				if(GameObject* pGo = GetSingleGameObjectFromStorage(GO_MOARG_DOOR1))
+					pGo->SetGoState(GO_STATE_ACTIVE);
+			break;
+		case TYPE_IRONHAND:
+            m_auiEncounter[TYPE_IRONHAND] = uiData;
+            if (uiData == DONE)
+			   if(GameObject* pGo = GetSingleGameObjectFromStorage(GO_MOARG_DOOR2))
+					pGo->SetGoState(GO_STATE_ACTIVE);
+			break;
+        case TYPE_SEPETHREA:
+            m_auiEncounter[TYPE_SEPETHREA] = uiData;
             break;
-        case TYPE_PATHALEON:
-            m_auiEncounter[uiType] = uiData;
+        case TYPE_EVENT1:
+            if ( m_auiEncounter[TYPE_EVENT1] != DONE )
+                HandleEvent(1);
+            m_auiEncounter[TYPE_EVENT1] = uiData;
+            break;
+        case TYPE_EVENT2:
+            if ( m_auiEncounter[TYPE_EVENT2] != DONE )
+                HandleEvent(2);
+            m_auiEncounter[TYPE_EVENT2] = uiData;
             break;
     }
 
@@ -111,14 +167,6 @@ void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
         SaveToDB();
         OUT_SAVE_INST_DATA_COMPLETE;
     }
-}
-
-uint32 instance_mechanar::GetData(uint32 uiType) const
-{
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
-
-    return 0;
 }
 
 void instance_mechanar::Load(const char* chrIn)
@@ -144,81 +192,12 @@ void instance_mechanar::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_mechanar::OnCreatureDeath(Creature* pCreature)
+uint32 instance_mechanar::GetData(uint32 uiType) const
 {
-    switch (pCreature->GetEntry())
-    {
-        case NPC_GYRO_KILL:      SetData(TYPE_GYRO_KILL, DONE); break;
-        case NPC_IRON_HAND:      SetData(TYPE_IRON_HAND, DONE); break;
-        case NPC_LORD_CAPACITUS: SetData(TYPE_CAPACITUS, DONE); break;
+    if (uiType < MAX_ENCOUNTER)
+        return m_auiEncounter[uiType];
 
-        case NPC_ASTROMAGE:
-        case NPC_PHYSICIAN:
-        case NPC_CENTURION:
-        case NPC_ENGINEER:
-        case NPC_NETHERBINDER:
-        case NPC_FORGE_DESTROYER:
-            if (m_sBridgeTrashGuidSet.find(pCreature->GetObjectGuid()) != m_sBridgeTrashGuidSet.end())
-            {
-                m_sBridgeTrashGuidSet.erase(pCreature->GetObjectGuid());
-
-                if (m_sBridgeTrashGuidSet.empty())
-                {
-                    // After the 3rd wave wait 10 seconds
-                    if (m_uiBridgeEventPhase == 3)
-                        m_uiBridgeEventTimer = 10000;
-                    else
-                        DoSpawnBridgeWave();
-                }
-            }
-            break;
-    }
-}
-
-void instance_mechanar::DoSpawnBridgeWave()
-{
-    if (Player* pPlayer = GetPlayerInMap(true, false))
-    {
-        for (uint8 i = 0; i < MAX_BRIDGE_TRASH; ++i)
-        {
-            // Skip the blank entries
-            if (aBridgeEventLocs[m_uiBridgeEventPhase][i].m_uiSpawnEntry == 0)
-                break;
-
-            if (Creature* pTemp = pPlayer->SummonCreature(aBridgeEventLocs[m_uiBridgeEventPhase][i].m_uiSpawnEntry, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fX, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fY, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fZ, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-            {
-                pTemp->CastSpell(pTemp, SPELL_ETHEREAL_TELEPORT, false);
-
-                switch (m_uiBridgeEventPhase)
-                {
-                    case 1:                                 // These waves should attack the player directly
-                    case 2:
-                    case 4:
-                    case 5:
-                        pTemp->AI()->AttackStart(pPlayer);
-                        break;
-                    case 6:                                 // Pathaleon
-                        DoScriptText(SAY_PATHALEON_INTRO, pTemp);
-                        break;
-                }
-            }
-        }
-    }
-    ++m_uiBridgeEventPhase;
-}
-
-void instance_mechanar::Update(uint32 uiDiff)
-{
-    if (m_uiBridgeEventTimer)
-    {
-        if (m_uiBridgeEventTimer <= uiDiff)
-        {
-            DoSpawnBridgeWave();
-            m_uiBridgeEventTimer = 0;
-        }
-        else
-            m_uiBridgeEventTimer -= uiDiff;
-    }
+    return 0;
 }
 
 InstanceData* GetInstanceData_instance_mechanar(Map* pMap)

@@ -101,8 +101,8 @@ struct MANGOS_DLL_DECL boss_pathaleon_the_calculatorAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATHALEON, DONE);
+  /*      if (m_pInstance)
+            m_pInstance->SetData(TYPE_PATHALEON, DONE);*/
     }
 
     void JustSummoned(Creature* pSummoned) override
