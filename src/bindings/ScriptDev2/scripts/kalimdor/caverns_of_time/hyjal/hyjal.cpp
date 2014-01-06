@@ -219,7 +219,8 @@ bool GossipSelect_npc_tyrande_whisperwind(Player* pPlayer, Creature* /*pCreature
 	return true;
 }
 
-// This script is for helper who summon NPC_GIANT from the air
+// This script is for helper who summon NPC_GIANT from the air 
+// See result here : http://www.youtube.com/watch?v=8HkXGiSIQzg
 struct MANGOS_DLL_DECL npc_helper_giantAI : public ScriptedAI
 {
 	npc_helper_giantAI(Creature* pCreature) : ScriptedAI(pCreature) 

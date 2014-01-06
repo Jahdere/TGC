@@ -3288,6 +3288,11 @@ void SpellMgr::LoadSpellCustomAttr()
 		case 32686:             // Earthquake - triggered spell must have radius
 			spellInfo->EffectRadiusIndex[1] = 12;
 			break;
+		case 34171:				// Underbat Tentacle Lash (behind target)
+		case 37956:
+			spellInfo->AttributesEx = SPELL_ATTR_EX_UNK9;
+			spellInfo->AttributesEx2 = SPELL_ATTR_EX2_UNK20;	
+			break;
 		default:
 			break;
 		}
