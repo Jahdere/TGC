@@ -69,12 +69,20 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 	case NPC_THRALL:
 		m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 		break;
-	case NPC_TYRANDE:	// Spawn Archimonde if needed when players come back another day
-		{
-			if(GetData(TYPE_ANETHERON) == DONE && GetData(TYPE_AZGALOR) == DONE)
-				DoSpawnArchimonde();
-			break;
-		}
+	case NPC_FOOTMAN:
+	case NPC_KNIGHT:
+	case NPC_SORCERESS:
+	case NPC_PRIESTMAN:
+	case NPC_RIFLEMAN:
+		lGardsAllyGUIDList.push_back(pCreature->GetObjectGuid());
+		break;
+	case NPC_GRUNT:
+	case NPC_HEADHUNTER:
+	case NPC_DOCTOR:
+	case NPC_SHAMAN:
+	case NPC_TAUREN:
+		lGardsHordeGUIDList.push_back(pCreature->GetObjectGuid());
+		break;
 	}
 }
 
@@ -103,25 +111,25 @@ void instance_mount_hyjal::OnCreatureEvade(Creature* pCreature)
 	case NPC_WINTERCHILL:
 		{
 			SetData(TYPE_WINTERCHILL, FAIL);
-			pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+			pCreature->GetMotionMaster()->MovePoint(3 , 5083.910f, -1789.040f, 1322.569f);
 		}
 		break;
 	case NPC_ANETHERON:
 		{
 			SetData(TYPE_ANETHERON, FAIL);  
-			pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);
+			pCreature->GetMotionMaster()->MovePoint(3 , 5083.910f, -1789.040f, 1322.569f);
 			break;
 		}
 	case NPC_KAZROGAL:
 		{
 			SetData(TYPE_KAZROGAL, FAIL);
-			pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
+			pCreature->GetMotionMaster()->MovePoint(7 , 5449.970f, -2723.770f, 1485.670f);
 			break;
 		}
 	case NPC_AZGALOR:
 		{    
 			SetData(TYPE_AZGALOR, FAIL);
-			pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);
+			pCreature->GetMotionMaster()->MovePoint(7 , 5449.970f, -2723.770f, 1485.670f);
 			break;
 		}
 	case NPC_NECRO:
@@ -133,14 +141,14 @@ void instance_mount_hyjal::OnCreatureEvade(Creature* pCreature)
 	case NPC_STALK:
 		{
 			if(GetData(TYPE_ANETHERON) == DONE)
-				pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1485.670f);	// Horde Base
+				pCreature->GetMotionMaster()->MovePoint(7 , 5449.970f, -2723.770f, 1485.670f);	// Horde Base
 			else
-				pCreature->GetMotionMaster()->MovePoint(0 , 5083.910f, -1789.040f, 1322.569f);	// Ally Base
+				pCreature->GetMotionMaster()->MovePoint(3 , 5083.910f, -1789.040f, 1322.569f);	// Ally Base
 			break;
 		}
 	case NPC_GARGO:
 	case NPC_FROST:
-		pCreature->GetMotionMaster()->MovePoint(0 , 5449.970f, -2723.770f, 1500.670f);	// Horde Base
+		pCreature->GetMotionMaster()->MovePoint(7 , 5449.970f, -2723.770f, 1500.670f);	// Horde Base (z +15.0f)
 		break;
 
 	}
@@ -211,6 +219,8 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
 					DoRespawnGameObject(*itr, DAY);
 				}
 			}
+			DoSpawnGards();
+			DoRetreatGards();
 		}
 		break;
 	}
@@ -245,6 +255,79 @@ void instance_mount_hyjal::DoSpawnArchimonde()
 	// Summon Archimonde
 	if (Player* pPlayer = GetPlayerInMap())
 		pPlayer->SummonCreature(NPC_ARCHIMONDE, aArchimondeSpawnLoc[0], aArchimondeSpawnLoc[1], aArchimondeSpawnLoc[2], aArchimondeSpawnLoc[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+}
+
+
+// Will be use in the future
+
+void instance_mount_hyjal::DoSpawnGards()
+{
+	if(GetData(TYPE_AZGALOR) != DONE)
+	{
+		if (!lGardsAllyGUIDList.empty())
+		{
+			for (GuidList::const_iterator itr = lGardsAllyGUIDList.begin(); itr != lGardsAllyGUIDList.end(); ++itr)
+			{
+				if(Creature* pTempGard = instance->GetCreature(*itr))
+				{
+					if(!pTempGard->isAlive())
+						pTempGard->SetDeathState(ALIVE);
+					if(!pTempGard->IsDespawned())
+						pTempGard->Respawn();
+				}
+			}
+		}
+	}
+	else
+	{
+		if (!lGardsHordeGUIDList.empty())
+		{
+			for (GuidList::const_iterator itr = lGardsHordeGUIDList.begin(); itr != lGardsHordeGUIDList.end(); ++itr)
+			{
+				if(Creature* pTempGard = instance->GetCreature(*itr))
+				{
+					if(!pTempGard->isAlive())
+						pTempGard->SetDeathState(ALIVE);
+					if(!pTempGard->IsDespawned())
+						pTempGard->Respawn();
+				}
+			}
+		}
+	}
+}
+
+void instance_mount_hyjal::DoRetreatGards()
+{
+	if(GetData(TYPE_ANETHERON) == DONE && GetData(TYPE_KAZROGAL) != DONE)
+	{
+		if(!lGardsAllyGUIDList.empty())
+		{
+			float fX, fY, fZ;
+			for (GuidList::const_iterator itr = lGardsAllyGUIDList.begin(); itr != lGardsAllyGUIDList.end(); ++itr)
+			{
+				if(Creature* pTempGard = instance->GetCreature(*itr))
+				{
+					pTempGard->GetRandomPoint(5083.910f, -1789.040f, 1322.569f, 3.0f, fX, fY, fZ);
+					pTempGard->SetWalk(true);
+					pTempGard->GetMotionMaster()->MovePoint(3 , fX, fY, fZ);
+				}
+			}
+		}
+	}else{
+		if(!lGardsHordeGUIDList.empty())
+		{
+			float fX, fY, fZ;
+			for (GuidList::const_iterator itr = lGardsHordeGUIDList.begin(); itr != lGardsHordeGUIDList.end(); ++itr)
+			{
+				if(Creature* pTempGard = instance->GetCreature(*itr))
+				{
+					pTempGard->GetRandomPoint(5449.970f, -2723.770f, 1485.670f, 3.0f, fX, fY, fZ);
+					pTempGard->SetWalk(false);
+					pTempGard->GetMotionMaster()->MovePoint(7 , fX, fY, fZ);
+				}
+			}
+		}
+	}
 }
 
 uint32 instance_mount_hyjal::GetData(uint32 uiType) const

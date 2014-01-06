@@ -71,7 +71,8 @@ enum MovePoint
 	POINT_ID_HORDE_FLY_BACK = 8,
 	POINT_ID_HORDE_FLY_BACK1 = 9,
 	POINT_ID_HORDE_FLY_FRONT = 10,
-	POINT_ID_HORDE_TRIGGER_GIANT = 11
+	POINT_ID_HORDE_TRIGGER_GIANT = 11,
+	POINT_ID_HORDE_EVENT = 12,
 };
 
 struct MANGOS_DLL_DECL hyjalAI : public ScriptedAI
@@ -105,6 +106,9 @@ struct MANGOS_DLL_DECL hyjalAI : public ScriptedAI
 
 	// "Teleport" all friendly creatures away from the base.
 	void Retreat();
+
+	// Spawn invaders after teleport.
+	void SpawnInvaders();
 
 	// Summons a creature for that wave in that base
 	void SpawnCreatureForWave(uint32 uiMobEntry);

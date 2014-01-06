@@ -48,6 +48,22 @@ enum
 	NPC_GIANT_HELPER			= 18242,
 	NPC_GIANT_TARGET			= 21075,
 
+	// Pnj Bastion Ally
+	NPC_RIFLEMAN				= 17921,
+	NPC_PRIESTMAN				= 17928,
+	NPC_SORCERESS				= 17922,
+	NPC_FOOTMAN					= 17919,
+	NPC_KNIGHT					= 17920,
+
+	// PNJ Bastion Horde
+	NPC_GRUNT					= 17932,
+	NPC_HEADHUNTER				= 17934,
+	NPC_DOCTOR					= 17935,
+	NPC_SHAMAN					= 17936,
+	NPC_TAUREN					= 17933,
+
+
+	// Summoned by Thrall and Jaina
 	NPC_WATER_ELEMENTAL         = 18001,
 	NPC_DIRE_WOLF               = 17854,
 
@@ -79,6 +95,9 @@ public:
 	const char* Save() const override { return m_strSaveData.c_str(); }
 	void Load(const char* chrIn) override;
 
+	void DoSpawnGards();
+	void DoRetreatGards();
+
 private:
 	void DoSpawnArchimonde();
 
@@ -87,7 +106,8 @@ private:
 
 	GuidList lAncientGemGUIDList;
 
-	GuidList lGardsGUIDList;
+	GuidList lGardsAllyGUIDList;
+	GuidList lGardsHordeGUIDList;
 
 	uint32 m_uiTrashCount;
 };
