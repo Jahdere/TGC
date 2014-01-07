@@ -5861,16 +5861,20 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
 	if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
 		DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
 
-	AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-	for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+	// EarthQuake Doomwalker Exception
+	if(spellProto->Id != 32686)
 	{
-		if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
-			(*i)->GetSpellProto()->EquippedItemClass == -1 &&
-			// -1 == any item class (not wand then)
-			(*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
-			// 0 == any inventory type (not wand then)
+		AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+		for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
 		{
-			DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+			if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
+				(*i)->GetSpellProto()->EquippedItemClass == -1 &&
+				// -1 == any item class (not wand then)
+				(*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
+				// 0 == any inventory type (not wand then)
+			{
+				DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+			}
 		}
 	}
 
