@@ -6063,6 +6063,15 @@ void Aura::PeriodicTick()
 				// 5..8 ticks have normal tick damage
 			}
 
+			// Aura of Anger (ROS)
+			if(spellProto->Id == 41337)
+			{
+				Aura* holder_anger = GetHolder()->GetAuraByEffectIndex(GetEffIndex());
+				holder_anger->GetHolder()->SetStackAmount(GetAuraTicks() + 1);
+				holder_anger = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1);
+				holder_anger->GetHolder()->SetStackAmount(GetAuraTicks());
+			}
+
 			// As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
 			// Reduce dot damage from resilience for players
 			if (target->GetTypeId() == TYPEID_PLAYER)
