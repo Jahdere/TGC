@@ -17,6 +17,7 @@ enum
 
 	TYPE_TRASH_COUNT            = 5,
 	TYPE_RETREAT                = 6,
+	TYPE_SPAWN_GO				= 7,
 
 	WORLD_STATE_WAVES           = 2842,
 	WORLD_STATE_ENEMY           = 2453,
@@ -68,9 +69,14 @@ enum
 	NPC_DIRE_WOLF               = 17854,
 
 	GO_ANCIENT_GEM              = 185557,
+	GO_ROARING_FIRE				= 182592,
+	GO_DOOR_ARCHIMONDE			= 182061,
+	GO_DOOR_THRALL				= 182060,
 };
 
 static const float aArchimondeSpawnLoc[4] = {5581.49f, -3445.63f, 1575.1f, 3.905f};
+
+const float SEPARATE_BASE  = -2400.0f;
 
 class MANGOS_DLL_DECL instance_mount_hyjal : public ScriptedInstance
 {
@@ -104,12 +110,17 @@ private:
 	uint32 m_auiEncounter[MAX_ENCOUNTER];
 	std::string m_strSaveData;
 
-	GuidList lAncientGemGUIDList;
+	GuidList lAncientGemAllyGUIDList;
+	GuidList lAncientGemHordeGUIDList;
+	GuidList lRoaringFireAllyGUIDList;
+	GuidList lRoaringFireHordeGUIDList;
 
 	GuidList lGardsAllyGUIDList;
 	GuidList lGardsHordeGUIDList;
 
 	uint32 m_uiTrashCount;
+
+	bool m_bCanSpawnHordeGem;
 };
 
 #endif

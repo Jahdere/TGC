@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: HyjalAI
-SD%Complete: 90
+SD%Complete: 100
 SDComment:
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
@@ -34,7 +34,7 @@ struct HyjalLocation
 // Locations for summoning waves
 // Must be even number
 
-static const HyjalLocation aHyjalSpawnLoc[6] =
+static const HyjalLocation aHyjalSpawnLoc[7] =
 {
 	{BASE_ALLY,  4969.819f, -1637.413f, 1343.208f, POINT_ID_ALLY},
 	{BASE_HORDE, 5526.233f, -2550.069f, 1482.918f, POINT_ID_HORDE},
@@ -42,12 +42,13 @@ static const HyjalLocation aHyjalSpawnLoc[6] =
 	{BASE_HORDE, 5441.202f, -2604.294f, 1545.218f, POINT_ID_HORDE_FLY_FRONT},
 	{BASE_HORDE, 5511.520f, -2727.871f, 1484.247f, POINT_ID_HORDE_TRIGGER_GIANT},
 	{BASE_HORDE, 5544.236f, -2635.696f, 1481.903f, POINT_ID_HORDE_EVENT},
+	{BASE_HORDE, 4991.555f, -1721.968f, 1334.545f, POINT_ID_ALLY_EVENT},
 };
 
 // used to inform the wave where to move after spawn
 static const HyjalLocation aHyjalWaveMoveTo[7] =
 {
-	{BASE_ALLY,  4901.451f, -1663.070f, 1320.038f, POINT_ID_ALLY1},
+	{BASE_ALLY,  4920.873f, -1676.423f, 1325.010f, POINT_ID_ALLY1},
 	{BASE_ALLY,  4991.555f, -1721.968f, 1334.545f, POINT_ID_ALLY2},
 	{BASE_ALLY,  5083.910f, -1789.040f, 1322.569f, POINT_ID_ALLY_JAINA},
 	{BASE_HORDE, 5548.570f, -2555.973f, 1478.572f, POINT_ID_HORDE1},
@@ -280,7 +281,7 @@ void hyjalAI::SpawnCreatureForWave(uint32 uiMobEntry)
 			m_creature->GetRandomPoint(pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 40.0f, fX, fY, fZ);
 			m_creature->SummonCreature(uiMobEntry, fX, fY, fZ + 30.0f, 10.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
 		}else
-			m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
+			m_creature->SummonCreature(uiMobEntry, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 5.0f, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 120000);
 	}
 }
 
@@ -291,6 +292,28 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 		return;
 
 	HyjalLocation const* pMove = NULL;
+	float fX, fY, fZ;
+
+	//Ally / Horde Base retreat event
+	if(m_pInstance)
+	{
+		if(m_uiBase == BASE_HORDE && m_pInstance->GetData(TYPE_AZGALOR) == DONE)
+		{
+			pMove = &aHyjalWaveMoveTo[6];
+			pSummoned->SetWalk(false);
+			pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
+			pSummoned->GetMotionMaster()->MovePoint(POINT_ID_HORDE_TRALL, fX, fY, fZ);
+			return;
+		}
+		else if(m_uiBase == BASE_ALLY && m_pInstance->GetData(TYPE_ANETHERON) == DONE)
+		{
+			pMove = &aHyjalWaveMoveTo[2];
+			pSummoned->SetWalk(false);
+			pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
+			pSummoned->GetMotionMaster()->MovePoint(POINT_ID_ALLY_JAINA, fX, fY, fZ);
+			return;
+		}
+	}
 
 	// Increment Enemy Count to be used in World States and instance script
 	if(pSummoned->GetEntry() != NPC_GIANT)	// Dont count twice
@@ -334,16 +357,6 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 				break;
 			}
 		default:
-			// Special case for event
-			if(m_pInstance)
-			{
-				if(m_pInstance->GetData(TYPE_AZGALOR) == DONE)
-				{
-					pMove = &aHyjalWaveMoveTo[6];
-					pSummoned->GetMotionMaster()->MovePoint(POINT_ID_HORDE_TRALL, pMove->m_fX, pMove->m_fY, pMove->m_fZ);
-					continue;
-				}
-			}
 			if((aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_ALLY1 && m_uiBase == BASE_ALLY) || (aHyjalWaveMoveTo[i].m_movePoint != POINT_ID_HORDE1 && m_uiBase == BASE_HORDE))
 				continue;
 		}
@@ -354,7 +367,6 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
 	if (pMove)
 	{
-		float fX, fY, fZ;
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
 
 		pSummoned->SetWalk(false);
@@ -385,28 +397,46 @@ void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, u
 	{
 	case POINT_ID_ALLY1:	// Go next step
 	case POINT_ID_ALLY2:	// Go Jaina
-		if(uiPointId == POINT_ID_ALLY2 && !pSummoned->IsWorldBoss())
-			pSummoned->SetWalk(true);
 		pMove = &aHyjalWaveMoveTo[uiPointId];
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
 		pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
 		break;
 	case POINT_ID_HORDE1:	// Go next step
 		pMove = &aHyjalWaveMoveTo[4];
-		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
 		if(pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO)
 			pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ + 15.0f);
 		else
 			pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ);
 		break;
 	case POINT_ID_HORDE_FLY_BACK1:	// Go Thrall
-	case POINT_ID_HORDE2:
-	case POINT_ID_HORDE_EVENT:
-		if((pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO) && !m_bIsFirstBossDead)
-			break;
-		pMove = &aHyjalWaveMoveTo[6];		
-		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 5.0f, fX, fY, fZ);
+	case POINT_ID_HORDE2:		
+		if((pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO) && m_bIsSecondBossDead)
+			pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 80.0f);
+		break;
+		pMove = &aHyjalWaveMoveTo[6];
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
 		pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ);
+		break;
+	case POINT_ID_ALLY_JAINA:
+		if(m_pInstance)
+		{
+			if(m_uiBase == BASE_ALLY && m_pInstance->GetData(TYPE_ANETHERON) == DONE)
+			{
+			pSummoned->GetRandomPoint(5083.910f, -1789.040f, 1322.569f, 5.0f, fX, fY, fZ);
+			pSummoned->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 80.0f);	// Ally Base retreat event
+			}
+		}
+		break;
+	case POINT_ID_HORDE_TRALL:
+		if(m_pInstance)
+		{
+			if(m_uiBase == BASE_HORDE && m_pInstance->GetData(TYPE_AZGALOR) == DONE)
+			{
+				pSummoned->GetRandomPoint(5523.940f, -2729.156f, 1483.631f, 5.0f, fX, fY, fZ);
+				pSummoned->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 80.0f);	// Horde Base retreat event
+			}
+		}
 		break;
 	}
 }
@@ -577,32 +607,35 @@ void hyjalAI::SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell)
 	}
 }
 
-// Event process
+// Event retreat process
 void hyjalAI::SpawnInvaders()
 {
 	if(m_uiBase == BASE_ALLY)
 	{
-		HyjalLocation const* pSpawn = &aHyjalSpawnLoc[0];
+		HyjalLocation const* pSpawn = &aHyjalSpawnLoc[6];
+		float fX, fY, fZ;		
 		if(pSpawn)
 		{
-			for (uint8 i = 0; i < 10; ++i)
+			for (uint8 i = 0; i < 15; ++i)
 			{
-				m_creature->SummonCreature(NPC_ABOMI, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
-				m_creature->SummonCreature(NPC_CRYPT, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
-				m_creature->SummonCreature(NPC_GHOUL, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
-				m_creature->SummonCreature(NPC_BANSH, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
-				m_creature->SummonCreature(NPC_NECRO, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				m_creature->GetRandomPoint(pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 10.0f, fX, fY, fZ);
+				m_creature->SummonCreature(NPC_ABOMI, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				m_creature->SummonCreature(NPC_CRYPT, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				m_creature->SummonCreature(NPC_GHOUL, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				m_creature->SummonCreature(NPC_BANSH, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				m_creature->SummonCreature(NPC_NECRO, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
 			}
 		}
 	}
 	else
 	{
 		HyjalLocation const* pSpawn = &aHyjalSpawnLoc[5];
-		HyjalLocation const* pSpawn_air = &aHyjalSpawnLoc[3];
+		HyjalLocation const* pSpawn_fly = &aHyjalSpawnLoc[2];
 		HyjalLocation const* pSpawn_inferno = &aHyjalSpawnLoc[4];
-		if(pSpawn && pSpawn_air && pSpawn_inferno)
+		float fX, fY, fZ;
+		if(pSpawn && pSpawn_fly && pSpawn_inferno)
 		{
-			for (uint8 i = 0; i < 10; ++i)
+			for (uint8 i = 0; i < 15; ++i)
 			{
 				m_creature->SummonCreature(NPC_ABOMI, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
 				m_creature->SummonCreature(NPC_CRYPT, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
@@ -610,11 +643,13 @@ void hyjalAI::SpawnInvaders()
 				m_creature->SummonCreature(NPC_BANSH, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
 				m_creature->SummonCreature(NPC_NECRO, pSpawn->m_fX, pSpawn->m_fY, pSpawn->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
 
-				m_creature->SummonCreature(NPC_GARGO, pSpawn_air->m_fX, pSpawn_air->m_fY, pSpawn_air->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				m_creature->SummonCreature(NPC_GARGO, pSpawn_fly->m_fX, pSpawn_fly->m_fY, pSpawn_fly->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
 				if(i < 3)
-					m_creature->SummonCreature(NPC_FROST, pSpawn_air->m_fX, pSpawn_air->m_fY, pSpawn_air->m_fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				{
+					m_creature->GetRandomPoint(pSpawn_fly->m_fX, pSpawn_fly->m_fY, pSpawn_fly->m_fZ, 40.0f, fX, fY, fZ);
+					m_creature->SummonCreature(NPC_FROST, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+				}
 
-				float fX, fY, fZ;
 				m_creature->GetRandomPoint(pSpawn_inferno->m_fX, pSpawn_inferno->m_fY, pSpawn_inferno->m_fZ, 40.0f, fX, fY, fZ);
 				m_creature->SummonCreature(NPC_GIANT_HELPER, fX, fY, fZ + 30.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 15000);
 			}

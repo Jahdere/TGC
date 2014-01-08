@@ -36,6 +36,7 @@ instance_mount_hyjal::instance_mount_hyjal(Map* pMap) : ScriptedInstance(pMap),
 	m_uiTrashCount(0)
 {
 	Initialize();
+	m_bCanSpawnHordeGem = false;
 }
 
 void instance_mount_hyjal::Initialize()
@@ -88,8 +89,60 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 
 void instance_mount_hyjal::OnObjectCreate(GameObject* pGo)
 {
-	if (pGo->GetEntry() == GO_ANCIENT_GEM)
-		lAncientGemGUIDList.push_back(pGo->GetObjectGuid());
+	switch(pGo->GetEntry())
+	{
+	case GO_ANCIENT_GEM:
+		{
+			if(pGo->GetPositionY() < SEPARATE_BASE)
+				lAncientGemHordeGUIDList.push_back(pGo->GetObjectGuid());
+			else
+				lAncientGemAllyGUIDList.push_back(pGo->GetObjectGuid());
+
+			SetData(TYPE_SPAWN_GO, SPECIAL);
+			break;
+		}
+	case GO_ROARING_FIRE:
+		{
+			if(pGo->GetPositionY() < SEPARATE_BASE)
+				lRoaringFireHordeGUIDList.push_back(pGo->GetObjectGuid());
+			else
+				lRoaringFireAllyGUIDList.push_back(pGo->GetObjectGuid());
+
+			SetData(TYPE_SPAWN_GO, SPECIAL);
+			break;
+		}
+	case GO_DOOR_THRALL:
+		{			
+			if (GetData(TYPE_ANETHERON) == DONE)
+			{			
+				pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+				pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+				pGo->SetGoState(GO_STATE_ACTIVE);
+			}
+			else
+			{
+				pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+			}
+			m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+			break;
+		}		
+	case GO_DOOR_ARCHIMONDE:
+		{
+			if (GetData(TYPE_AZGALOR) == DONE)
+			{
+				pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+				pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+				pGo->SetGoState(GO_STATE_ACTIVE);
+			}
+			else
+			{
+				pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+			}
+			m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+			break;
+		}
+	default: return;
+	}
 }
 
 void instance_mount_hyjal::OnCreatureEnterCombat(Creature* pCreature)
@@ -140,15 +193,42 @@ void instance_mount_hyjal::OnCreatureEvade(Creature* pCreature)
 	case NPC_GIANT:
 	case NPC_STALK:
 		{
-			if(GetData(TYPE_ANETHERON) == DONE)
-				pCreature->GetMotionMaster()->MovePoint(7 , 5449.970f, -2723.770f, 1485.670f);	// Horde Base
+			float fX, fY, fZ;
+			if(GetData(TYPE_ANETHERON) == DONE && GetData(TYPE_AZGALOR) != DONE && !m_uiTrashCount)
+			{
+				pCreature->GetRandomPoint(5083.910f, -1789.040f, 1322.569f, 5.0f, fX, fY, fZ);
+				pCreature->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 80.0f);	// Ally Base retreat event
+			}
+			else if(GetData(TYPE_AZGALOR) == DONE && !m_uiTrashCount)
+			{
+				pCreature->GetRandomPoint(5523.940f, -2729.156f, 1483.631f, 5.0f, fX, fY, fZ);
+				pCreature->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 80.0f);	// Horde Base retreat event
+			}
+			else if(GetData(TYPE_ANETHERON) == DONE)
+			{
+				pCreature->GetRandomPoint(5449.970f, -2723.770f, 1485.670f, 5.0f, fX, fY, fZ);
+				pCreature->GetMotionMaster()->MovePoint(7 , fX, fY, fZ);	// Horde Base wave event
+			}
 			else
-				pCreature->GetMotionMaster()->MovePoint(3 , 5083.910f, -1789.040f, 1322.569f);	// Ally Base
+			{
+				pCreature->GetRandomPoint(5083.910f, -1789.040f, 1322.569f, 5.0f, fX, fY, fZ);
+				pCreature->GetMotionMaster()->MovePoint(3 , fX, fY, fZ);	// Ally Base wave event
+			}
 			break;
 		}
 	case NPC_GARGO:
 	case NPC_FROST:
-		pCreature->GetMotionMaster()->MovePoint(7 , 5449.970f, -2723.770f, 1500.670f);	// Horde Base (z +15.0f)
+		float fX, fY, fZ;
+		if(GetData(TYPE_AZGALOR) == DONE && !m_uiTrashCount)
+		{
+			pCreature->GetRandomPoint(5523.940f, -2729.156f, 1500.631f, 5.0f, fX, fY, fZ);
+			pCreature->GetMotionMaster()->MoveRandomAroundPoint(fX, fY, fZ, 80.0f);	// Horde Base retreat event
+		}
+		else
+		{
+			pCreature->GetRandomPoint(5449.970f, -2723.770f, 1500.670f, 5.0f, fX, fY, fZ);
+			pCreature->GetMotionMaster()->MovePoint(7 , fX, fY, fZ);	// Horde Base wave (z +15.0f)
+		}
 		break;
 
 	}
@@ -189,15 +269,35 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
 {
 	switch (uiType)
 	{
-	case TYPE_WINTERCHILL:
-	case TYPE_ANETHERON:
+	case TYPE_WINTERCHILL:	
 	case TYPE_KAZROGAL:
 		m_auiEncounter[uiType] = uiData;
+		break;
+	case TYPE_ANETHERON:
+		m_auiEncounter[uiType] = uiData;
+		if (uiData == DONE)
+		{
+			if(GameObject* pGo = GetSingleGameObjectFromStorage(GO_DOOR_THRALL))
+			{
+				pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+				pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+				pGo->SetGoState(GO_STATE_ACTIVE);
+			}
+		}
 		break;
 	case TYPE_AZGALOR:
 		m_auiEncounter[uiType] = uiData;
 		if (uiData == DONE)
+		{
+			if(GameObject* pGo = GetSingleGameObjectFromStorage(GO_DOOR_ARCHIMONDE))
+			{
+				pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+				pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+				pGo->SetGoState(GO_STATE_ACTIVE);
+			}
 			DoSpawnArchimonde();
+			m_bCanSpawnHordeGem = true;
+		}
 		break;
 	case TYPE_ARCHIMONDE:
 		m_auiEncounter[uiType] = uiData;
@@ -211,16 +311,54 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
 	case TYPE_RETREAT:
 		if (uiData == SPECIAL)
 		{
-			if (!lAncientGemGUIDList.empty())
+			if(GetData(TYPE_AZGALOR) == DONE)
 			{
-				for (GuidList::const_iterator itr = lAncientGemGUIDList.begin(); itr != lAncientGemGUIDList.end(); ++itr)
+				if(!lAncientGemHordeGUIDList.empty())
+					for (GuidList::const_iterator itr = lAncientGemHordeGUIDList.begin(); itr != lAncientGemHordeGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+				if(!lRoaringFireHordeGUIDList.empty())
+					for (GuidList::const_iterator itr = lRoaringFireHordeGUIDList.begin(); itr != lRoaringFireHordeGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+			}
+			else
+			{
+				if(!lAncientGemAllyGUIDList.empty())
+					for (GuidList::const_iterator itr = lAncientGemAllyGUIDList.begin(); itr != lAncientGemAllyGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+				if(!lRoaringFireAllyGUIDList.empty())
+					for (GuidList::const_iterator itr = lRoaringFireAllyGUIDList.begin(); itr != lRoaringFireAllyGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+			}
+			DoRetreatGards();
+		}
+		break;
+
+	case TYPE_SPAWN_GO:
+		if (uiData == SPECIAL)
+		{
+			if(GetData(TYPE_AZGALOR) == DONE)
+			{
+				if(!lRoaringFireHordeGUIDList.empty())
+					for (GuidList::const_iterator itr = lRoaringFireHordeGUIDList.begin(); itr != lRoaringFireHordeGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+				if(!lRoaringFireAllyGUIDList.empty())
+					for (GuidList::const_iterator itr = lRoaringFireAllyGUIDList.begin(); itr != lRoaringFireAllyGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+
+				// Need to spawn with OnCreateObject call
+				if(m_bCanSpawnHordeGem)
 				{
-					// don't know how long it expected
-					DoRespawnGameObject(*itr, DAY);
+					if (!lAncientGemHordeGUIDList.empty())
+						for (GuidList::const_iterator itr = lAncientGemHordeGUIDList.begin(); itr != lAncientGemHordeGUIDList.end(); ++itr)
+							DoRespawnGameObject(*itr, DAY);
 				}
 			}
-			DoSpawnGards();
-			DoRetreatGards();
+			else if(GetData(TYPE_ANETHERON) == DONE)
+			{
+				if(!lRoaringFireAllyGUIDList.empty())
+					for (GuidList::const_iterator itr = lRoaringFireAllyGUIDList.begin(); itr != lRoaringFireAllyGUIDList.end(); ++itr)
+						DoRespawnGameObject(*itr, DAY);
+			}
 		}
 		break;
 	}
@@ -259,7 +397,6 @@ void instance_mount_hyjal::DoSpawnArchimonde()
 
 
 // Will be use in the future
-
 void instance_mount_hyjal::DoSpawnGards()
 {
 	if(GetData(TYPE_AZGALOR) != DONE)
@@ -296,6 +433,7 @@ void instance_mount_hyjal::DoSpawnGards()
 	}
 }
 
+// Start Event
 void instance_mount_hyjal::DoRetreatGards()
 {
 	if(GetData(TYPE_ANETHERON) == DONE && GetData(TYPE_KAZROGAL) != DONE)
@@ -307,8 +445,12 @@ void instance_mount_hyjal::DoRetreatGards()
 			{
 				if(Creature* pTempGard = instance->GetCreature(*itr))
 				{
+					if(!pTempGard->isAlive())
+						pTempGard->SetDeathState(ALIVE);
+					if(!pTempGard->IsDespawned())
+						pTempGard->Respawn();
 					pTempGard->GetRandomPoint(5083.910f, -1789.040f, 1322.569f, 3.0f, fX, fY, fZ);
-					pTempGard->SetWalk(true);
+					pTempGard->SetWalk(false);
 					pTempGard->GetMotionMaster()->MovePoint(3 , fX, fY, fZ);
 				}
 			}
@@ -321,6 +463,10 @@ void instance_mount_hyjal::DoRetreatGards()
 			{
 				if(Creature* pTempGard = instance->GetCreature(*itr))
 				{
+					if(!pTempGard->isAlive())
+						pTempGard->SetDeathState(ALIVE);
+					if(!pTempGard->IsDespawned())
+						pTempGard->Respawn();
 					pTempGard->GetRandomPoint(5449.970f, -2723.770f, 1485.670f, 3.0f, fX, fY, fZ);
 					pTempGard->SetWalk(false);
 					pTempGard->GetMotionMaster()->MovePoint(7 , fX, fY, fZ);
