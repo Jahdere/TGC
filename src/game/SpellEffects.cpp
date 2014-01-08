@@ -2907,6 +2907,13 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 		}else{
 			switch(m_spellInfo->Id)
 			{
+				// Holy Strength amount decrease by 4% each level after 60
+			case 20007:
+				{
+					if(GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
+						addhealth = int32(addhealth * (1 - (((float(GetCaster()->getLevel()) - 60) * 4) / 100)));
+					break;
+				}
 				// Bonus T4 p2 Paladin @Kordbc
 			case 20267:
 			case 20341:
