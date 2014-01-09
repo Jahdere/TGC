@@ -2907,7 +2907,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 		}else{
 			switch(m_spellInfo->Id)
 			{
-				// Holy Strength amount decrease by 4% each level after 60
+				// Holy Strength heal decrease by 4% each level after 60
 			case 20007:
 				{
 					if(GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
