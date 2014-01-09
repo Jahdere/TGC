@@ -121,8 +121,6 @@ void FleeingMovementGenerator<T>::Initialize(T& owner)
 
     if (owner.GetTypeId() == TYPEID_UNIT)
         owner.SetTargetGuid(ObjectGuid());
-
-    _setTargetLocation(owner);
 }
 
 template<>
