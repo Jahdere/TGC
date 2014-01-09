@@ -6684,8 +6684,10 @@ void Aura::PeriodicDummyTick()
 				//              case 45945: break;
 				//              // Ahune's Shield
 				//              case 45954: break;
-				//              // Nether Vapor Lightning
-				//              case 45960: break;
+				// Nether Vapor Lightning
+			case 45960: 
+				target->CastSpell(target, m_modifier.m_amount, true, NULL, this);
+				break;
 				//              // Darkness
 				//              case 45996: break;
 			case 46041:                                 // Summon Blood Elves Periodic

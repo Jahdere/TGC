@@ -127,6 +127,7 @@ enum
 	// ***** Other summons spells ********
 	//Nether Vapor spell
 	SPELL_NETHER_VAPOR                  = 35858,
+	SPELL_NETHER_VAPOR_LIGHT			= 45960,
 	//Phoenix spell
 	SPELL_BURN                          = 36720,
 	SPELL_EMBER_BLAST                   = 34341,
@@ -365,7 +366,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 		if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
 			pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
 		else if (pSummoned->GetEntry() == NPC_NETHER_VAPOR)
+		{
+			pSummoned->CastSpell(pSummoned, SPELL_NETHER_VAPOR_LIGHT, true);
 			pSummoned->CastSpell(pSummoned, SPELL_NETHER_VAPOR, false, NULL, NULL, m_creature->GetObjectGuid());
+		}
 		else if(pSummoned->GetEntry() == NPC_HELPER_BEAM)
 		{
 			if(m_uiCountBeamer == 0 || m_uiCountBeamer == 2)
