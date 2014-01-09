@@ -6684,8 +6684,7 @@ void Aura::PeriodicDummyTick()
 				//              case 45945: break;
 				//              // Ahune's Shield
 				//              case 45954: break;
-				// Nether Vapor Lightning
-			case 45960: 
+			case 45960:									// Nether Vapor Lightning
 				target->CastSpell(target, m_modifier.m_amount, true, NULL, this);
 				break;
 				//              // Darkness
