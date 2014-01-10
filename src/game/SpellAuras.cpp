@@ -373,8 +373,8 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
 
 	// Apply haste for aura triggered by channeled cast @Kordbc
 	uint32 pt = spellproto->EffectAmplitude[eff];
-	if(spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_2))
-		pt = int32(float(pt) * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+	if(caster && (spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) || spellproto->HasAttribute(SPELL_ATTR_EX_CHANNELED_2)))
+		pt = uint32(float(pt) * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
 
 	SetModifier(AuraType(spellproto->EffectApplyAuraName[eff]), damage, pt, spellproto->EffectMiscValue[eff]);
 
