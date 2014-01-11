@@ -3735,10 +3735,6 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
 			{
 				if (Player* modOwner = caster->GetSpellModOwner())
 					modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RESIST_DISPEL_CHANCE, miss_chance, this);
-				// Add SPELL_AURA_MOD_DISPEL_RESIST calcul
-				Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_MOD_DISPEL_RESIST);
-				for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-					miss_chance += (*itr)->GetModifier()->m_amount;
 			}
 			// Try dispel
 			if (roll_chance_i(miss_chance))
@@ -6953,10 +6949,6 @@ void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
 			{
 				if (Player* modOwner = caster->GetSpellModOwner())
 					modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RESIST_DISPEL_CHANCE, miss_chance, this);
-				// SPELL_AURA_MOD_DISPEL_RESIST calcul
-				Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_MOD_DISPEL_RESIST);
-				for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-					miss_chance += (*itr)->GetModifier()->m_amount;
 			}
 			if (roll_chance_i(miss_chance))
 				fail_list.push_back(spellInfo->Id);

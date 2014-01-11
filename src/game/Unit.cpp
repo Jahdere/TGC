@@ -2900,6 +2900,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 //   Resist
 SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool CanReflect)
 {
+
 	// Return evade for units in evade mode
 	if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
 		return SPELL_MISS_EVADE;
@@ -2910,7 +2911,17 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 
 	// All positive spells can`t miss
 	// TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-	if (IsPositiveSpell(spell->Id))
+	bool dispelPositive = true;
+	for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
+	{
+		if (spell->Effect[i] == SPELL_EFFECT_DISPEL && IsHostileTo(pVictim))
+		{
+			dispelPositive = false;
+			break;
+		}
+	}
+
+	if (IsPositiveSpell(spell->Id) && dispelPositive)
 		return SPELL_MISS_NONE;
 
 	// Check for immune (use charges)
