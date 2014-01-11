@@ -2848,7 +2848,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 	if (IsAreaOfEffectSpell(spell))
 		modHitChance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
 	// Reduce spell hit chance for dispel mechanic spells from victim SPELL_AURA_MOD_DISPEL_RESIST
-	if (IsDispelSpell(spell))
+	if (IsDispelSpell(spell) || IsSpellHaveEffect(spell, SPELL_EFFECT_STEAL_BENEFICIAL_BUFF))
 		modHitChance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_DISPEL_RESIST);
 	// Chance resist mechanic (select max value from every mechanic spell effect)
 	int32 resist_mech = 0;
@@ -2911,17 +2911,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 
 	// All positive spells can`t miss
 	// TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-	bool dispelPositive = true;
-	for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
-	{
-		if (spell->Effect[i] == SPELL_EFFECT_DISPEL && IsHostileTo(pVictim))
-		{
-			dispelPositive = false;
-			break;
-		}
-	}
-
-	if (IsPositiveSpell(spell->Id) && dispelPositive)
+	if (IsPositiveSpell(spell->Id) && !(IsSpellHaveEffect(spell, SPELL_EFFECT_DISPEL) && IsHostileTo(pVictim)))
 		return SPELL_MISS_NONE;
 
 	// Check for immune (use charges)
