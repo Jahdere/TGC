@@ -435,7 +435,7 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 		return;
 
 	// not when pnj hit another pnj non in combat with a SPELL_ATTR_EX_NO_THREAT 
-	if(pThreatSpell && pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && !pVictim->isInCombat() &&  getOwner()->GetTypeId() == TYPEID_UNIT && pVictim->GetTypeId() == TYPEID_UNIT)
+	if(pThreatSpell && pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && getOwner()->GetTypeId() == TYPEID_UNIT && pVictim->GetTypeId() == TYPEID_UNIT)
 		return;
 
 	MANGOS_ASSERT(getOwner()->GetTypeId() == TYPEID_UNIT);
