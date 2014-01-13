@@ -434,20 +434,52 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 	if (!pVictim->isAlive() || !getOwner()->isAlive())
 		return;
 
+	// not when pnj hit another pnj non in combat with a SPELL_ATTR_EX_NO_THREAT 
+	if(pThreatSpell && pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && !pVictim->isInCombat() &&  getOwner()->GetTypeId() == TYPEID_UNIT && pVictim->GetTypeId() == TYPEID_UNIT)
+		return;
+
 	MANGOS_ASSERT(getOwner()->GetTypeId() == TYPEID_UNIT);
 
 	float threat = ThreatCalcHelper::CalcThreat(pVictim, iOwner, pThreat, crit, schoolMask, pThreatSpell);
 
 	if (threat > 0.0f)
 	{
-		if (Unit* redirectedTarget = pVictim->getHostileRefManager().GetThreatRedirectionTarget())
+		bool canAddThreat = true;
+		// check if it is between twho unit (except pet)
+		if(pVictim->GetTypeId() == TYPEID_UNIT && getOwner()->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet())
 		{
-			if (redirectedTarget != getOwner() && redirectedTarget->isAlive())
+
+			canAddThreat = false;
+			if(pThreatSpell)
 			{
-				addThreatDirectly(redirectedTarget, threat);
-				threat = 0;                                 // but still need add to threat list
+				// Only threat on fire totem
+				if(((Creature*)pVictim)->IsTotem() && schoolMask == SPELL_SCHOOL_MASK_FIRE)
+					canAddThreat = true;
+
+				// Only threat on spell threat effect
+				for(int i = 0; i < MAX_EFFECT_INDEX; i++)
+				{
+					if(pThreatSpell->Effect[i] == SPELL_EFFECT_THREAT || pThreatSpell->Effect[i] == SPELL_EFFECT_THREAT_ALL)
+					{
+						canAddThreat = true;
+						break;
+					}
+				}
 			}
 		}
+
+		if(canAddThreat)
+		{
+			if (Unit* redirectedTarget = pVictim->getHostileRefManager().GetThreatRedirectionTarget())
+			{
+				if (redirectedTarget != getOwner() && redirectedTarget->isAlive())
+				{
+					addThreatDirectly(redirectedTarget, threat);
+					threat = 0;                                 // but still need add to threat list
+				}
+			}
+		}else
+			threat = 0.0f;
 	}
 
 	addThreatDirectly(pVictim, threat);
