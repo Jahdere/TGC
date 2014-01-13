@@ -229,8 +229,11 @@ void hyjalAI::JustReachedHome()
 	if (m_uiBase == BASE_ALLY)
 		DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
 
+	if(m_bIsRetreating)
+		DoCastSpellIfCan(m_creature, SPELL_MASS_TELEPORT);
+
 	m_bIsFirstBossDead = m_uiBase ? m_pInstance->GetData(TYPE_KAZROGAL) == DONE : m_pInstance->GetData(TYPE_WINTERCHILL) == DONE;
-	m_bIsSecondBossDead = m_uiBase ? m_pInstance->GetData(TYPE_AZGALOR) == DONE : m_pInstance->GetData(TYPE_ANETHERON) == DONE;
+	m_bIsSecondBossDead = m_uiBase ? m_pInstance->GetData(TYPE_AZGALOR) == DONE : m_pInstance->GetData(TYPE_ANETHERON) == DONE;	
 }
 
 void hyjalAI::Aggro(Unit* /*who*/)
@@ -663,7 +666,7 @@ void hyjalAI::Retreat()
 	if (m_pInstance)
 		m_pInstance->SetData(TYPE_RETREAT, SPECIAL);
 
-	DoCastSpellIfCan(m_creature, SPELL_MASS_TELEPORT);
+	m_creature->GetMotionMaster()->MoveTargetedHome();
 
 	m_bIsRetreating = true;
 }
