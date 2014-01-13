@@ -976,7 +976,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		{
 			// can cause back attack (if detected)
 			if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
-				m_caster->isVisibleForOrDetect(unit, unit, false))
+				m_caster->isVisibleForOrDetect(unit, unit, false) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 			{
 				if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
 					((Creature*)unit)->AI()->AttackedBy(real_caster);
@@ -1186,7 +1186,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 
 			// can cause back attack (if detected), stealth removed at Spell::cast if spell break it
 			if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
-				m_caster->isVisibleForOrDetect(unit, unit, false))
+				m_caster->isVisibleForOrDetect(unit, unit, false) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 			{
 				// use speedup check to avoid re-remove after above lines
 				if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
@@ -1223,7 +1223,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 			if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
 				realCaster->SetContestedPvP();
 
-			if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+			if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 			{
 				realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
 				unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
@@ -4087,7 +4087,7 @@ void Spell::HandleThreatSpells()
 		// for negative spells threat gets distributed among affected targets
 		else
 		{
-			if (!target->CanHaveThreatList())
+			if (!target->CanHaveThreatList() || !CanAddThreat())
 				continue;
 
 			target->AddThreat(m_caster, threat, false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);
