@@ -2837,6 +2837,17 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 	else
 		modHitChance = 94 - (leveldif - 2) * lchance;
 
+	// unit spell resistances calculation
+	if(pVictim->GetTypeId() == TYPEID_PLAYER)
+	{
+		SpellSchools school = GetFirstSchoolInMask(schoolMask);
+		int32 unitResistanceMod = int32((float(pVictim->GetResistance(school)) / (float(getLevel()) * 5.0f)) * 75.0f);
+		// Max is 75%
+		if(unitResistanceMod > 75)
+			unitResistanceMod = 75;
+		modHitChance -= unitResistanceMod;
+	}
+
 	// Spellmod from SPELLMOD_RESIST_MISS_CHANCE
 	if (Player* modOwner = GetSpellModOwner())
 		modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
@@ -6927,7 +6938,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 		return;
 
 	if (PvP)
-		m_CombatTimer = 6000;
+		m_CombatTimer = 5500;
 
 	bool creatureNotInCombat = GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
