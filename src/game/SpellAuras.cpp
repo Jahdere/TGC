@@ -1959,7 +1959,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 						// max duration is 2 minutes, but expected to be random duration
 						// real time randomness is unclear, using max 30 seconds here
 						// see further down for expire of this aura
-						GetHolder()->SetAuraDuration(urand(4, 30)*IN_MILLISECONDS);
+						GetHolder()->SetAuraDuration(urand(2, 10)*IN_MILLISECONDS);
 						return;
 					}
 				case 33326:                             // Stolen Soul Dispel
