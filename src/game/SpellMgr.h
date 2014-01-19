@@ -97,6 +97,25 @@ inline bool IsSpellHaveEffect(SpellEntry const* spellInfo, SpellEffects effect)
     return false;
 }
 
+// damage spells are only binary if they have an additional non-damage effect (frost bolt is an exception)
+inline bool IsSpellBinary(SpellEntry const* spellInfo, Unit const* caster)
+{
+	if(spellInfo->SchoolMask == SPELL_SCHOOL_MASK_NORMAL)
+		return false;
+
+	// Case frostbolt exception on 2.4.3
+	if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000180020))
+		return false;
+	
+	// Generic case
+	for(int i = 0 ; i < MAX_EFFECT_INDEX ; i ++)
+		if(spellInfo->Effect[i] != SPELL_EFFECT_NONE && spellInfo->Effect[i] != SPELL_EFFECT_SCHOOL_DAMAGE &&
+			spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE && spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE_PERCENT && spellInfo->EffectApplyAuraName[i] != SPELL_AURA_DUMMY)
+			return true;
+
+	return false;
+}
+
 inline bool IsAuraApplyEffect(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
 {
     switch (spellInfo->Effect[effecIdx])

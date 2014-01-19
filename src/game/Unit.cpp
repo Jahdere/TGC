@@ -2246,6 +2246,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType)
 {
 	bool blocked = false;
+	bool spellBinary = false;
 	// Get blocked status
 	switch (spellProto->DmgClass)
 	{
@@ -2253,6 +2254,11 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 	case SPELL_DAMAGE_CLASS_RANGED:
 	case SPELL_DAMAGE_CLASS_MELEE:
 		blocked = IsSpellBlocked(pCaster, spellProto, attType);
+		break;
+	case SPELL_DAMAGE_CLASS_NONE:
+	case SPELL_DAMAGE_CLASS_MAGIC:		
+		if(IsSpellBinary(spellProto, this))
+			spellBinary = true;
 		break;
 	default:
 		break;
@@ -2266,7 +2272,8 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 		damageInfo->damage -= damageInfo->blocked;
 	}
 
-	CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+	if(!spellBinary)
+		CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
 	damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
 }
 
@@ -2837,17 +2844,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 	else
 		modHitChance = 94 - (leveldif - 2) * lchance;
 
-	// unit spell resistances calculation
-	if(pVictim->GetTypeId() == TYPEID_PLAYER)
-	{
-		SpellSchools school = GetFirstSchoolInMask(schoolMask);
-		int32 unitResistanceMod = int32((float(pVictim->GetResistance(school)) / (float(getLevel()) * 5.0f)) * 75.0f);
-		// Max is 75%
-		if(unitResistanceMod > 75)
-			unitResistanceMod = 75;
-		modHitChance -= unitResistanceMod;
-	}
-
 	// Spellmod from SPELLMOD_RESIST_MISS_CHANCE
 	if (Player* modOwner = GetSpellModOwner())
 		modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
@@ -2897,6 +2893,25 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
 	if (rand < tmp)
 		return SPELL_MISS_RESIST;
+
+	// unit spell resistances calculation for binary spell
+	if(IsSpellBinary(spell, this))
+	{
+		SpellSchools school = GetFirstSchoolInMask(schoolMask);
+		if(pVictim->GetResistance(school))
+		{
+			int32 ModResistanceHitChance = int32((float(pVictim->GetResistance(school)) / (float(getLevel()) * 5.0f)) * 75.0f);
+			// Max is 75%
+			if(ModResistanceHitChance > 75)
+				ModResistanceHitChance = 75;
+			int32 ResistanceHitChance = ModResistanceHitChance * 100;
+			int32 randResistance = irand(0, 10000);
+			sLog.outError("********** ResistanceHitChance %u ********" , ResistanceHitChance);
+			sLog.outError("********** randResistance %u ********" , randResistance);
+			if (randResistance < ResistanceHitChance)				
+				return SPELL_MISS_RESIST;
+		}
+	}
 
 	return SPELL_MISS_NONE;
 }
@@ -6321,9 +6336,11 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
 
 	// apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
 	DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
-
+	sLog.outError("******** DONE HEAL TOTAL AFTER COEF : %u *********", DoneTotal);
+	sLog.outError("******** STACK : %u *********", stack);
 	// use float as more appropriate for negative values and percent applying
 	float heal = (healamount + DoneTotal * int32(stack)) * DoneTotalMod;
+	sLog.outError("******** DONE HEAL TOTAL AFTER STACK : %f *********", heal);
 	// apply spellmod to Done amount
 	if (Player* modOwner = GetSpellModOwner())
 		modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
