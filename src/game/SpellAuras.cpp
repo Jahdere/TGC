@@ -1957,9 +1957,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 				case 32052:
 					{
 						// max duration is 2 minutes, but expected to be random duration
-						// real time randomness is unclear, using max 30 seconds here
+						// real time randomness is unclear, using max 5 seconds here
 						// see further down for expire of this aura
-						GetHolder()->SetAuraDuration(urand(2, 10)*IN_MILLISECONDS);
+						GetHolder()->SetAuraDuration(urand(1, 5)*IN_MILLISECONDS);
 						return;
 					}
 				case 33326:                             // Stolen Soul Dispel
@@ -6082,7 +6082,8 @@ void Aura::PeriodicTick()
 			if (target->GetTypeId() == TYPEID_PLAYER)
 				pdamage -= ((Player*)target)->GetDotDamageReduction(pdamage);
 
-			target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+			if(!IsSpellBinary(spellProto, pCaster))
+				target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
 
 			DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
 				GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
