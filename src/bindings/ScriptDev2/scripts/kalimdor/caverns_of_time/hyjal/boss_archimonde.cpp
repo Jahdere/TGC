@@ -32,9 +32,10 @@ enum
 	SAY_DOOMFIRE2               = -1534021,
 	SAY_AIR_BURST1              = -1534022,
 	SAY_AIR_BURST2              = -1534023,
+	/*
 	SAY_SLAY1                   = -1534024,
 	SAY_SLAY2                   = -1534025,
-	SAY_SLAY3                   = -1534026,
+	SAY_SLAY3                   = -1534026,*/
 	SAY_ENRAGE                  = -1534027,
 	SAY_EPILOGUE                = -1534028,
 	SAY_SOUL_CHARGE1            = -1534029,
@@ -51,9 +52,12 @@ enum
 	SPELL_AIR_BURST             = 32014,
 	SPELL_GRIP_OF_THE_LEGION    = 31972,
 	SPELL_DOOMFIRE_STRIKE       = 31903,                    // summons 18095 and 18104
-	SPELL_SOUL_CHARGE_YELLOW    = 32045,                    // procs 32054
+	/*SPELL_SOUL_CHARGE_YELLOW    = 32045,                    // procs 32054
 	SPELL_SOUL_CHARGE_GREEN     = 32051,                    // procs 32057
 	SPELL_SOUL_CHARGE_RED       = 32052,                    // procs 32053
+	SPELL_SOUL_CHARGE_GREEN_CAST = 32057,
+	SPELL_SOUL_CHARGE_RED_CAST	= 32053,
+	SPELL_SOUL_CHARGE_YELLOW_CAST = 32054,*/
 	SPELL_FEAR                  = 31970,
 
 	SPELL_PROTECTION_OF_ELUNE   = 38528,                    // protect the players on epilogue
@@ -112,12 +116,12 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 	void Reset() override
 	{
-		m_uiDrainNordrassilTimer = 10000;
+		m_uiDrainNordrassilTimer = 5000;
 		m_uiFearTimer            = 40000;
-		m_uiAirBurstTimer        = 30000;
-		m_uiGripOfTheLegionTimer = urand(5000, 25000);
+		m_uiAirBurstTimer        = 20000;
+		m_uiGripOfTheLegionTimer = 5000;
 		m_uiDoomfireTimer        = 15000;
-		m_uiFingerOfDeathTimer   = 15000;
+		m_uiFingerOfDeathTimer   = 0;
 		m_uiWispCount            = 0;
 		m_uiCheckRangeTimer		 = 5000;
 		m_uiEnrageTimer          = 10 * MINUTE * IN_MILLISECONDS;
@@ -143,38 +147,6 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		}
 
 		ScriptedAI::MoveInLineOfSight(pWho);
-	}
-
-	void KilledUnit(Unit* pVictim) override
-	{
-		if (pVictim->GetTypeId() != TYPEID_PLAYER)
-			return;
-
-		switch (urand(0, 2))
-		{
-		case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-		case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-		case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-		}
-
-		switch (pVictim->getClass())
-		{
-		case CLASS_PRIEST:
-		case CLASS_PALADIN:
-		case CLASS_WARLOCK:
-			pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_RED, true);
-			break;
-		case CLASS_MAGE:
-		case CLASS_ROGUE:
-		case CLASS_WARRIOR:
-			pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_YELLOW, true);
-			break;
-		case CLASS_DRUID:
-		case CLASS_SHAMAN:
-		case CLASS_HUNTER:
-			pVictim->CastSpell(m_creature, SPELL_SOUL_CHARGE_GREEN, true);
-			break;
-		}
 	}
 
 	void JustReachedHome() override
@@ -222,7 +194,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 		if (pTarget)
 		{
-			if (!m_creature->IsWithinDistInMap(pTarget, ATTACK_DISTANCE))
+			if (!m_creature->IsWithinDistInMap(pTarget, 10.0f))
 			{
 				std::vector<Unit*> suitableTargets;
 				ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
@@ -230,14 +202,14 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				{
 					if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
 					{
-						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pTarget, ATTACK_DISTANCE))
+						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pNewTarget, ATTACK_DISTANCE))
 						{
 							AttackStart(pNewTarget);
 							return true;
 						}                                        
 					}
 				}
-			}                
+			}
 		}
 
 		// Will call EnterEvadeMode if fit
@@ -326,7 +298,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 			{
 				if (DoCastSpellIfCan(pTarget, SPELL_GRIP_OF_THE_LEGION) == CAST_OK)
-					m_uiGripOfTheLegionTimer = urand(5000, 15000);
+					m_uiGripOfTheLegionTimer = urand(5000, 10000);
 			}
 		}
 		else
@@ -339,7 +311,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				if (DoCastSpellIfCan(pTarget, SPELL_AIR_BURST) == CAST_OK)
 				{
 					DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
-					m_uiAirBurstTimer = urand(20000, 30000);
+					m_uiAirBurstTimer = urand(10000, 20000);
 				}
 			}
 		}
@@ -357,7 +329,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			{
 				if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
 				{
-					if (pTarget->GetTypeId() == TYPEID_PLAYER && (pTarget->GetPositionZ() - m_creature->GetMap()->GetHeight(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ()) > 0.1f ))
+					if (pTarget->GetTypeId() == TYPEID_PLAYER && (pTarget->GetPositionZ() - m_creature->GetMap()->GetHeight(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ()) > 0.5f ))
 					{
 						m_bCanFear = false;
 						break;
@@ -370,7 +342,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			{
 				if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
 				{
-					m_uiFearTimer = 40000;
+					m_uiFearTimer = urand(40000, 50000);
 					m_uiCheckRangeTimer = 3000;
 				}
 			}else
@@ -385,7 +357,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			if (DoCastSpellIfCan(m_creature, SPELL_DOOMFIRE_STRIKE) == CAST_OK)
 			{
 				DoScriptText(urand(0, 1) ? SAY_DOOMFIRE1 : SAY_DOOMFIRE2, m_creature);
-				m_uiDoomfireTimer = urand(8000, 10000);
+				m_uiDoomfireTimer = urand(7000, 11000);
 			}
 		}
 		else
@@ -397,10 +369,9 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			{
 				if (!m_creature->IsNonMeleeSpellCasted(false))
 					if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FINGER_DEATH, SELECT_FLAG_PLAYER))
-						if(DoCastSpellIfCan(pTarget, SPELL_FINGER_DEATH) == CAST_OK)
-							m_uiCheckRangeTimer = 1000;
-			}else
-				m_uiCheckRangeTimer = 3000;
+						DoCastSpellIfCan(pTarget, SPELL_FINGER_DEATH);
+			}
+			m_uiCheckRangeTimer = 3500;
 		}else
 			m_uiCheckRangeTimer -= uiDiff;
 
@@ -411,12 +382,18 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 /* This is the script for the Doomfire Spirit Mob. This mob controls the doomfire npc and allows it to move randomly around the map. */
 struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 {
-	npc_doomfire_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+	npc_doomfire_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) { 
+		Reset(); 
+	}
 
 	ObjectGuid m_doomfireGuid;
 
 	uint32 m_uiDoomfireLoadTimer;
 	uint32 m_uiChangeTargetTimer;
+	int32 m_uiRandTarget;
+	Unit* pTargetFollow;
+
+	float pDistance;
 	float m_fAngle;
 
 	void Reset() override
@@ -424,6 +401,7 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 		m_uiDoomfireLoadTimer = 1000;
 		m_uiChangeTargetTimer = 1500;
 		m_fAngle              = urand(0, M_PI_F * 2);
+		pTargetFollow		  = NULL;
 	}
 
 	void UpdateAI(const uint32 uiDiff) override
@@ -447,9 +425,40 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 		{
 			if (Creature* pDoomfire = m_creature->GetMap()->GetCreature(m_doomfireGuid))
 			{
-				float fX, fY, fZ;
-				pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, 30.0f, m_fAngle + frand(0, M_PI_F * .5));
-				pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+				m_uiRandTarget = urand(0, 1);
+				if(m_uiRandTarget)
+				{
+					Map::PlayerList const& lPlayers = pDoomfire->GetMap()->GetPlayers();
+					if (!lPlayers.isEmpty())
+					{
+						for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+						{
+							if(Player* pPlayer = itr->getSource())
+							{
+								if(pPlayer->isAlive() && pDoomfire->HasInArc(float(M_PI), pPlayer))
+								{
+									pTargetFollow = pPlayer;
+									break;
+								}
+							}
+						}
+					}
+
+					if(pTargetFollow)
+						pDoomfire->GetMotionMaster()->MoveFollow(pTargetFollow, 0.0f, 0.0f);
+					else
+					{
+						float fX, fY, fZ;
+						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, 30.0f, m_fAngle + frand(0, M_PI_F * .5));
+						pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+					}
+				}
+				else
+				{
+					float fX, fY, fZ;
+					pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, 30.0f, m_fAngle + frand(0, M_PI_F * .5));
+					pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+				}
 			}
 
 			m_uiChangeTargetTimer = 4000;

@@ -18,6 +18,7 @@ enum
 	TYPE_TRASH_COUNT            = 5,
 	TYPE_RETREAT                = 6,
 	TYPE_SPAWN_GO				= 7,
+	TYPE_START_EVENT			= 8,
 
 	WORLD_STATE_WAVES           = 2842,
 	WORLD_STATE_ENEMY           = 2453,
@@ -72,6 +73,16 @@ enum
 	GO_ROARING_FIRE				= 182592,
 	GO_DOOR_ARCHIMONDE			= 182061,
 	GO_DOOR_THRALL				= 182060,
+
+	// Archimonde Spell And Sript Text
+	SPELL_SOUL_CHARGE_YELLOW    = 32045,
+	SPELL_SOUL_CHARGE_GREEN     = 32051,
+	SPELL_SOUL_CHARGE_RED       = 32052,
+	SAY_SLAY1                   = -1534024,
+	SAY_SLAY2                   = -1534025,
+	SAY_SLAY3                   = -1534026,
+
+
 };
 
 static const float aArchimondeSpawnLoc[4] = {5581.49f, -3445.63f, 1575.1f, 3.905f};
@@ -87,13 +98,14 @@ public:
 	bool IsEncounterInProgress() const override;
 
 	void OnPlayerEnter(Player* pPlayer) override;
+	void OnPlayerDeath(Player* pPlayer) override;
 
 	void OnCreatureCreate(Creature* pCreature) override;
 	void OnObjectCreate(GameObject* pGo) override;
 
 	void OnCreatureEnterCombat(Creature* pCreature) override;
 	void OnCreatureEvade(Creature* pCreature);
-	void OnCreatureDeath(Creature* pCreature) override;
+	void OnCreatureDeath(Creature* pCreature) override;	
 
 	void SetData(uint32 uiType, uint32 uiData) override;
 	uint32 GetData(uint32 uiType) const override;
@@ -101,7 +113,7 @@ public:
 	const char* Save() const override { return m_strSaveData.c_str(); }
 	void Load(const char* chrIn) override;
 
-	void DoSpawnGards();
+	void DoSpawnGards(bool isWave = false);
 	void DoRetreatGards();
 
 private:

@@ -401,7 +401,7 @@ void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, u
 	case POINT_ID_ALLY1:	// Go next step
 	case POINT_ID_ALLY2:	// Go Jaina
 		pMove = &aHyjalWaveMoveTo[uiPointId];
-		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);
+		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 2.0f, fX, fY, fZ);		
 		pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint, fX, fY, fZ);
 		break;
 	case POINT_ID_HORDE1:	// Go next step
@@ -415,8 +415,10 @@ void hyjalAI::SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, u
 	case POINT_ID_HORDE_FLY_BACK1:	// Go Thrall
 	case POINT_ID_HORDE2:		
 		if((pSummoned->GetEntry() == NPC_FROST || pSummoned->GetEntry() == NPC_GARGO) && m_bIsSecondBossDead)
+		{
 			pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 80.0f);
-		break;
+			break;
+		}
 		pMove = &aHyjalWaveMoveTo[6];
 		pSummoned->GetRandomPoint(pMove->m_fX, pMove->m_fY, pMove->m_fZ, 10.0f, fX, fY, fZ);
 		pSummoned->GetMotionMaster()->MovePoint(pMove->m_movePoint,fX, fY, fZ);
@@ -556,6 +558,8 @@ void hyjalAI::StartEvent()
 	m_pInstance->DoUpdateWorldState(WORLD_STATE_WAVES, 0);
 	m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMY, 0);
 	m_pInstance->DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, 0);
+
+	m_pInstance->SetData(TYPE_START_EVENT, 0);
 
 	m_creature->SetActiveObjectState(true);
 }

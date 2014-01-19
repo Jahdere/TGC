@@ -58,6 +58,41 @@ void instance_mount_hyjal::OnPlayerEnter(Player* /*pPlayer*/)
 		DoSpawnArchimonde();
 }
 
+void instance_mount_hyjal::OnPlayerDeath(Player* pPlayer)
+{
+	if(GetData(TYPE_ARCHIMONDE) == IN_PROGRESS)
+	{
+		if(Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARCHIMONDE))
+		{
+			switch (urand(0, 2))
+			{
+			case 0: DoScriptText(SAY_SLAY1, pCreature); break;
+			case 1: DoScriptText(SAY_SLAY2, pCreature); break;
+			case 2: DoScriptText(SAY_SLAY3, pCreature); break;
+			}
+
+			switch (pPlayer->getClass())
+			{
+			case CLASS_PRIEST:
+			case CLASS_PALADIN:
+			case CLASS_WARLOCK:
+				pPlayer->CastSpell(pCreature, SPELL_SOUL_CHARGE_RED, true);
+				break;
+			case CLASS_MAGE:
+			case CLASS_ROGUE:
+			case CLASS_WARRIOR:
+				pPlayer->CastSpell(pCreature, SPELL_SOUL_CHARGE_YELLOW, true);
+				break;
+			case CLASS_DRUID:
+			case CLASS_SHAMAN:
+			case CLASS_HUNTER:
+				pPlayer->CastSpell(pCreature, SPELL_SOUL_CHARGE_GREEN, true);
+				break;
+			}
+		}
+	}
+}
+
 void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 {
 	switch(pCreature->GetEntry())
@@ -239,12 +274,11 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* pCreature)
 {
 	switch (pCreature->GetEntry())
 	{
-	case NPC_WINTERCHILL: SetData(TYPE_WINTERCHILL, DONE); break;
-	case NPC_ANETHERON:   SetData(TYPE_ANETHERON, DONE);   break;
-	case NPC_KAZROGAL:    SetData(TYPE_KAZROGAL, DONE);    break;
-	case NPC_AZGALOR:     SetData(TYPE_AZGALOR, DONE);     break;
-	case NPC_ARCHIMONDE:  SetData(TYPE_ARCHIMONDE, DONE);  break;
-
+	case NPC_WINTERCHILL: SetData(TYPE_WINTERCHILL, DONE);	break;
+	case NPC_ANETHERON:		SetData(TYPE_ANETHERON, DONE);	break;
+	case NPC_KAZROGAL:		SetData(TYPE_KAZROGAL, DONE);	break;
+	case NPC_AZGALOR:		SetData(TYPE_AZGALOR, DONE);	break;
+	case NPC_ARCHIMONDE:	SetData(TYPE_ARCHIMONDE, DONE); break;
 		// Trash Mobs summoned in waves
 	case NPC_NECRO:
 	case NPC_ABOMI:
@@ -306,6 +340,11 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
 	case TYPE_TRASH_COUNT:
 		m_uiTrashCount = uiData;
 		DoUpdateWorldState(WORLD_STATE_ENEMYCOUNT, m_uiTrashCount);
+		DoSpawnGards(true);
+		break;
+
+	case TYPE_START_EVENT:
+		DoSpawnGards();
 		break;
 
 	case TYPE_RETREAT:
@@ -396,10 +435,10 @@ void instance_mount_hyjal::DoSpawnArchimonde()
 }
 
 
-// Will be use in the future
-void instance_mount_hyjal::DoSpawnGards()
+// Only Spawn Grunt or Footman during waves , else spawn all guards when a boss die for the next event
+void instance_mount_hyjal::DoSpawnGards(bool isWave)
 {
-	if(GetData(TYPE_AZGALOR) != DONE)
+	if(GetData(TYPE_ANETHERON) != DONE)
 	{
 		if (!lGardsAllyGUIDList.empty())
 		{
@@ -407,10 +446,11 @@ void instance_mount_hyjal::DoSpawnGards()
 			{
 				if(Creature* pTempGard = instance->GetCreature(*itr))
 				{
-					if(!pTempGard->isAlive())
-						pTempGard->SetDeathState(ALIVE);
-					if(!pTempGard->IsDespawned())
-						pTempGard->Respawn();
+					if(!isWave || (isWave && pTempGard->GetEntry() == NPC_FOOTMAN))
+					{
+						if(!pTempGard->isAlive() || !pTempGard->IsDespawned())
+							pTempGard->Respawn();
+					}
 				}
 			}
 		}
@@ -423,10 +463,11 @@ void instance_mount_hyjal::DoSpawnGards()
 			{
 				if(Creature* pTempGard = instance->GetCreature(*itr))
 				{
-					if(!pTempGard->isAlive())
-						pTempGard->SetDeathState(ALIVE);
-					if(!pTempGard->IsDespawned())
-						pTempGard->Respawn();
+					if(!isWave || (isWave && pTempGard->GetEntry() == NPC_GRUNT))
+					{
+						if(!pTempGard->isAlive() || !pTempGard->IsDespawned())
+							pTempGard->Respawn();
+					}
 				}
 			}
 		}
@@ -445,9 +486,7 @@ void instance_mount_hyjal::DoRetreatGards()
 			{
 				if(Creature* pTempGard = instance->GetCreature(*itr))
 				{
-					if(!pTempGard->isAlive())
-						pTempGard->SetDeathState(ALIVE);
-					if(!pTempGard->IsDespawned())
+					if(!pTempGard->isAlive() || !pTempGard->IsDespawned())
 						pTempGard->Respawn();
 					pTempGard->GetRandomPoint(5083.910f, -1789.040f, 1322.569f, 3.0f, fX, fY, fZ);
 					pTempGard->SetWalk(false);
@@ -463,9 +502,7 @@ void instance_mount_hyjal::DoRetreatGards()
 			{
 				if(Creature* pTempGard = instance->GetCreature(*itr))
 				{
-					if(!pTempGard->isAlive())
-						pTempGard->SetDeathState(ALIVE);
-					if(!pTempGard->IsDespawned())
+					if(!pTempGard->isAlive() || !pTempGard->IsDespawned())
 						pTempGard->Respawn();
 					pTempGard->GetRandomPoint(5449.970f, -2723.770f, 1485.670f, 3.0f, fX, fY, fZ);
 					pTempGard->SetWalk(false);
