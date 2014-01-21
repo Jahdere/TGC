@@ -177,6 +177,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		}
 		else if (pSummoned->GetEntry() == NPC_DOOMFIRE)
 		{
+			pSummoned->SetWalk(false);
 			pSummoned->setFaction(m_creature->getFaction());
 			pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE_SPAWN, true);
 			pSummoned->CastSpell(pSummoned, SPELL_DOOMFIRE, true, NULL, NULL, m_creature->GetObjectGuid());
@@ -343,7 +344,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
 				{
 					m_uiFearTimer = urand(40000, 50000);
-					m_uiCheckRangeTimer = 3000;
+					m_uiCheckRangeTimer = 5000;
 				}
 			}else
 				m_uiFearTimer = 1000;
@@ -357,7 +358,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 			if (DoCastSpellIfCan(m_creature, SPELL_DOOMFIRE_STRIKE) == CAST_OK)
 			{
 				DoScriptText(urand(0, 1) ? SAY_DOOMFIRE1 : SAY_DOOMFIRE2, m_creature);
-				m_uiDoomfireTimer = urand(7000, 11000);
+				m_uiDoomfireTimer = urand(8000, 12000);
 			}
 		}
 		else
@@ -365,7 +366,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 		if(m_uiCheckRangeTimer < uiDiff)
 		{
-			if (!m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
+			if (!m_creature->IsWithinDistInMap(m_creature->getVictim(), 10.0f))
 			{
 				if (!m_creature->IsNonMeleeSpellCasted(false))
 					if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FINGER_DEATH, SELECT_FLAG_PLAYER))
@@ -390,18 +391,21 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 
 	uint32 m_uiDoomfireLoadTimer;
 	uint32 m_uiChangeTargetTimer;
+	uint32 m_uiDespawnTimer;
 	int32 m_uiRandTarget;
 	Unit* pTargetFollow;
 
-	float pDistance;
 	float m_fAngle;
+	float m_fDistance;
 
 	void Reset() override
 	{
 		m_uiDoomfireLoadTimer = 1000;
 		m_uiChangeTargetTimer = 1500;
 		m_fAngle              = urand(0, M_PI_F * 2);
+		m_fDistance			  = 30.0f;
 		pTargetFollow		  = NULL;
+		m_uiDespawnTimer	  = 28000;
 	}
 
 	void UpdateAI(const uint32 uiDiff) override
@@ -412,7 +416,10 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 			{
 				// Get the closest doomfire
 				if (Creature* pTemp = GetClosestCreatureWithEntry(m_creature, NPC_DOOMFIRE, 5.0f))
+				{
 					m_doomfireGuid = pTemp->GetObjectGuid();
+					pTemp->SetFacingTo(m_fAngle);
+				}
 
 				m_uiDoomfireLoadTimer = 0;
 			}
@@ -425,7 +432,13 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 		{
 			if (Creature* pDoomfire = m_creature->GetMap()->GetCreature(m_doomfireGuid))
 			{
-				m_uiRandTarget = urand(0, 1);
+				if(pTargetFollow)
+				{
+					m_fAngle = pDoomfire->GetOrientation();
+					pTargetFollow = NULL;
+				}
+
+				m_uiRandTarget = urand(0, 2);
 				if(m_uiRandTarget)
 				{
 					Map::PlayerList const& lPlayers = pDoomfire->GetMap()->GetPlayers();
@@ -435,7 +448,7 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 						{
 							if(Player* pPlayer = itr->getSource())
 							{
-								if(pPlayer->isAlive() && pDoomfire->HasInArc(float(M_PI), pPlayer))
+								if(pPlayer->isAlive() && pDoomfire->GetDistance(pPlayer) <= m_fDistance && pDoomfire->HasInArc(float(M_PI_F * 0.75), pPlayer))
 								{
 									pTargetFollow = pPlayer;
 									break;
@@ -449,14 +462,14 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 					else
 					{
 						float fX, fY, fZ;
-						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, 30.0f, m_fAngle + frand(0, M_PI_F * .5));
+						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));
 						pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
 					}
 				}
 				else
 				{
 					float fX, fY, fZ;
-					pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, 30.0f, m_fAngle + frand(0, M_PI_F * .5));
+					pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));
 					pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
 				}
 			}
@@ -465,6 +478,16 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 		}
 		else
 			m_uiChangeTargetTimer -= uiDiff;
+
+		if(m_uiDespawnTimer < uiDiff)
+		{
+			if (Creature* pDoomfire = m_creature->GetMap()->GetCreature(m_doomfireGuid))
+			{
+				pDoomfire->ForcedDespawn();
+				m_creature->ForcedDespawn();
+			}
+		}else
+			m_uiDespawnTimer -= uiDiff;
 	}
 };
 
