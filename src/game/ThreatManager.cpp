@@ -38,8 +38,9 @@ float ThreatCalcHelper::CalcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 
 	if (pThreatSpell)
 	{
-		// Keep exception to calculate the real threat for SPELL_AURA_MOD_TOTAL_THREAT @Kordbc
-		bool ExceptNoThreat = false;
+		// Keep exception to calculate the real threat @Kordbc
+		bool ExceptNoThreat = false;	// SPELL_AURA_MOD_TOTAL_THREAT
+		bool PeriodicEnergize = false;	// SPELL_AURA_PERIODIC_ENERGIZE
 		for(int i = 0; i < MAX_EFFECT_INDEX; i++)
 		{
 			if(pThreatSpell->EffectApplyAuraName[i] == SPELL_AURA_MOD_TOTAL_THREAT && pThreatSpell->EffectBasePoints[i] < 0)
@@ -47,11 +48,17 @@ float ThreatCalcHelper::CalcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 				ExceptNoThreat = true;
 				break;
 			}
+
+			if(pThreatSpell->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_ENERGIZE)
+				PeriodicEnergize = true;
 		}
 
 		if(!ExceptNoThreat)
 		{
 			if (pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+				return 0.0f;
+
+			if(pHatedUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)pHatedUnit)->IsTotem() && PeriodicEnergize)
 				return 0.0f;
 
 			if (Player* modOwner = pHatedUnit->GetSpellModOwner())
