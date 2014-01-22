@@ -988,35 +988,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		}
 	}
 
-	bool isHot = true;
-	bool isDot = true;
-	/*
-	//Check if is HOT and proc flag on first cast
-	if(real_caster->GetTypeId() == TYPEID_PLAYER)
-	{
-	bool isHot = false;
-	for (int i = 0; i < 3; ++i)
-	{
-	// Periodic Heals
-	if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL)
-	{
-	isHot = true;
-	break;
-	}
-	}
-	//Check if is DOT and proc flag on first cast		
-	for (int i = 0; i < 3; ++i)
-	{
-	// Periodic Dmg
-	if (m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE)
-	{
-	procAttacker = uint32(PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT);
-	isDot = true;
-	break;
-	}
-	}
-	}*/
-
 	// All calculated do it!
 	// Do healing and triggers
 	if (m_healing)
@@ -1114,7 +1085,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		procEx = createProcExtendMask(&damageInfo, missInfo);
 		// Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
 		if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
-			caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo);
+			caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 1, m_attackType, m_spellInfo);
 	}
 
 	// Call scripted function for AI if this spell is casted upon a creature
@@ -1524,8 +1495,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 		targetMode = TARGET_INFRONT_OF_VICTIM;
 
 	// Hack Remove Spine
-	if(m_spellInfo->Id == 39977)
-		targetMode = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;
+	/*if(m_spellInfo->Id == 39977)
+	targetMode = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;*/
 
 	switch (targetMode)
 	{
