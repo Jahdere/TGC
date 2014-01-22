@@ -1,0 +1,22 @@
+src/game/SpellMgr.cpp View file @ 7ca4763
+@@ -1996,6 +1995,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
+          if ((spellInfo_2->SpellFamilyFlags & UI64LIT(0x2)) && spellInfo_1->Id == 23694)
+            return false;
+  
++         // Battle Shout and Rallying Cry
++         if (spellInfo_1->Id == 31732 && spellInfo_2->SpellIconID == 456)
++           return false;
+          break;
+        }
+      case SPELLFAMILY_DRUID:
+@@ -2185,6 +2187,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
+      if (spellInfo_2->Id == 2825 && spellInfo_1->SpellIconID == 38 && spellInfo_1->SpellVisual == 0)
+        return false;
+  
++     // Battle Shout and Rallying Cry
++     if (spellInfo_1->SpellIconID == 456 && spellInfo_2->Id == 31732)
++       return false;
++ 
+      break;
+    case SPELLFAMILY_PRIEST:
+      if (spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST)

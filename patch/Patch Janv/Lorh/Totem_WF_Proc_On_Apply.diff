@@ -1,0 +1,22 @@
+src/game/SpellAuras.cpp View
+ @@ -4440,13 +4440,20 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
+  
+    Unit* target = GetTarget();
+  
+    if (apply)
+    {
+      switch(GetId())
+      {
+        //Totem shaman Effect apply effect when summoned
+-     case 10612:    // WF totem
+-     //case 8167:    // Poison totem
++      // WF totem
++     case 8515:  // Rank 1
++     case 10609: // Rank 2
++     case 10612: // Rank 3  
++     case 25581: // Rank 4
++     case 25582: // Rank 5
++     //case 8167:    // Poison totem
+      case 8145:    // Seisme totem
+      case 6474:    // Earthbind Totem
+        TriggerSpell();

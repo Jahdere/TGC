@@ -1,0 +1,29 @@
+src/game/SpellEffects.cpp View file @ 331a2ef
+@@ -2907,6 +2907,13 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
+      }else{
+        switch(m_spellInfo->Id)
+        {
++        // Holy Strength amount decrease by 4% each level after 60
++       case 20007:
++         {
++            if(GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
++             addhealth = int32(addhealth * (1 - (((float(GetCaster()->getLevel()) - 60) * 4) / 100)));
++           break;
++         }
+          // Bonus T4 p2 Paladin @Kordbc
+        case 20267:
+        case 20341:
+
+src/game/SpellAuras.cpp View file @ 331a2ef
+@@ -4823,6 +4823,11 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
+      return;
+    }
+  
++   // Holy Strength amount decrease by 4% each level after 60
++   if(apply && GetId() == 20007)
++     if(GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
++       m_modifier.m_amount = int32(m_modifier.m_amount * (1 - (((float(GetCaster()->getLevel()) - 60) * 4) / 100)));
++ 
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    {
+      // -1 or -2 is all stats ( misc < -2 checked in function beginning )

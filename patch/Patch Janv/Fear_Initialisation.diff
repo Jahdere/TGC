@@ -1,0 +1,10 @@
+src/game/FleeingMovementGenerator.cpp View file @ 7a77216
+@@ -121,8 +121,6 @@
+  
+      if (owner.GetTypeId() == TYPEID_UNIT)
+          owner.SetTargetGuid(ObjectGuid());
+-
+-     _setTargetLocation(owner);
+  }
+  
+  template<>

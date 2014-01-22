@@ -1,0 +1,15 @@
+src/game/Spell.cpp View file @ 06ffc7d
+@@ -1235,9 +1235,10 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
+    m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell);
+    m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
+    // Increase Diminishing on unit, current informations for actually casts will use values above
+-   if ((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||
+-     GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
+-     unit->IncrDiminishing(m_diminishGroup);
++   if(!(m_caster->GetTypeId() == TYPEID_UNIT && !((Creature*)m_caster)->IsPet() && !((Creature*)m_caster)->IsTotem()))  // Dont apply dimishing effect if it is a creature (exclusion of pet and totem)
++     if ((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER)||
++       GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
++       unit->IncrDiminishing(m_diminishGroup);
+  
+    // Apply additional spell effects to target
+    CastPreCastSpells(unit);

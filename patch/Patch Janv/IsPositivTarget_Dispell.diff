@@ -1,0 +1,17 @@
+src/game/Unit.cpp View file @ a50b186
+@@ -2910,7 +2911,17 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool
+  
+    // All positive spells can`t miss
+    // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
+-   if (IsPositiveSpell(spell->Id))
++   bool dispelPositive = true;
++   for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
++   {
++     if (spell->Effect[i] == SPELL_EFFECT_DISPEL && IsHostileTo(pVictim))
++     {
++       dispelPositive = false;
++       break;
++     }
++   }
++
++   if (IsPositiveSpell(spell->Id) && dispelPositive)

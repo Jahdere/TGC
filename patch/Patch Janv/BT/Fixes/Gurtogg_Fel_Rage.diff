@@ -1,0 +1,23 @@
+src/game/SpellAuras.cpp View file @ 7eef2b2
+@@ -5046,6 +5046,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
+    case 28726:                                         // Nightmare Seed
+    case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
+    case 44055:                                         // Tremendous Fortitude (Battlemaster's Alacrity)
++   case 40604:                      					// Fel Rage( Gurtogg )
+      {
+        if (Real)
+        {
+
+src/game/SpellMgr.cpp View file @ 7eef2b2
+@@ -1962,6 +1962,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
+            (spellInfo_2->Id == 40402  && spellInfo_1->Id == 34585))
+            return false;
+  
++         //Fel rage Gurtogg
++         if ((spellInfo_1->Id == 40604  && spellInfo_2->Id == 40616) ||  
++           (spellInfo_2->Id == 40604  && spellInfo_1->Id == 40616))
++           return false;
++
+          break;
+        }
+      case SPELLFAMILY_MAGE:

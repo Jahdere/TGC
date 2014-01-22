@@ -1,0 +1,10 @@
+src/game/Unit.cpp View file @ 6b0c04e
+@@ -1767,7 +1767,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
+  
+    // If this is a creature and it attacks from behind it has a probability to daze it's victim
+    if ((damageInfo->hitOutCome == MELEE_HIT_CRIT || damageInfo->hitOutCome == MELEE_HIT_CRUSHING || damageInfo->hitOutCome == MELEE_HIT_NORMAL || damageInfo->hitOutCome == MELEE_HIT_GLANCING) &&
+-     GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->GetCharmerOrOwnerGuid() && !pVictim->HasInArc(M_PI_F, this))
++     GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->GetCharmerOrOwnerGuid() && !pVictim->HasInArc(M_PI_F, this) && !(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsWorldBoss()))
+    {
+      // -probability is between 0% and 40%
+      // 20% base chance

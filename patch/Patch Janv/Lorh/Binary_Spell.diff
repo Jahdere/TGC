@@ -1,0 +1,93 @@
+src/game/Unit.cpp View file @ b742b7e
+@@ -2246,6 +2246,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
+  void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType)
+  {
+    bool blocked = false;
++   bool spellBinary = false;
+    // Get blocked status
+    switch (spellProto->DmgClass)
+    {
+@@ -2254,6 +2255,11 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
+    case SPELL_DAMAGE_CLASS_MELEE:
+      blocked = IsSpellBlocked(pCaster, spellProto, attType);
+      break;
++   case SPELL_DAMAGE_CLASS_NONE:
++   case SPELL_DAMAGE_CLASS_MAGIC:    
++     if(IsSpellBinary(spellProto, this))
++       spellBinary = true;
++     break;
+    default:
+      break;
+    }
+@@ -2266,7 +2272,8 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
+      damageInfo->damage -= damageInfo->blocked;
+    }
+  
+-   CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
++   if(!spellBinary)
++     CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+    damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
+  }
+@@ -2898,6 +2894,25 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
+    if (rand < tmp)
+      return SPELL_MISS_RESIST;
+  
++   // unit spell resistances calculation for binary spell
++   if(IsSpellBinary(spell, this))
++   {
++    SpellSchools school = GetFirstSchoolInMask(schoolMask);
++    if(pVictim->GetResistance(school))
++     {
++       int32 ModResistanceHitChance = int32((float(pVictim->GetResistance(school)) / (float(getLevel()) * 5.0f)) * 75.0f);
++       // Max is 75%
++       if(ModResistanceHitChance > 75)
++         ModResistanceHitChance = 75;
++       int32 ResistanceHitChance = ModResistanceHitChance * 100;
++       int32 randResistance = irand(0, 10000);
++       if (randResistance < ResistanceHitChance)        
++         return SPELL_MISS_RESIST;
++     }
++   }
++ 
+    return SPELL_MISS_NONE;
+  }
+
+src/game/SpellAuras.cpp View file @ eb55704
+@@ -6082,7 +6082,8 @@ void Aura::PeriodicTick()
+        if (target->GetTypeId() == TYPEID_PLAYER)
+          pdamage -= ((Player*)target)->GetDotDamageReduction(pdamage);
+  
+-       target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
++       if(!IsSpellBinary(spellProto, pCaster))
++         target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+  
+
+
+
+src/game/SpellMgr.h View file @ b742b7e
+ @@ -97,6 +97,25 @@ inline bool IsSpellHaveEffect(SpellEntry const* spellInfo, SpellEffects effect)
+      return false;
+  }
+  
++ // damage spells are only binary if they have an additional non-damage effect (frost bolt is an exception)
++ inline bool IsSpellBinary(SpellEntry const* spellInfo, Unit const* caster)
++ {
++   if(spellInfo->SchoolMask == SPELL_SCHOOL_MASK_NORMAL)
++     return false;
++
++   // Case frostbolt exception on 2.4.3
++   if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000180020))
++     return false;
++  
++   // Generic case
++   for(int i = 0 ; i < MAX_EFFECT_INDEX ; i ++)
++     if(spellInfo->Effect[i] != SPELL_EFFECT_NONE && spellInfo->Effect[i] != SPELL_EFFECT_SCHOOL_DAMAGE &&
++       spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE && spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE_PERCENT && spellInfo->EffectApplyAuraName[i] != SPELL_AURA_DUMMY)
++       return true;
++
++   return false;
++ }
++
+  inline bool IsAuraApplyEffect(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
+  {
+      switch (spellInfo->Effect[effecIdx])

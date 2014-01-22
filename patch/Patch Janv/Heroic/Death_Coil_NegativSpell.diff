@@ -1,0 +1,14 @@
+src/game/SpellMgr.cpp View file @ 00e07b5
+@@ -894,6 +894,12 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
+              return false;
+            break;
+          }
++       case SPELL_AURA_MOD_FEAR:
++         {
++           if(spellproto->Id == 30500)        // Death Coil
++             return false;
++           break;
++         }
+        default:
+          break;
+        }
