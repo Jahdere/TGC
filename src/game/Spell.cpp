@@ -323,7 +323,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 	// determine reflection
 	m_canReflect = false;
 
-	if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED))
+	if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
 	{
 		for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
 		{
@@ -1082,10 +1082,13 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 	{
 		// Fill base damage struct (unitTarget - is real spell target)
 		SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
+		uint32 procDamage = 0;
 		procEx = createProcExtendMask(&damageInfo, missInfo);
+		if(missInfo == SPELL_MISS_NONE)
+			procDamage = 1;
 		// Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
 		if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
-			caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 1, m_attackType, m_spellInfo);
+			caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, procDamage, m_attackType, m_spellInfo);
 	}
 
 	// Call scripted function for AI if this spell is casted upon a creature
