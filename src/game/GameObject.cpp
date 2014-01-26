@@ -884,6 +884,7 @@ void GameObject::TriggerLinkedGameObject(Unit* target)
 	GameObject* trapGO = NULL;
 
 	{
+		error_log("******** SEARCH TRAP PROCESS ********");
 		// search closest with base of used GO, using max range of trap spell as search radius (why? See above)
 		MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*this, trapEntry, range);
 		MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(trapGO, go_check);
@@ -891,9 +892,14 @@ void GameObject::TriggerLinkedGameObject(Unit* target)
 		Cell::VisitGridObjects(this, checker, range);
 	}
 
+
 	// found correct GO
 	if (trapGO)
+	{
+		error_log("******** TRAP GO FOUND : %u ********", trapGO->GetGOInfo()->id);
 		trapGO->Use(target);
+	}else
+		error_log("******** TRAP GO NOT FOUND ******** ");
 }
 
 GameObject* GameObject::LookupFishingHoleAround(float range)
@@ -1064,6 +1070,7 @@ void GameObject::Use(Unit* user)
 			// FIXME: when GO casting will be implemented trap must cast spell to target
 			if (spellId = goInfo->trap.spellId)
 				caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
+
 			// use template cooldown if provided
 			m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
 

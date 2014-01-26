@@ -16,14 +16,14 @@ INSERT INTO `creature_template` (`entry`, `KillCredit1`, `KillCredit2`, `modelid
 `faction_H`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, 
 `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, 
 `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, 
-`resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `PetSpellDataId`, 
+`resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `PetSpellDataId`, 
 `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `unk16`, `unk17`, `RacialLeader`, `RegenHealth`, `equipment_id`, `trainer_id`,
  `vendor_id`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`) 
  VALUES (100200, 0, 0, 10045, 0, 10045, 0, 'Trigger (Mechanar) 1', 'Visual', '', 0, 1, 1, 8, 8, 0, 0, 0, 35, 35, 0, 0.91, 1.14286, 1, 
- 0, 7, 7, 0, 3, 1, 2000, 2200, 0, 4096, 0, 8, 0, 0, 0, 0, 1.76, 2.42, 100, 8, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+ 0, 7, 7, 0, 3, 1, 2000, 2200, 0, 4096, 0, 8, 0, 0, 0, 0, 1.76, 2.42, 100, 8, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
  0, 0, 'EventAI', 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 130, ''),
  (100201, 0, 0, 10045, 0, 10045, 0, 'Trigger (Mechanar) 2', 'Visual', '', 0, 1, 1, 8, 8, 0, 0, 0, 35, 35, 0, 0.91, 1.14286, 1, 
- 0, 7, 7, 0, 3, 1, 2000, 2200, 0, 4096, 0, 8, 0, 0, 0, 0, 1.76, 2.42, 100, 8, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+ 0, 7, 7, 0, 3, 1, 2000, 2200, 0, 4096, 0, 8, 0, 0, 0, 0, 1.76, 2.42, 100, 8, 5242886, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
  0, 0, 'EventAI', 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 130, '');
 
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, 

@@ -16,8 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Archimonde
-SD%Complete: 85
-SDComment: Timers; Some details may need adjustments.
+SD%Complete: 100%
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
@@ -123,7 +122,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		m_uiDoomfireTimer        = 15000;
 		m_uiFingerOfDeathTimer   = 0;
 		m_uiWispCount            = 0;
-		m_uiCheckRangeTimer		 = 5000;
+		m_uiCheckRangeTimer		 = 10000;
 		m_uiEnrageTimer          = 10 * MINUTE * IN_MILLISECONDS;
 
 		m_bIsEnraged             = false;
@@ -144,6 +143,12 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		{
 			m_uiEnrageTimer = 1000;
 			m_bIsEnraged = true;
+		}
+		else if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
+			m_creature->IsWithinDistInMap(pWho, 80.0f) && !m_creature->isInCombat())
+		{
+			pWho->SetInCombatWith(m_creature);
+			m_creature->AddThreat(pWho);
 		}
 
 		ScriptedAI::MoveInLineOfSight(pWho);
@@ -313,6 +318,9 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				{
 					DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
 					m_uiAirBurstTimer = urand(10000, 20000);
+
+					if(m_uiFearTimer <= 5000)
+						m_uiFearTimer = 5000;
 				}
 			}
 		}
@@ -321,33 +329,12 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 
 		if (m_uiFearTimer < uiDiff)
 		{
-			// Set CanFear by default
-			m_bCanFear = true;
-			//Check if nobody in the air
-			std::vector<Unit*> suitableTargets;
-			ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-			for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+			if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
 			{
-				if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
-				{
-					if (pTarget->GetTypeId() == TYPEID_PLAYER && (pTarget->GetPositionZ() - m_creature->GetMap()->GetHeight(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ()) > 0.5f ))
-					{
-						m_bCanFear = false;
-						break;
-					}
-				}
+				m_uiFearTimer = urand(40000, 50000);
+				m_uiCheckRangeTimer = 5000;
 			}
 
-			//Can fear? just do it !
-			if(m_bCanFear)
-			{
-				if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
-				{
-					m_uiFearTimer = urand(40000, 50000);
-					m_uiCheckRangeTimer = 5000;
-				}
-			}else
-				m_uiFearTimer = 1000;
 		}
 		else
 			m_uiFearTimer -= uiDiff;
@@ -388,12 +375,16 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 	}
 
 	ObjectGuid m_doomfireGuid;
+	ObjectGuid m_archimondeGuid;
 
 	uint32 m_uiDoomfireLoadTimer;
 	uint32 m_uiChangeTargetTimer;
 	uint32 m_uiDespawnTimer;
 	int32 m_uiRandTarget;
 	Unit* pTargetFollow;
+	Unit* pTargetException;
+
+	bool m_bJustSpawn;
 
 	float m_fAngle;
 	float m_fDistance;
@@ -402,10 +393,12 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 	{
 		m_uiDoomfireLoadTimer = 1000;
 		m_uiChangeTargetTimer = 1500;
-		m_fAngle              = urand(0, M_PI_F * 2);
+		m_fAngle              = 0.0f;
 		m_fDistance			  = 30.0f;
 		pTargetFollow		  = NULL;
+		pTargetException	  = NULL;
 		m_uiDespawnTimer	  = 28000;
+		m_bJustSpawn		  = true;
 	}
 
 	void UpdateAI(const uint32 uiDiff) override
@@ -417,8 +410,14 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 				// Get the closest doomfire
 				if (Creature* pTemp = GetClosestCreatureWithEntry(m_creature, NPC_DOOMFIRE, 5.0f))
 				{
-					m_doomfireGuid = pTemp->GetObjectGuid();
-					pTemp->SetFacingTo(m_fAngle);
+					if(Creature* pArchimonde = GetClosestCreatureWithEntry(m_creature, NPC_ARCHIMONDE, 80.0f))
+					{
+						m_doomfireGuid = pTemp->GetObjectGuid();
+						m_archimondeGuid = pArchimonde->GetObjectGuid();						
+
+						m_fAngle = pTemp->GetAngle(pArchimonde) + urand(M_PI * .75,  M_PI * 1.5);
+						pTemp->SetOrientation(m_fAngle);
+					}
 				}
 
 				m_uiDoomfireLoadTimer = 0;
@@ -427,7 +426,7 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 				m_uiDoomfireLoadTimer -= uiDiff;
 		}
 
-		// It's not very clear how should this one move. For the moment just move to random points around on timer
+		// Select a random player in M_PI * .75 arc except the main target of Archimonde or select a random point
 		if (m_uiChangeTargetTimer < uiDiff)
 		{
 			if (Creature* pDoomfire = m_creature->GetMap()->GetCreature(m_doomfireGuid))
@@ -435,7 +434,16 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 				if(pTargetFollow)
 				{
 					m_fAngle = pDoomfire->GetOrientation();
-					pTargetFollow = NULL;
+					pTargetFollow = NULL;						
+				}
+
+				if(pTargetException)
+					pTargetException = NULL;
+
+				if(Creature* pArchimonde = m_creature->GetMap()->GetCreature(m_archimondeGuid))
+				{
+					if(pArchimonde->getVictim())
+						pTargetException = pArchimonde->getVictim();
 				}
 
 				m_uiRandTarget = urand(0, 2);
@@ -448,7 +456,8 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 						{
 							if(Player* pPlayer = itr->getSource())
 							{
-								if(pPlayer->isAlive() && pDoomfire->GetDistance(pPlayer) <= m_fDistance && pDoomfire->HasInArc(float(M_PI_F * 0.75), pPlayer))
+								if(!pPlayer->isGameMaster() && pPlayer->isAlive() && pDoomfire->GetDistance(pPlayer) <= m_fDistance && pDoomfire->HasInArc(float(M_PI_F * 0.75), pPlayer)
+									&& pPlayer != pTargetException)
 								{
 									pTargetFollow = pPlayer;
 									break;
@@ -462,15 +471,29 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 					else
 					{
 						float fX, fY, fZ;
-						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));
+						if(m_bJustSpawn)
+						{
+							pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle);
+							m_bJustSpawn = false;
+						}
+						else
+							pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));
+
 						pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
 					}
 				}
 				else
 				{
 					float fX, fY, fZ;
-					pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));
-					pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+					if(m_bJustSpawn)
+					{
+						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle);
+						m_bJustSpawn = false;
+					}
+					else
+						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));	
+
+					pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);					
 				}
 			}
 

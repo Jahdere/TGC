@@ -3133,10 +3133,6 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
 
 void Spell::EffectCreateItem(SpellEffectIndex eff_idx)
 {
-	// Remove Spine @Kordbc
-	if(m_spellInfo->Id == 39956)
-		GetCaster()->CastSpell(GetCaster(), 39977, true);
-
 	DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx]);
 }
 
