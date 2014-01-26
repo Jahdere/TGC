@@ -58,8 +58,8 @@ float ThreatCalcHelper::CalcThreat(Unit* pHatedUnit, Unit* /*pHatingUnit*/, floa
 			if (pThreatSpell->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 				return 0.0f;
 
-			if(pHatedUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)pHatedUnit)->IsTotem() && PeriodicEnergize)
-				return 0.0f;
+		/*	if(pHatedUnit->GetTypeId() == TYPEID_UNIT && ((Creature*)pHatedUnit)->IsTotem() && PeriodicEnergize)
+				return 0.0f;*/
 
 			if (Player* modOwner = pHatedUnit->GetSpellModOwner())
 				modOwner->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, threat);

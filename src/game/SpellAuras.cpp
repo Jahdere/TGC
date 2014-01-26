@@ -5967,6 +5967,19 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 			m_modifier.m_amount += (int32)DoneActualBenefit;
 		}
 	}
+	else
+	{
+		Unit::AuraList const& auraClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+		for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+		{
+			switch((*itr)->m_modifier.m_miscvalue)
+			{
+			case 6787:
+				target->SetStandState(UNIT_STAND_STATE_DEAD);
+				break;
+			}
+		}
+	}
 }
 
 void Aura::PeriodicTick()
@@ -6400,7 +6413,8 @@ void Aura::PeriodicTick()
 			int32 gain = target->ModifyPower(power, pdamage);
 
 			if (Unit* pCaster = GetCaster())
-				target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+				pCaster->getHostileRefManager().threatAssist(target, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+
 			break;
 		}
 	case SPELL_AURA_OBS_MOD_MANA:
