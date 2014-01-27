@@ -3696,6 +3696,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 				pObj->SetSpellId(GetId());
 				target->AddGameObject(pObj);
 				target->GetMap()->Add(pObj);
+				pObj->SummonLinkedTrapIfAny();
 			}
 			else
 				delete pObj;
@@ -6414,7 +6415,6 @@ void Aura::PeriodicTick()
 
 			if (Unit* pCaster = GetCaster())
 				pCaster->getHostileRefManager().threatAssist(target, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
-
 			break;
 		}
 	case SPELL_AURA_OBS_MOD_MANA:
