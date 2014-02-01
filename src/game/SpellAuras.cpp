@@ -777,7 +777,24 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procE
 				if ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && active)
 					return true;
 				else
+				{
+					for(int i = 0; i < MAX_EFFECT_INDEX; i++)
+					{
+						switch(spell->EffectApplyAuraName[i])
+						{
+							// Some aura effect can proc when !active
+						case SPELL_AURA_PERIODIC_DAMAGE:
+						case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+						case SPELL_AURA_PERIODIC_HEAL:
+						case SPELL_AURA_PERIODIC_LEECH:
+						case SPELL_AURA_MOD_FEAR:
+						case SPELL_AURA_DUMMY:
+							return true;
+							break;
+						}
+					}
 					return false;
+				}
 			}
 			else // Passive spells hits here only if resist/reflect/immune/evade
 			{
@@ -6092,10 +6109,10 @@ void Aura::PeriodicTick()
 			// Aura of Anger (ROS)
 			if(spellProto->Id == 41337)
 			{
-				Aura* holder_anger = GetHolder()->GetAuraByEffectIndex(GetEffIndex());
-				holder_anger->GetHolder()->SetStackAmount(GetAuraTicks() + 1);
-				holder_anger = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1);
-				holder_anger->GetHolder()->SetStackAmount(GetAuraTicks());
+				if(Aura* AuraAngerEff0 = GetHolder()->GetAuraByEffectIndex(GetEffIndex()))
+					AuraAngerEff0->GetHolder()->SetStackAmount(GetAuraTicks() + 1);
+				if(Aura* AuraAngerEff1 = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1))
+					AuraAngerEff1->GetHolder()->SetStackAmount(GetAuraTicks());
 			}
 
 			// As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
