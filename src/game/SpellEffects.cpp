@@ -3973,6 +3973,14 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
 					summon->FixateTarget(pTarget);
 			}
 
+			// Summon Spirit (Shadow of Death initial spell)
+			if(m_spellInfo->Id == 40266)
+			{
+				m_caster->CastSpell(m_caster, 40268, true, NULL, NULL, m_caster->GetObjectGuid()); // Possess Spirit by Player
+				m_caster->CastSpell(m_caster, 40282, true);	// Can't be attackable
+				summon->CastSpell(summon, 40282, true);		// Can't be attackable
+			}
+
 			// Notify original caster if not done already
 			if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
 				((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
@@ -5386,6 +5394,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
 					unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
+				}
+			case 40892:									// Fixated
+				{
+					if(!unitTarget)
+						return;
+
+					unitTarget->CastSpell(unitTarget, 40893, true);
 				}
 			case 41055:                                 // Copy Weapon
 				{
