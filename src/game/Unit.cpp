@@ -2832,9 +2832,6 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 	if (!pVictim->isAlive())
 		return SPELL_MISS_NONE;
 
-	if(!this->IsHostileTo(pVictim))
-		return SPELL_MISS_NONE;
-
 	SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
 	// PvP - PvE spell misschances per leveldif > 2
 	int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
@@ -2933,6 +2930,10 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 	// Return evade for units in evade mode
 	if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
 		return SPELL_MISS_EVADE;
+
+	// Naj'entus Hurl Spine exception
+	if(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->GetEntry() == 22887 && spell->Id == 39948)
+		return SPELL_MISS_NONE;
 
 	// Check for immune
 	if (pVictim->IsImmuneToSpell(spell, this == pVictim))
@@ -8641,6 +8642,9 @@ void CharmInfo::InitPossessCreateSpells()
 		else
 			AddSpellToActionBar(((Creature*)m_unit)->m_spells[x], ACT_PASSIVE);
 	}
+
+	if(m_unit->GetEntry() == 23109)
+		AddSpellToActionBar(40322, ACT_PASSIVE); // Exception case 5 spell (Spirit Shield , Teron)
 }
 
 void CharmInfo::InitCharmCreateSpells()
@@ -8696,6 +8700,30 @@ void CharmInfo::InitCharmCreateSpells()
 bool CharmInfo::AddSpellToActionBar(uint32 spell_id, ActiveStates newstate)
 {
 	uint32 first_id = sSpellMgr.GetFirstSpellInChain(spell_id);
+
+	switch(spell_id)
+	{
+	case 40325: // Spirit Strike
+		SetActionBar(0, spell_id, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+		return true;
+		break;
+	case 40157: // Spirit Lance
+		SetActionBar(2, spell_id, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+		return true;
+		break;
+	case 40175: // Spirit Chain
+		SetActionBar(3, spell_id, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+		return true;
+		break;
+	case 40314: // Spirit Volley
+		SetActionBar(4, spell_id, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+		return true;
+		break;
+	case 40322: // Spirit Shield
+		SetActionBar(6, spell_id, newstate == ACT_DECIDE ? ACT_DISABLED : newstate);
+		return true;
+		break;
+	}
 
 	// new spell rank can be already listed
 	for (uint8 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
