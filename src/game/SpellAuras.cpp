@@ -3436,6 +3436,13 @@ void Aura::HandleModPossess(bool apply, bool Real)
 			((Creature*)target)->AIM_Initialize();
 			target->AttackedBy(caster);
 		}
+
+		// Shadow Of death insta kill (Teron)
+		if(GetId() == 40268)
+		{
+			p_caster->DealDamage(p_caster, p_caster->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+			p_caster->CastSpell(target, 41626, true, NULL, this);
+		}
 	}
 }
 
@@ -3711,8 +3718,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 			{
 				pObj->SetRespawnTime(GetAuraDuration() / IN_MILLISECONDS);
 				pObj->SetSpellId(GetId());
-				target->AddGameObject(pObj);
 				target->GetMap()->Add(pObj);
+				pObj->SetOwnerGuid(ObjectGuid());
 				pObj->SummonLinkedTrapIfAny();
 			}
 			else
@@ -5987,15 +5994,14 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 	}
 	else
 	{
-		Unit::AuraList const& auraClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-		for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+		if (GetId() == 40251)
 		{
-			switch((*itr)->m_modifier.m_miscvalue)
-			{
-			case 6787:
-				target->SetStandState(UNIT_STAND_STATE_DEAD);
-				break;
-			}
+			// Shadow Of Death Summon Skeleton & Spirit (Teron)
+			target->CastSpell(target, 40270, true);
+			target->CastSpell(target, 41948, true);
+			target->CastSpell(target, 41949, true);
+			target->CastSpell(target, 41950, true);
+			target->CastSpell(target, 40266, true);
 		}
 	}
 }
@@ -6119,9 +6125,9 @@ void Aura::PeriodicTick()
 			// Reduce dot damage from resilience for players
 			if (target->GetTypeId() == TYPEID_PLAYER)
 				pdamage -= ((Player*)target)->GetDotDamageReduction(pdamage);
-
-			if(!IsSpellBinary(spellProto, pCaster))
-				target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+			target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+			if(IsSpellBinary(spellProto, pCaster))
+				resist = 0;
 
 			DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
 				GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
