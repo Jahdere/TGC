@@ -1082,13 +1082,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 	{
 		// Fill base damage struct (unitTarget - is real spell target)
 		SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
-		uint32 procDamage = 0;
 		procEx = createProcExtendMask(&damageInfo, missInfo);
-		if(missInfo == SPELL_MISS_NONE)
-			procDamage = 1;
 		// Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
 		if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
-			caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, procDamage, m_attackType, m_spellInfo);
+			caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo);
 	}
 
 	// Call scripted function for AI if this spell is casted upon a creature
