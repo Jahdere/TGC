@@ -87,6 +87,7 @@ struct MANGOS_DLL_DECL boss_doomwalkerAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
+		m_creature->RemoveAurasDueToSpell(SPELL_MARK_OF_DEATH_AURA);
         DoScriptText(SAY_DEATH, m_creature);
     }
 
