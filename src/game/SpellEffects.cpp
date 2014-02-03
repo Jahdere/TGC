@@ -5401,6 +5401,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 						return;
 
 					unitTarget->CastSpell(unitTarget, 40893, true);
+					return;
 				}
 			case 41055:                                 // Copy Weapon
 				{
