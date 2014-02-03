@@ -1067,12 +1067,7 @@ void GameObject::Use(Unit* user)
 
 			// FIXME: when GO casting will be implemented trap must cast spell to target
 			if (spellId = goInfo->trap.spellId)
-			{
-				if(spellId == 39977)	// Remove Empaling Spine
-					user->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
-				else
-					caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
-			}
+				caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
 			// use template cooldown if provided
 			m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
 
