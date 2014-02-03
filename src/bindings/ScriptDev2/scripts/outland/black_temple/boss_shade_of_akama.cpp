@@ -179,6 +179,14 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 		}
 	}
 
+	void AttackStart(Unit* pVictim) override
+	{
+		if(pVictim->GetEntry() == NPC_SHADE_OF_AKAMA)
+			ScriptedAI::AttackStart(pVictim);
+		else if (m_uiPhase == PHASE_CHANNEL)
+			DoCastSpellIfCan(m_creature, SPELL_AKAMA_SOUL_CHANNEL);
+	}
+
 	void KilledUnit(Unit* pVictim) override
 	{
 		// Note: this is called from the Shade, Channeler and Sorcerer script
@@ -452,10 +460,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 		case PHASE_COMBAT:
 
 			if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-			{
-				m_uiPhase = PHASE_CHANNEL;
 				return;
-			}
 
 			if (!m_bHasYelledOnce && m_creature->GetHealthPercent() < 15.0f)
 			{

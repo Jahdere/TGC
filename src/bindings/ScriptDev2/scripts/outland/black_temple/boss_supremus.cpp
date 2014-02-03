@@ -282,10 +282,13 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
 			{
 				if (m_creature->GetCombatDistance(m_creature->getVictim(), false) < RANGE_MOLTEN_PUNCH)
 				{
-					DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE);
-					DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
+					if(urand(0,1))
+					{
+						DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE);
+						DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
+					}
 				}
-				m_uiMoltenPunchTimer = 8000;                // might be better with small timer and some sort of cast-chance
+				m_uiMoltenPunchTimer = 6000;
 			}
 			else
 				m_uiMoltenPunchTimer -= uiDiff;

@@ -536,11 +536,15 @@ struct MANGOS_DLL_DECL boss_essence_of_angerAI : public ScriptedAI
 	uint32 m_uiSoulScreamTimer;
 	uint32 m_uiSpiteTimer;
 
+	Unit* pCurrentVictim;
+
 	void Reset() override
 	{
-		m_uiSeetheTimer      = 5000;
+		m_uiSeetheTimer      = 1000;
 		m_uiSoulScreamTimer  = 10000;
 		m_uiSpiteTimer       = 20000;
+
+		pCurrentVictim		 = NULL;
 
 		DoCastSpellIfCan(m_creature, SPELL_AURA_OF_ANGER);
 	}
@@ -574,8 +578,17 @@ struct MANGOS_DLL_DECL boss_essence_of_angerAI : public ScriptedAI
 
 		if (m_uiSeetheTimer < uiDiff)
 		{
-			if (DoCastSpellIfCan(m_creature, SPELL_SEETHE) == CAST_OK)
-				m_uiSeetheTimer = urand(20000, 30000);
+			// Set pCurrentVictim if no exist
+			if(!pCurrentVictim)
+				if(m_creature->getVictim())
+					pCurrentVictim = m_creature->getVictim();
+
+			// Cast SPELL_SEETHE only if current victim change
+			if(pCurrentVictim != m_creature->getVictim())
+				if(DoCastSpellIfCan(m_creature, SPELL_SEETHE) == CAST_OK)
+					pCurrentVictim = m_creature->getVictim();
+
+			m_uiSeetheTimer = 1000;
 		}
 		else
 			m_uiSeetheTimer -= uiDiff;

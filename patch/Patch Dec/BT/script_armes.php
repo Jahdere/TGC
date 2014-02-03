@@ -155,39 +155,66 @@ $bdd = new PDO('mysql:dbname=world;host=localhost', 'jahdere', 'test');
 // Requêtes de check si des créatures de BT ont des set d'armes liés à creature_equip_template
 $queryCheck = "SELECT e.* , c.equipment_id FROM creature_template c JOIN creature_equip_template e ON e.entry = c.equipment_id WHERE c.entry =";
 
-foreach ($data as $key => $value) {
-	$prepare_check = $bdd->query($queryCheck.$key);
-	$data_check = $prepare_check->fetchAll();
+ // récupération du dernier entry de creature_equip_template_raw
+ $query_last_entry = $bdd->query("SELECT entry FROM creature_equip_template_raw ORDER BY entry DESC LIMIT 1");
+ $execute_query_last_entry = $query_last_entry->fetchAll();
+ $last_entry = $execute_query_last_entry[0]['entry'];
 
-	//Check si aucune créature n'est liée à creature_equip_template afin d'être sur d'update uniquement creature_equip_template_raw
-	if(!empty($data_check))
-		die('Certaines armes ne sont pas gérées dans creature_equip_template_raw :( ');
-}
+ echo $last_entry;
 
-
+// Compteur d'update
  $count = 0;
+
  //Début de la transaction
  $bdd->beginTransaction();
  foreach($data as $key=>$value)
  {
- 	//On récupère l'equipment_id de la créature
- 	$prepare = $bdd->query('SELECT equipment_id FROM creature_template WHERE entry ='.$key);
- 	$execute_equipment_id = $prepare->fetchAll();
- 	if(!empty($execute_equipment_id))
- 	{
- 		try{
- 		//Update de l'équipement
- 		$prepare_update = $bdd->exec('UPDATE creature_equip_template_raw SET equipmodel1 = '.$value['equipmodel1'].', equipmodel2 = '.$value['equipmodel2'].', 
- 			equipmodel3 = '.$value['equipmodel3'].', equipinfo1 = '.$value['equipinfo1'].', equipinfo2 = '.$value['equipinfo2'].', equipinfo3 = '.$value['equipinfo3'].',
- 			equipslot1 = '.$value['equipslot1'].', equipslot2 = '.$value['equipslot2'].', equipslot3 = '.$value['equipslot3'].' WHERE entry = '.$value['entry']);
 
- 		$count++;
- 		}catch(exception $e){
- 			//Si une erreur on annule la transaction et on affiche l'exception
- 			$bdd->rollBack();
- 			echo $e->getMessage();
- 		}
- 	}
+	$prepare_check = $bdd->query($queryCheck.$key);
+	$data_check = $prepare_check->fetchAll();
+
+	$prepare = $bdd->query('SELECT equipment_id FROM creature_template WHERE entry ='.$key);
+	$execute_equipment_id = $prepare->fetchAll();
+
+	// Si L'équipement est gérée via creature_equip_template ou si il n'a pas d'equipment_id, on créait un creature_equip_template_raw pour ensuite lui attribuer
+	if(!empty($data_check) || $execute_equipment_id[0]['equipment_id'] == 0)
+	{
+		echo "test";
+		try{
+			// Génération d'un entry
+			$last_entry++;
+			// Création d'un equipment
+			$prepare_insert = $bdd->exec("INSERT INTO `creature_equip_template_raw` (`entry`, `equipmodel1`, `equipmodel2`, `equipmodel3`, `equipinfo1`, `equipinfo2`, `equipinfo3`, `equipslot1`, `equipslot2`, `equipslot3`) 
+				VALUES (".$last_entry.",".$value['equipmodel1'].", ".$value['equipmodel2'].", ".$value['equipmodel3'].", ".$value['equipinfo1'].", ".$value['equipinfo2'].", ".$value['equipinfo3'].", ".$value['equipslot1'].", ".$value['equipslot2'].", ".$value['equipslot3'].")");
+			// Mise à jour de l'equipement_id de la créature
+			$update_equipment = $bdd->exec("UPDATE creature_template SET equipment_id = ".$last_entry." WHERE entry = ".$key);
+
+			$count++;
+		}catch(exception $e){
+			//Si une erreur on annule la transaction et on affiche l'exception
+	 		$bdd->rollBack();
+	 		echo $e->getMessage();
+		}
+
+	}else{
+
+	 	//On récupère l'equipment_id de la créature	 	
+	 	if(!empty($execute_equipment_id))
+	 	{
+	 		try{
+	 		//Update de l'équipement
+	 		$prepare_update = $bdd->exec('UPDATE creature_equip_template_raw SET equipmodel1 = '.$value['equipmodel1'].', equipmodel2 = '.$value['equipmodel2'].', 
+	 			equipmodel3 = '.$value['equipmodel3'].', equipinfo1 = '.$value['equipinfo1'].', equipinfo2 = '.$value['equipinfo2'].', equipinfo3 = '.$value['equipinfo3'].',
+	 			equipslot1 = '.$value['equipslot1'].', equipslot2 = '.$value['equipslot2'].', equipslot3 = '.$value['equipslot3'].' WHERE entry = '.$value['entry']);
+
+	 		$count++;
+	 		}catch(exception $e){
+	 			//Si une erreur on annule la transaction et on affiche l'exception
+	 			$bdd->rollBack();
+	 			echo $e->getMessage();
+	 		}
+	 	}
+	 }
  }
  $bdd->commit();
  echo "Done";

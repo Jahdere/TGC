@@ -44,21 +44,23 @@ enum
 	SPELL_SHADOW_OF_DEATH       = 40251,
 	SPELL_BERSERK               = 45078,
 	SPELL_SUMMON_DOOM_BLOSSOM   = 40188,
-	SPELL_SUMMON_SKELETON_1     = 40270,
+	/*SPELL_SUMMON_SKELETON_1     = 40270,
 	SPELL_SUMMON_SKELETON_2     = 41948,
 	SPELL_SUMMON_SKELETON_3     = 41949,
 	SPELL_SUMMON_SKELETON_4     = 41950,
-	SPELL_SUMMON_SPIRIT         = 40266,
+	SPELL_SUMMON_SPIRIT         = 40266,*/
 	SPELL_DESTROY_SPIRIT        = 41626,                    // purpose unk
 	SPELL_DESTROY_ALL_SPIRITS   = 44659,                    // purpose unk
 
 	// Spells - other
 	// SPELL_ATROPHY             = 40327,                   // Shadowy Constructs use this when they get within melee range of a player
 	SPELL_SHADOWY_CONSTRUCT     = 40326,
+	SPELL_SHADOW_BOLT			= 40185,
 
-	// NPC_DOOM_BLOSSOM          = 23123,                   // scripted in eventAI
-	NPC_SHADOWY_CONSTRUCT       = 23111,                    // scripted in eventAI
-	// NPC_VENGEFUL_SPIRIT       = 23109,                   // npc controlled by the dead player
+	NPC_DOOM_BLOSSOM			= 23123,
+	NPC_DOOM_BLOSSOM_TARGET		= 23124,
+	NPC_SHADOWY_CONSTRUCT       = 23111,                   // scripted in eventAI
+	//NPC_VENGEFUL_SPIRIT			= 23109,                   // npc controlled by the dead player
 };
 
 struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
@@ -78,11 +80,13 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 	uint32 m_uiCrushingShadowsTimer;
 	uint32 m_uiShadowOfDeathTimer;
 
+	ObjectGuid m_doomblossomGuid;
+
 	bool m_bIntroDone;
 
 	void Reset() override
 	{
-		m_uiIncinerateTimer         = urand(20000, 30000);
+		m_uiIncinerateTimer         = urand(20000, 30000); //urand(20000, 30000);
 		m_uiSummonDoomBlossomTimer  = urand(5000, 10000);
 		m_uiShadowOfDeathTimer      = 10000;
 		m_uiCrushingShadowsTimer    = 22000;
@@ -132,10 +136,21 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 
 	void JustSummoned(Creature* pSummoned) override
 	{
-		if (pSummoned->GetEntry() == NPC_SHADOWY_CONSTRUCT)
+		switch(pSummoned->GetEntry())
+		{
+		case NPC_SHADOWY_CONSTRUCT:
 			pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true);
-
-		pSummoned->SetInCombatWithZone();
+			pSummoned->SetInCombatWithZone();
+			break;
+		case NPC_DOOM_BLOSSOM:
+			pSummoned->setFaction(m_creature->getFaction());
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+			m_creature->SummonCreature(NPC_DOOM_BLOSSOM_TARGET, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 10.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 120000);
+			break;
+		case NPC_DOOM_BLOSSOM_TARGET:
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);	
+			break;
+		}
 	}
 
 	void UpdateAI(const uint32 uiDiff) override
@@ -158,7 +173,7 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 
 		if (m_uiIncinerateTimer < uiDiff)
 		{
-			Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+			Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_INCINERATE , SELECT_FLAG_PLAYER);
 
 			if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
 				m_uiIncinerateTimer = urand(20000, 50000);
@@ -211,9 +226,68 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 	}
 };
 
+struct MANGOS_DLL_DECL npc_doomblossomAI : public ScriptedAI
+{
+	npc_doomblossomAI(Creature* pCreature) : ScriptedAI(pCreature) { 
+		Reset(); 
+	}
+
+	uint32 m_uiShadowBoltTimer;
+	uint32 m_uiLoadTargetTimer;
+
+	void Reset() override 
+	{
+		m_uiShadowBoltTimer = urand(2000, 3000);;
+		m_uiLoadTargetTimer = 500;		
+	}
+
+	void AttackStart(Unit* pWho) override{}
+
+	void EnterEvadeMode() override{}
+
+	void UpdateAI(const uint32 uiDiff) override 
+	{
+		if(m_uiLoadTargetTimer)
+		{
+			if(m_uiLoadTargetTimer <= uiDiff)
+			{
+				if (Creature* pTemp = GetClosestCreatureWithEntry(m_creature, NPC_DOOM_BLOSSOM_TARGET, 15.0f))
+				{
+					m_creature->GetMotionMaster()->MoveFollow(pTemp, 0.0f, 0.0f);
+					m_uiLoadTargetTimer = 0;
+				}
+			}
+			else 
+				m_uiLoadTargetTimer -= uiDiff;
+		}
+
+		if(m_uiShadowBoltTimer < uiDiff)
+		{
+			if(Creature* pTeron = GetClosestCreatureWithEntry(m_creature, NPC_TERON_GOREFIEND, 40.0f))
+			{
+				//if(Unit* pTarget = pTeron->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOW_BOLT, SELECT_FLAG_PLAYER))
+				if(Unit* pTarget = pTeron->getVictim())
+				{
+					if(DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
+					{
+						m_uiShadowBoltTimer = urand(2000, 3000);
+					}
+				}
+			}
+		}
+		else
+			m_uiShadowBoltTimer -= uiDiff;
+	}
+};
+
 CreatureAI* GetAI_boss_teron_gorefiend(Creature* pCreature)
 {
 	return new boss_teron_gorefiendAI(pCreature);
+}
+
+CreatureAI* GetAI_npc_doomblossom(Creature* pCreature)
+{
+	return new npc_doomblossomAI(pCreature);
 }
 
 void AddSC_boss_teron_gorefiend()
@@ -223,5 +297,10 @@ void AddSC_boss_teron_gorefiend()
 	pNewScript = new Script;
 	pNewScript->Name = "boss_teron_gorefiend";
 	pNewScript->GetAI = &GetAI_boss_teron_gorefiend;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "npc_doomblossom";
+	pNewScript->GetAI = &GetAI_npc_doomblossom;
 	pNewScript->RegisterSelf();
 }

@@ -1,16 +1,3 @@
-src/game/Spell.cpp View file @ 9d243a0
-@@ -1522,6 +1522,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
-    if(m_spellInfo->Id == 724 || m_spellInfo->Id == 27870 || m_spellInfo->Id == 27871 || m_spellInfo->Id == 28275)
-      targetMode = TARGET_INFRONT_OF_VICTIM;
-  
-+   // Hack Remove Spine
-+   if(m_spellInfo->Id == 39977)
-+     targetMode = TARGET_ALL_FRIENDLY_UNITS_IN_AREA;
-+
-    switch (targetMode)
-    {
-    case TARGET_RANDOM_NEARBY_LOC:
-
 src/game/SpellEffects.cpp View file @ 9d243a0
 @@ -1850,6 +1850,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
   
@@ -28,14 +15,56 @@ src/game/SpellEffects.cpp View file @ 9d243a0
         break;
       }
     case SPELLFAMILY_PRIEST:
-@@ -3103,6 +3112,10 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
+
+src/game/GameObject.cpp View
+@@ -875,16 +875,19 @@ void GameObject::TriggerLinkedGameObject(Unit* target)
+    // The range to search for linked trap is weird. We set 0.5 as default. Most (all?)
+    // traps are probably expected to be pretty much at the same location as the used GO,
+    // so it appears that using range from spell is obsolete.
+-   float range = 0.5f;
++   float range = 0.0f;
   
-  void Spell::EffectCreateItem(SpellEffectIndex eff_idx)
-  {
-+   // Remove Spine @Kordbc
-+   if(m_spellInfo->Id == 39956)
-+     GetCaster()->CastSpell(GetCaster(), 39977, true);
-+ 
-    DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx]);
-  }
+    if (trapSpell)                                          // checked at load already
+      range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
+  
++   if(!range)
++     range = 0.5f;
++
+    // search nearest linked GO
+    GameObject* trapGO = NULL;
+  
+    {
+
+@@ -1069,8 +1067,12 @@ void GameObject::Use(Unit* user)
+  
+        // FIXME: when GO casting will be implemented trap must cast spell to target
+        if (spellId = goInfo->trap.spellId)
+-         caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
+-
++       {
++         if(spellId == 39977)  // Remove Empaling Spine
++           user->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
++         else
++           caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
++       }
+
+src/game/SpellAuras.cpp View
+@@ -3696,6 +3696,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
+          pObj->SetSpellId(GetId());
+          target->AddGameObject(pObj);
+          target->GetMap()->Add(pObj);
++         pObj->SummonLinkedTrapIfAny();
+        }
+        else
+          delete pObj;
+
+src/game/SpellMgr.cpp View
+@@ -690,6 +690,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
+      case 10258:                                 // Awaken Vault Warder
+      case 16807:                  				  // Jaina / Thrall Mass Teleportation
+      case 18153:                                 // Kodo Kombobulator
++     case 39977:                  				  // Remove Impaling Spine
+        return true;
+      default:
+        break;
   

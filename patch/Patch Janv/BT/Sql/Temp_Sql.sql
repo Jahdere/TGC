@@ -36,10 +36,7 @@ UPDATE creature_template set modelid_1 = 11686, modelid_2 = 11686 WHERE entry = 
 
 #================================ SEPARATOR DONE
 
-#Speed Molten Flame
-UPDATE creature_template SET modelid_1 = 11686 , modelid_2 = 11686, speed_walk = 0.9, speed_run = 0.9, ScriptName = "molten_flame" WHERE entry = 23095;
-
-#Ai script Volcano
-UPDATE creature_template SET ScriptName = "npc_volcano" WHERE entry = 23085;
-
-
+#Teron
+INSERT INTO `creature_linking_template` (`entry`, `map`, `master_entry`, `flag`, `search_range`) VALUES ('23123', '564', '22871', '4112', '0');
+INSERT INTO `creature_linking_template` (`entry`, `map`, `master_entry`, `flag`, `search_range`) VALUES ('23124', '564', '22871', '4112', '0');
+INSERT INTO `creature_linking_template` (`entry`, `map`, `master_entry`, `flag`, `search_range`) VALUES ('23111', '564', '22871', '4112', '0');
