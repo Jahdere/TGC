@@ -791,6 +791,7 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procE
 						case SPELL_AURA_DUMMY:
 							return true;
 							break;
+						default:break;
 						}
 					}
 					return false;
@@ -1969,16 +1970,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 							target->RemoveAurasDueToSpell(31970);
 						return;
 					}
-				case 32045:                             // Soul Charge
-				case 32051:
-				case 32052:
-					{
-						// max duration is 2 minutes, but expected to be random duration
-						// real time randomness is unclear, using max 5 seconds here
-						// see further down for expire of this aura
-						GetHolder()->SetAuraDuration(urand(1, 5)*IN_MILLISECONDS);
-						return;
-					}
 				case 33326:                             // Stolen Soul Dispel
 					{
 						target->RemoveAurasDueToSpell(32346);
@@ -2191,27 +2182,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 				target->CastSpell(target, 28206, true, NULL, this);
 				// Poison Cloud
 				target->CastSpell(target, 28240, true, NULL, this);
-				return;
-			}
-		case 32045:                                     // Soul Charge
-			{
-				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32054, true, NULL, this, target->GetObjectGuid());
-
-				return;
-			}
-		case 32051:                                     // Soul Charge
-			{
-				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32057, true, NULL, this, target->GetObjectGuid());
-
-				return;
-			}
-		case 32052:                                     // Soul Charge
-			{
-				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-					target->CastSpell(target, 32053, true, NULL, this, target->GetObjectGuid());
-
 				return;
 			}
 		case 32286:                                     // Focus Target Visual

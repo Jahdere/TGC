@@ -53,10 +53,10 @@ enum
 	SPELL_DOOMFIRE_STRIKE       = 31903,                    // summons 18095 and 18104
 	/*SPELL_SOUL_CHARGE_YELLOW    = 32045,                    // procs 32054
 	SPELL_SOUL_CHARGE_GREEN     = 32051,                    // procs 32057
-	SPELL_SOUL_CHARGE_RED       = 32052,                    // procs 32053
+	SPELL_SOUL_CHARGE_RED       = 32052,                    // procs 32053*/
 	SPELL_SOUL_CHARGE_GREEN_CAST = 32057,
-	SPELL_SOUL_CHARGE_RED_CAST	= 32053,
-	SPELL_SOUL_CHARGE_YELLOW_CAST = 32054,*/
+	SPELL_SOUL_CHARGE_RED_CAST	 = 32053,
+	SPELL_SOUL_CHARGE_YELLOW_CAST= 32054,
 	SPELL_FEAR                  = 31970,
 
 	SPELL_PROTECTION_OF_ELUNE   = 38528,                    // protect the players on epilogue
@@ -106,6 +106,9 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 	uint32 m_uiWispCount;
 	uint32 m_uiCheckRangeTimer;
 	uint32 m_uiEnrageTimer;
+	uint32 m_uiRedChargeTimer;
+	uint32 m_uiYellowChargeTimer;
+	uint32 m_uiGreenChargeTimer;
 
 	bool m_bHasIntro;
 	bool m_bIsEnraged;
@@ -124,6 +127,9 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		m_uiWispCount            = 0;
 		m_uiCheckRangeTimer		 = 10000;
 		m_uiEnrageTimer          = 10 * MINUTE * IN_MILLISECONDS;
+		m_uiRedChargeTimer		 = 0;
+		m_uiYellowChargeTimer	 = 0;
+		m_uiGreenChargeTimer	 = 0;
 
 		m_bIsEnraged             = false;
 		m_bIsEpilogue            = false;
@@ -189,6 +195,23 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 		}
 	}
 
+	void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
+	{
+		switch(pSpell->Id)
+		{
+		case SPELL_SOUL_CHARGE_YELLOW:
+			m_uiYellowChargeTimer = urand(1000, 10000);
+			break;
+		case SPELL_SOUL_CHARGE_RED:
+			m_uiRedChargeTimer = urand(1000, 10000);
+			break;
+		case SPELL_SOUL_CHARGE_GREEN:
+			m_uiGreenChargeTimer = urand(1000, 10000);
+			break;
+		default:break;
+		}
+	}
+
 	// Custom threat management
 	bool SelectHostileTarget()
 	{
@@ -212,7 +235,7 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 						{
 							AttackStart(pNewTarget);
 							return true;
-						}                                        
+						}
 					}
 				}
 			}
@@ -299,6 +322,89 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 				m_uiEnrageTimer -= uiDiff;
 		}
 
+		// Soul Charge Management
+		if(m_uiYellowChargeTimer)
+		{
+			if(m_uiYellowChargeTimer <= uiDiff)
+			{
+				if(DoCastSpellIfCan(m_creature, SPELL_SOUL_CHARGE_YELLOW_CAST) == CAST_OK)
+				{
+					if(Aura* soulCharge = m_creature->GetDummyAura(SPELL_SOUL_CHARGE_YELLOW))
+					{
+						if(soulCharge->GetHolder()->GetStackAmount() > 1)
+						{	
+							soulCharge->GetHolder()->SetStackAmount(soulCharge->GetHolder()->GetStackAmount() - 1);
+							m_uiYellowChargeTimer = urand(1000, 10000);
+						}
+						else
+						{
+							m_creature->RemoveAurasDueToSpell(SPELL_SOUL_CHARGE_YELLOW);
+							m_uiYellowChargeTimer = 0;
+						}
+					}
+				}
+				else
+					m_uiYellowChargeTimer = 500;
+			}
+			else
+				m_uiYellowChargeTimer -= uiDiff;
+		}
+
+		if(m_uiRedChargeTimer)
+		{
+			if(m_uiRedChargeTimer <= uiDiff)
+			{
+				if(DoCastSpellIfCan(m_creature, SPELL_SOUL_CHARGE_RED_CAST) == CAST_OK)
+				{
+					if(Aura* soulCharge = m_creature->GetDummyAura(SPELL_SOUL_CHARGE_RED))
+					{
+						if(soulCharge->GetHolder()->GetStackAmount() > 1)
+						{	
+							soulCharge->GetHolder()->SetStackAmount(soulCharge->GetHolder()->GetStackAmount() - 1);
+							m_uiRedChargeTimer = urand(1000, 10000);
+						}
+						else
+						{
+							m_creature->RemoveAurasDueToSpell(SPELL_SOUL_CHARGE_RED);
+							m_uiRedChargeTimer = 0;
+						}
+					}
+				}
+				else
+					m_uiRedChargeTimer = 500;
+			}
+			else
+				m_uiRedChargeTimer -= uiDiff;
+		}
+
+		if(m_uiGreenChargeTimer)
+		{
+			if(m_uiGreenChargeTimer <= uiDiff)
+			{
+				if(DoCastSpellIfCan(m_creature, SPELL_SOUL_CHARGE_GREEN_CAST) == CAST_OK)
+				{
+					if(Aura* soulCharge = m_creature->GetDummyAura(SPELL_SOUL_CHARGE_GREEN))
+					{
+						if(soulCharge->GetHolder()->GetStackAmount() > 1)
+						{	
+							soulCharge->GetHolder()->SetStackAmount(soulCharge->GetHolder()->GetStackAmount() - 1);
+							m_uiGreenChargeTimer = urand(1000, 10000);
+						}
+						else
+						{
+							m_creature->RemoveAurasDueToSpell(SPELL_SOUL_CHARGE_GREEN);
+							m_uiGreenChargeTimer = 0;
+						}
+					}
+				}
+				else
+					m_uiGreenChargeTimer = 500;
+			}
+			else
+				m_uiGreenChargeTimer -= uiDiff;
+		}
+
+		// Others spell
 		if (m_uiGripOfTheLegionTimer < uiDiff)
 		{
 			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -319,8 +425,8 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
 					DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
 					m_uiAirBurstTimer = urand(10000, 20000);
 
-					if(m_uiFearTimer <= 5000)
-						m_uiFearTimer = 5000;
+					if(m_uiFearTimer <= 6000)
+						m_uiFearTimer = 6000;
 				}
 			}
 		}
@@ -438,7 +544,7 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 				if(pTargetFollow)
 				{
 					m_fAngle = pDoomfire->GetOrientation();
-					pTargetFollow = NULL;						
+					pTargetFollow = NULL;
 				}
 
 				if(pTargetException)
@@ -496,7 +602,7 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
 					else
 						pDoomfire->GetNearPoint(pDoomfire, fX, fY, fZ, 0, m_fDistance, m_fAngle + frand(0, float(M_PI_F * .5)));	
 
-					pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);					
+					pDoomfire->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
 				}
 			}
 
