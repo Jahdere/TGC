@@ -100,6 +100,9 @@ inline bool IsSpellHaveEffect(SpellEntry const* spellInfo, SpellEffects effect)
 // damage spells are only binary if they have an additional non-damage effect (frost bolt is an exception)
 inline bool IsSpellBinary(SpellEntry const* spellInfo, Unit const* caster)
 {
+	if(spellInfo->SchoolMask == SPELL_SCHOOL_MASK_NORMAL)
+		return false;
+
 	// Case frostbolt exception on 2.4.3
 	if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000180020))
 		return false;

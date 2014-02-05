@@ -5400,7 +5400,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					if(!unitTarget)
 						return;
 
-					unitTarget->CastSpell(unitTarget, 40893, true);
+					unitTarget->CastSpell(m_caster, 40893, true);
 					return;
 				}
 			case 41055:                                 // Copy Weapon

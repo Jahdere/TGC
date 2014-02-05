@@ -690,7 +690,6 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
 		case 10258:                                 // Awaken Vault Warder
 		case 16807:									// Jaina / Thrall Mass Teleportation
 		case 18153:                                 // Kodo Kombobulator
-		case 39977:									// Remove Impaling Spine
 			return true;
 		default:
 			break;

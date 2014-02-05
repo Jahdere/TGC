@@ -2107,11 +2107,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 	// Cast back reflect damage spell
 	if (canReflect && reflectSpell)
 	{
-		SpellEntry const* m_spellInfoReflect = sSpellStore.LookupEntry(reflectSpell);
-		//Check for Trap Spell and Physical Spell @Kordbc
-		if(m_spellInfoReflect && m_spellInfoReflect->IsFitToFamilyMask(UI64LIT(0x0000200000000014)) && m_spellInfoReflect->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
-			CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
+		error_log("******* COUCOU REFLECT *********");
 
+		CastCustomSpell(pCaster, reflectSpell, &reflectDamage, NULL, NULL, true, NULL, reflectTriggeredBy);
 		reflectTriggeredBy->SetInUse(false);                // free lock from deletion
 	}
 
@@ -5875,7 +5873,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
 */
 uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
-	if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE)
+	if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE || spellProto->HasAttribute(SPELL_ATTR_EX3_UNK29))
 		return pdamage;
 
 	// For totems get damage bonus from owner (statue isn't totem in fact)
@@ -5893,20 +5891,17 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
 	if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
 		DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
 
-	// EarthQuake Doomwalker Exception
-	if(spellProto->Id != 32686)
+
+	AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+	for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
 	{
-		AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-		for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+		if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
+			(*i)->GetSpellProto()->EquippedItemClass == -1 &&
+			// -1 == any item class (not wand then)
+			(*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
+			// 0 == any inventory type (not wand then)
 		{
-			if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
-				(*i)->GetSpellProto()->EquippedItemClass == -1 &&
-				// -1 == any item class (not wand then)
-				(*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
-				// 0 == any inventory type (not wand then)
-			{
-				DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
-			}
+			DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
 		}
 	}
 
