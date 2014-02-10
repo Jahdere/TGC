@@ -972,6 +972,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 	}
 	else if (missInfo == SPELL_MISS_MISS || missInfo == SPELL_MISS_RESIST)
 	{
+		if(m_spellInfo->Id == 40953)
+			error_log("******* TROLL IMMOLATION *******");
 		if (real_caster && real_caster != unit)
 		{
 			// can cause back attack (if detected)
@@ -5295,7 +5297,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 
 		if (_target)                                        // for target dead/target not valid
 		{
-			if (!_target->isTargetableForAttack())
+			if (!_target->isTargetableForAttack() && m_caster != _target)
 				return SPELL_FAILED_BAD_TARGETS;            // guessed error
 
 			if (IsPositiveSpell(m_spellInfo->Id))
@@ -5311,7 +5313,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
 					// TARGET_DUELVSPLAYER is positive AND negative
 					duelvsplayertar |= (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DUELVSPLAYER);
 				}
-				if (m_caster->IsFriendlyTo(target) && !duelvsplayertar)
+				if (m_caster->IsFriendlyTo(target) && !duelvsplayertar && m_caster != _target)
 				{
 					return SPELL_FAILED_BAD_TARGETS;
 				}
