@@ -594,6 +594,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 			case 32051:
 			case 32052:
 				{
+					if(target->IsNonMeleeSpellCasted(true))
+						return SPELL_AURA_PROC_FAILED;
+
+					float chance = 40.0f;
+					if (!roll_chance_f(chance))
+						return SPELL_AURA_PROC_FAILED;
+
 					switch(dummySpell->Id)
 					{
 					case 32045: triggered_spell_id = 32054; break;
@@ -601,17 +608,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 					case 32052: triggered_spell_id = 32053; break;
 					}
 
-					float chance = 40.0f;
-					if (!roll_chance_f(chance))
-						return SPELL_AURA_PROC_FAILED;	
-
 					CastSpell(this, triggered_spell_id, false, NULL, triggeredByAura, this->GetObjectGuid());
-
-					if(triggeredByAura->GetHolder()->GetStackAmount() > 1)
-					{
-						triggeredByAura->GetHolder()->SetStackAmount(triggeredByAura->GetHolder()->GetStackAmount() - 1);
-						return SPELL_AURA_PROC_FAILED;
-					}
 					return SPELL_AURA_PROC_OK;
 				}
 				// Mark of Malice

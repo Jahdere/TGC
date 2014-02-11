@@ -1884,7 +1884,6 @@ void Aura::TriggerSpellWithValue()
 		else 
 			return;
 	}
-		
 
 	target->CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, NULL, this, casterGuid);
 }
@@ -1978,6 +1977,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 						// Air Burst (Archimonde) Prevent remove fear @Kordbc
 						if(target->HasAura(31970))
 							target->RemoveAurasDueToSpell(31970);
+						return;
+					}
+				case 32045:								// Soul Charge
+				case 32051:
+				case 32052:
+					{
+						GetHolder()->SetAuraCharges(GetHolder()->GetStackAmount());							
 						return;
 					}
 				case 33326:                             // Stolen Soul Dispel
