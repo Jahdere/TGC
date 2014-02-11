@@ -361,11 +361,12 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 					// Cataclysmic Bolt
 				case 38441:
 					damage = unitTarget->GetMaxHealth() / 2;
-					break;
-					// Blood Splash
-				case 41067:
-					{						
-						damage = m_triggeredBySpellInfo->EffectBasePoints[effect_idx];
+					break;					
+				case 41067:	// Blood Splash
+				case 41089:	// Volley
+					{
+						if(m_triggeredBySpellInfo)
+							damage = m_triggeredBySpellInfo->EffectBasePoints[effect_idx];
 						break;
 					}
 					//Aura of desire -> trigger spell proc effect , decrease mana max 5% 
