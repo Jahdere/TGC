@@ -1804,7 +1804,16 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 							++itr;
 					}
 					break;
-				}				
+				}
+			case 41294:								// Fixate (spell hit the closest target)
+				{
+					if (targetUnitMap.size() > unMaxTargets)
+					{
+						targetUnitMap.sort(TargetDistanceOrderNear(m_caster));
+						targetUnitMap.resize(unMaxTargets);
+					}
+					break;
+				}
 			}
 		}
 		sLog.outError("Size of Area Target ******* ===  %u", targetUnitMap.size());
