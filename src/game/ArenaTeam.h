@@ -179,6 +179,7 @@ class ArenaTeam
 		bool HasFoughtAgainst(uint32 arenaTeamIdOpponent) { return m_foughtTeamList.find(arenaTeamIdOpponent) != m_foughtTeamList.end(); }
         FoughtTeamList GetFoughtTeamList() const { return m_foughtTeamList; }
         void SetFoughtAgainst(uint32 opponentTeamId);
+		void DropOldFight();
 
         bool IsFighting() const;
 
