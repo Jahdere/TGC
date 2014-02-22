@@ -1,0 +1,34 @@
+src/game/Unit.cpp View
+
+  		// Remove charge (aura can be removed by triggers)
+		
+src/game/UnitAuraProcHandler.cpp View
+@@ -589,6 +589,31 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
+  					triggered_spell_id = 34650;
+  					break;
+  				}
++				// Soul Charge
++			case 32045:
++			case 32051:
++			case 32052:
++				{
++					if(IsNonMeleeSpellCasted(true) && m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id != procSpell->Id)
++						return SPELL_AURA_PROC_FAILED;
++
++					switch(dummySpell->Id)
++					{
++					case 32045: triggered_spell_id = 32054; break;
++					case 32051: triggered_spell_id = 32057; break;
++					case 32052: triggered_spell_id = 32053; break;
++					}
++
++					if(triggeredByAura->GetHolder()->GetStackAmount() > 1)
++						triggeredByAura->GetHolder()->SetStackAmount(triggeredByAura->GetHolder()->GetStackAmount() - 1);
++					else
++						RemoveAurasDueToSpell(dummySpell->Id);
++					CastSpell(this, triggered_spell_id, false, NULL, triggeredByAura, GetObjectGuid());
++					return SPELL_AURA_PROC_FAILED;
++				}
+  				// Mark of Malice
+  			case 33493:
+  				{

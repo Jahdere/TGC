@@ -1,0 +1,10 @@
+src/game/Spell.cpp View
+@@ -323,7 +323,7 @@ void SpellCastTargets::write(ByteBuffer& data) const
+    // determine reflection
+    m_canReflect = false;
+  
+-   if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED))
++   if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+    {
+      for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+      {

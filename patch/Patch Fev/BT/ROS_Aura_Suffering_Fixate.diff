@@ -1,0 +1,14 @@
+src/game/SpellEffects.cpp View
+@@ -2337,7 +2337,11 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
+      return;
+    }
+  
+-  unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID);
++   // Suffering Passiv fixate
++   if(triggered_spell_id == 41295)
++     unitTarget->CastSpell(m_caster, spellInfo, true);
++   else
++     unitTarget->CastSpell(unitTarget, spellInfo, true, NULL, NULL, m_originalCasterGUID);
+  }
+  
+  void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)

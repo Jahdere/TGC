@@ -1,0 +1,10 @@
+src/game/SpellEffects.cpp View
+@@ -5401,6 +5401,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
+						return;
+
+-					unitTarget->CastSpell(unitTarget, 40893, true);
++					unitTarget->CastSpell(m_caster, 40893, true);
++					return;
+				}
+			case 41055:                                 // Copy Weapon
+				{

@@ -1,0 +1,24 @@
+src/game/SpellAuras.cpp
+@@ -6119,9 +6125,9 @@ void Aura::PeriodicTick()
+			// Reduce dot damage from resilience for players
+			if (target->GetTypeId() == TYPEID_PLAYER)
+				pdamage -= ((Player*)target)->GetDotDamageReduction(pdamage);
+-
+-			if(!IsSpellBinary(spellProto, pCaster))
+-				target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
++			target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
++			if(IsSpellBinary(spellProto, pCaster))
++				resist = 0;
+
+src/game/Unit.cpp View
+@@ -2272,8 +2272,9 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
+		damageInfo->damage -= damageInfo->blocked;
+	}
+
+-	if(!spellBinary)
+-		CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
++	CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
++	if(spellBinary)
++		damageInfo->resist = 0;
+	damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
+}

@@ -1,0 +1,211 @@
+src/game/SpellAuras.cpp View
+@@ -1969,16 +1970,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
+							target->RemoveAurasDueToSpell(31970);
+						return;
+					}
+-				case 32045:                             // Soul Charge
+-				case 32051:
+-				case 32052:
+-					{
+-						// max duration is 2 minutes, but expected to be random duration
+-						// real time randomness is unclear, using max 5 seconds here
+-						// see further down for expire of this aura
+-						GetHolder()->SetAuraDuration(urand(1, 5)*IN_MILLISECONDS);
+-						return;
+-					}
+				case 33326:                             // Stolen Soul Dispel
+					{
+						target->RemoveAurasDueToSpell(32346);
+@@ -2193,27 +2184,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
+				target->CastSpell(target, 28240, true, NULL, this);
+				return;
+			}
+-		case 32045:                                     // Soul Charge
+-			{
+-				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+-					target->CastSpell(target, 32054, true, NULL, this, target->GetObjectGuid());
+-
+-				return;
+-			}
+-		case 32051:                                     // Soul Charge
+-			{
+-				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+-					target->CastSpell(target, 32057, true, NULL, this, target->GetObjectGuid());
+-
+-				return;
+-			}
+-		case 32052:                                     // Soul Charge
+-			{
+-				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+-					target->CastSpell(target, 32053, true, NULL, this, target->GetObjectGuid());
+-
+-				return;
+-			}
+		case 32286:                                     // Focus Target Visual
+			{
+				if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+
+
+src/bindings/ScriptDev2/scripts/kalimdor/caverns_of_time/hyjal/boss_archimonde.cpp View
+@@ -53,10 +53,10 @@ enum
+  SPELL_DOOMFIRE_STRIKE       = 31903,                    // summons 18095 and 18104
+  /*SPELL_SOUL_CHARGE_YELLOW    = 32045,                    // procs 32054
+  SPELL_SOUL_CHARGE_GREEN     = 32051,                    // procs 32057
+- SPELL_SOUL_CHARGE_RED       = 32052,                    // procs 32053
++ SPELL_SOUL_CHARGE_RED       = 32052,                    // procs 32053*/
+  SPELL_SOUL_CHARGE_GREEN_CAST = 32057,
+- SPELL_SOUL_CHARGE_RED_CAST  = 32053,
+- SPELL_SOUL_CHARGE_YELLOW_CAST = 32054,*/
++ SPELL_SOUL_CHARGE_RED_CAST   = 32053,
++ SPELL_SOUL_CHARGE_YELLOW_CAST= 32054,
+  SPELL_FEAR                  = 31970,
+
+  SPELL_PROTECTION_OF_ELUNE   = 38528,                    // protect the players on epilogue
+@@ -106,6 +106,9 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+  uint32 m_uiWispCount;
+  uint32 m_uiCheckRangeTimer;
+  uint32 m_uiEnrageTimer;
++ uint32 m_uiRedChargeTimer;
++ uint32 m_uiYellowChargeTimer;
++ uint32 m_uiGreenChargeTimer;
+
+  bool m_bHasIntro;
+  bool m_bIsEnraged;
+@@ -124,6 +127,9 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+    m_uiWispCount            = 0;
+    m_uiCheckRangeTimer    = 10000;
+    m_uiEnrageTimer          = 10 * MINUTE * IN_MILLISECONDS;
++   m_uiRedChargeTimer     = 0;
++   m_uiYellowChargeTimer  = 0;
++   m_uiGreenChargeTimer   = 0;
+
+    m_bIsEnraged             = false;
+    m_bIsEpilogue            = false;
+@@ -189,6 +195,23 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+    }
+  }
+
++  void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
++  {
++    switch(pSpell->Id)
++    {
++    case SPELL_SOUL_CHARGE_YELLOW:
++	   if(!m_uiYellowChargeTimer)
++      	m_uiYellowChargeTimer = urand(1000, 10000);
++      break;
++    case SPELL_SOUL_CHARGE_RED:
++	   if(!m_uiRedChargeTimer)
++      	m_uiRedChargeTimer = urand(1000, 10000);
++      break;
++    case SPELL_SOUL_CHARGE_GREEN:
++      if(!m_uiGreenChargeTimer)
++      	m_uiGreenChargeTimer = urand(1000, 10000);
++      break;
++    default:break;
++    }
++  }
++
+  // Custom threat management
+  bool SelectHostileTarget()
+  {
+@@ -299,6 +322,89 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+        m_uiEnrageTimer -= uiDiff;
+    }
+
++    // Soul Charge Management
++    if(m_uiYellowChargeTimer)
++    {
++      if(m_uiYellowChargeTimer <= uiDiff)
++      {
++        if(DoCastSpellIfCan(m_creature, SPELL_SOUL_CHARGE_YELLOW_CAST) == CAST_OK)
++        {
++          if(Aura* soulCharge = m_creature->GetDummyAura(SPELL_SOUL_CHARGE_YELLOW))
++          {
++            if(soulCharge->GetHolder()->GetStackAmount() > 1)
++            { 
++              soulCharge->GetHolder()->SetStackAmount(soulCharge->GetHolder()->GetStackAmount() - 1);
++              m_uiYellowChargeTimer = urand(1000, 10000);
++            }
++            else
++            {
++              m_creature->RemoveAurasDueToSpell(SPELL_SOUL_CHARGE_YELLOW);
++              m_uiYellowChargeTimer = 0;
++            }
++          }
++        }
++        else
++          m_uiYellowChargeTimer = 500;
++      }
++      else
++        m_uiYellowChargeTimer -= uiDiff;
++    }
++
++    if(m_uiRedChargeTimer)
++    {
++      if(m_uiRedChargeTimer <= uiDiff)
++      {
++        if(DoCastSpellIfCan(m_creature, SPELL_SOUL_CHARGE_RED_CAST) == CAST_OK)
++        {
++          if(Aura* soulCharge = m_creature->GetDummyAura(SPELL_SOUL_CHARGE_RED))
++          {
++            if(soulCharge->GetHolder()->GetStackAmount() > 1)
++            { 
++              soulCharge->GetHolder()->SetStackAmount(soulCharge->GetHolder()->GetStackAmount() - 1);
++              m_uiRedChargeTimer = urand(1000, 10000);
++            }
++            else
++            {
++              m_creature->RemoveAurasDueToSpell(SPELL_SOUL_CHARGE_RED);
++              m_uiRedChargeTimer = 0;
++            }
++          }
++        }
++        else
++          m_uiRedChargeTimer = 500;
++      }
++      else
++        m_uiRedChargeTimer -= uiDiff;
++    }
++
++    if(m_uiGreenChargeTimer)
++    {
++      if(m_uiGreenChargeTimer <= uiDiff)
++      {
++        if(DoCastSpellIfCan(m_creature, SPELL_SOUL_CHARGE_GREEN_CAST) == CAST_OK)
++        {
++          if(Aura* soulCharge = m_creature->GetDummyAura(SPELL_SOUL_CHARGE_GREEN))
++          {
++            if(soulCharge->GetHolder()->GetStackAmount() > 1)
++            { 
++              soulCharge->GetHolder()->SetStackAmount(soulCharge->GetHolder()->GetStackAmount() - 1);
++              m_uiGreenChargeTimer = urand(1000, 10000);
++            }
++            else
++            {
++              m_creature->RemoveAurasDueToSpell(SPELL_SOUL_CHARGE_GREEN);
++              m_uiGreenChargeTimer = 0;
++            }
++          }
++        }
++        else
++          m_uiGreenChargeTimer = 500;
++      }
++      else
++        m_uiGreenChargeTimer -= uiDiff;
++    }
++
++    // Others spell
+    if (m_uiGripOfTheLegionTimer < uiDiff)
+    {
+      if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+@@ -319,8 +425,8 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+          DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
+          m_uiAirBurstTimer = urand(10000, 20000);
+
+-          if(m_uiFearTimer <= 5000)
+-            m_uiFearTimer = 5000;
++          if(m_uiFearTimer <= 6000)
++            m_uiFearTimer = 6000;
+        }
+      }
+    }

@@ -1,16 +1,26 @@
-src/game/Spell.cpp View
-@@ -1114,7 +1085,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
-    {
-      // Fill base damage struct (unitTarget - is real spell target)
-      SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
-+     uint32 procDamage = 0;
-      procEx = createProcExtendMask(&damageInfo, missInfo);
-+     if(missInfo == SPELL_MISS_NONE)
-+       procDamage = 1;
-      // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
-      if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
--       caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo);
-+       caster->ProcDamageAndSpell(unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, procDamage, m_attackType, m_spellInfo);
-    }
-  
-    // Call scripted function for AI if this spell is casted upon a creature
+src/game/SpellAuras.cpp View
+@@ -777,7 +777,24 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 EventProcEx, uint32 procE
+  				if ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && active)
+  					return true;
+  				else
++				{
++					for(int i = 0; i < MAX_EFFECT_INDEX; i++)
++					{
++						switch(spell->EffectApplyAuraName[i])
++						{
++							// Some aura effect can proc when !active
++						case SPELL_AURA_PERIODIC_DAMAGE:
++						case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
++						case SPELL_AURA_PERIODIC_HEAL:
++						case SPELL_AURA_PERIODIC_LEECH:
++						case SPELL_AURA_MOD_FEAR:
++						case SPELL_AURA_DUMMY:
++							return true;
++							break;
++						}
++					}
+					return false;
++				}
+  			}
+  			else // Passive spells hits here only if resist/reflect/immune/evade
+  			{

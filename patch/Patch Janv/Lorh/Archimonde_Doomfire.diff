@@ -1,0 +1,56 @@
+src/bindings/ScriptDev2/scripts/kalimdor/caverns_of_time/hyjal/boss_archimonde.cpp View
+@@ -370,12 +370,14 @@ struct MANGOS_DLL_DECL boss_archimondeAI : public ScriptedAI
+/* This is the script for the Doomfire Spirit Mob. This mob controls the doomfire npc and allows it to move randomly around the map. */
+struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
+{
+-	npc_doomfire_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) { 
+-		Reset(); 
++	npc_doomfire_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) {
++		Reset();
++		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+	}
+
++	ScriptedInstance* m_pInstance;
++
+	ObjectGuid m_doomfireGuid;
+-	ObjectGuid m_archimondeGuid;
+
+	uint32 m_uiDoomfireLoadTimer;
+	uint32 m_uiChangeTargetTimer;
+@@ -410,13 +412,15 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
+				// Get the closest doomfire
+				if (Creature* pTemp = GetClosestCreatureWithEntry(m_creature, NPC_DOOMFIRE, 5.0f))
+				{
+-					if(Creature* pArchimonde = GetClosestCreatureWithEntry(m_creature, NPC_ARCHIMONDE, 80.0f))
++					if(m_pInstance)
+					{
+-						m_doomfireGuid = pTemp->GetObjectGuid();
+-						m_archimondeGuid = pArchimonde->GetObjectGuid();						
++						if(Creature* pArchimonde = m_pInstance->GetSingleCreatureFromStorage(NPC_ARCHIMONDE))
++						{
++							m_doomfireGuid = pTemp->GetObjectGuid();
+
+-						m_fAngle = pTemp->GetAngle(pArchimonde) + urand(M_PI * .75,  M_PI * 1.5);
+-						pTemp->SetOrientation(m_fAngle);
++							m_fAngle = pTemp->GetAngle(pArchimonde) + urand(M_PI * .75,  M_PI * 1.5);
++							pTemp->SetOrientation(m_fAngle);
++						}
+					}
+				}
+
+@@ -440,11 +444,10 @@ struct MANGOS_DLL_DECL npc_doomfire_spiritAI : public ScriptedAI
+				if(pTargetException)
+					pTargetException = NULL;
+
+-				if(Creature* pArchimonde = m_creature->GetMap()->GetCreature(m_archimondeGuid))
+-				{
+-					if(pArchimonde->getVictim())
+-						pTargetException = pArchimonde->getVictim();
+-				}
++				if(m_pInstance)
++					if(Creature* pArchimonde = m_pInstance->GetSingleCreatureFromStorage(NPC_ARCHIMONDE))				
++						if(pArchimonde->getVictim())
++							pTargetException = pArchimonde->getVictim();
+
+				m_uiRandTarget = urand(0, 2);
+				if(m_uiRandTarget)

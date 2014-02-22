@@ -1,0 +1,9 @@
+@@ -4402,6 +4395,10 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
+void Aura::HandleAuraModDmgImmunity(bool apply, bool /*Real*/)
+  {
+  	GetTarget()->ApplySpellImmune(GetId(), IMMUNITY_DAMAGE, m_modifier.m_miscvalue, apply);
++
++	// Spite
++	if(!apply && GetId() == 41376)
++		GetCaster()->CastSpell(GetTarget(), 41377, true, NULL, this);
+  }

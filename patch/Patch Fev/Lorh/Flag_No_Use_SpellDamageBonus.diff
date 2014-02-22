@@ -1,0 +1,10 @@
+src/game/Unit.cpp View
+@@ -5875,7 +5873,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
+*/
+uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+{
+-	if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE)
++	if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE || spellProto->HasAttribute(SPELL_ATTR_EX3_UNK29))
+		return pdamage;
+
+	// For totems get damage bonus from owner (statue isn't totem in fact)

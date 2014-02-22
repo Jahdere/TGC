@@ -1,0 +1,19 @@
+src/game/Spell.cpp View
+@@ -5295,7 +5297,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
+
+		if (_target)                                        // for target dead/target not valid
+		{
+-			if (!_target->isTargetableForAttack())
++			if (!_target->isTargetableForAttack() && m_caster != _target)
+				return SPELL_FAILED_BAD_TARGETS;            // guessed error
+
+			if (IsPositiveSpell(m_spellInfo->Id))
+@@ -5311,7 +5313,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
+					// TARGET_DUELVSPLAYER is positive AND negative
+					duelvsplayertar |= (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DUELVSPLAYER);
+				}
+-				if (m_caster->IsFriendlyTo(target) && !duelvsplayertar)
++				if (m_caster->IsFriendlyTo(target) && !duelvsplayertar && m_caster != _target)
+				{
+					return SPELL_FAILED_BAD_TARGETS;
+				}

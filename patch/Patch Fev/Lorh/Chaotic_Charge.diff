@@ -1,0 +1,17 @@
+src/game/SpellAuras.cpp View
+@@ -1876,6 +1876,16 @@ void Aura::TriggerSpellWithValue()
+  	uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
+  	int32  basepoints0 = GetModifier()->m_amount;
+  
++	// Chaotic Charge
++	if(trigger_spell_id == 41039)
++	{
++		if(Aura* holder = target->GetDummyAura(41033))
++			basepoints0 = basepoints0 * holder->GetHolder()->GetStackAmount();
++		else 
++			return;
++	}
++		
++
+  	target->CastCustomSpell(target, trigger_spell_id, &basepoints0, NULL, NULL, true, NULL, this, casterGuid);
+  }

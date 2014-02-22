@@ -1,0 +1,12 @@
+src/game/SpellAuras.cpp View
+@@ -4306,6 +4306,10 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
+  {
+    Unit* target = GetTarget();
+  
++   // Suffering passive immune health drain
++   if(apply && GetId() == 41296)
++     target->CastSpell(target, 41623, true);
++ 
+    // when removing flag aura, handle flag drop
+    if (!apply && target->GetTypeId() == TYPEID_PLAYER
+      && (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION))

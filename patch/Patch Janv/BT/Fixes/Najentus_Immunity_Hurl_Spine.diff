@@ -1,0 +1,9 @@
+src/game/Unit.cpp View
+@@ -2934,6 +2931,10 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool
+	if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+		return SPELL_MISS_EVADE;
+
++	// Naj'entus Hurl Spine exception
++	if(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->GetEntry() == 22887 && spell->Id == 39948)
++		return SPELL_MISS_NONE;
++

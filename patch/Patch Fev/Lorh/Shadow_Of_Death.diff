@@ -1,0 +1,52 @@
+src/game/SpellAuras.cpp View
+@@ -3436,6 +3436,13 @@ void Aura::HandleModPossess(bool apply, bool Real)
+			((Creature*)target)->AIM_Initialize();
+			target->AttackedBy(caster);
+		}
++
++		// Shadow Of death insta kill (Teron)
++		if(GetId() == 40268)
++		{
++			p_caster->DealDamage(p_caster, p_caster->GetMaxHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
++			p_caster->CastSpell(target, 41626, true, NULL, this);
++		}
+	}
+}
+
+@@ -5987,15 +5994,14 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
+  			DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
+
+			m_modifier.m_amount += (int32)DoneActualBenefit;
+		}
+	}
++	else
++	{
++		if (GetId() == 40251)
++		{
++			// Shadow Of Death Summon Skeleton & Spirit (Teron)
++			target->CastSpell(target, 40270, true);
++			target->CastSpell(target, 41948, true);
++			target->CastSpell(target, 41949, true);
++			target->CastSpell(target, 41950, true);
++			target->CastSpell(target, 40266, true);
++		}
++	}
+  }
+
+
+src/game/SpellEffects.cpp View
+@@ -3973,6 +3973,14 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
+					summon->FixateTarget(pTarget);
+			}
+
++			// Summon Spirit (Shadow of Death initial spell)
++			if(m_spellInfo->Id == 40266)
++			{
++				m_caster->CastSpell(m_caster, 40268, true, NULL, NULL, m_caster->GetObjectGuid()); // Possess Spirit by Player
++				m_caster->CastSpell(m_caster, 40282, true);	// Can't be attackable
++				summon->CastSpell(summon, 40282, true);		// Can't be attackable
++			}
++
+			// Notify original caster if not done already
+			if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+				((Creature*)m_originalCaster)->AI()->JustSummoned(summon);

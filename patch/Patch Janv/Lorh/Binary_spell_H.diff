@@ -1,0 +1,30 @@
+@@ -99,115 +91,118 @@ enum SpellSpecific
+inline boo@@ -91,115 +91,118 @@ enum SpellSpecificl IsSpellBinary(SpellEntry const* spellInfo, Unit const* caster)
+{
+	if(spellInfo->SchoolMask == SPELL_SCHOOL_MASK_NORMAL)
+		return false;
+
+	// Case frostbolt exception on 2.4.3
+	if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_MAGE && spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000180020))
+		return false;
+-	
+-	// Generic case
+-	for(int i = 0 ; i < MAX_EFFECT_INDEX ; i ++)
+-		if(spellInfo->Effect[i] != SPELL_EFFECT_NONE && spellInfo->Effect[i] != SPELL_EFFECT_SCHOOL_DAMAGE &&
+-			spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE && spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE_PERCENT && spellInfo->EffectApplyAuraName[i] != SPELL_AURA_DUMMY)
+-			return true;
++
++	if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE)
++	{
++		for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
++		{
++			if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && 
++				(spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE && 
++				spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_LEECH && 
++				spellInfo->EffectApplyAuraName[i] != SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
++				return true;
++		}
++	}
+
+	return false;
+}
