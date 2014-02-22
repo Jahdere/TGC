@@ -140,6 +140,7 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 		{
 		case NPC_SHADOWY_CONSTRUCT:
 			pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true);
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 			pSummoned->SetInCombatWithZone();
 			break;
 		case NPC_DOOM_BLOSSOM:

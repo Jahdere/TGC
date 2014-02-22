@@ -157,7 +157,7 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
 	void MoveInLineOfSight(Unit* pWho) override
 	{
 		if (m_uiPhase == PHASE_0_NOT_BEGUN && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-			m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+			m_creature->IsWithinDistInMap(pWho, 65.0f) && m_creature->IsWithinLOSInMap(pWho))
 		{
 			// Start phase 1
 			m_uiPhase = PHASE_1_SUFFERING;
@@ -188,6 +188,9 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
 			break;
 		case NPC_ESSENCE_ANGER:
 			DoScriptText(ANGER_SAY_FREED, pSummoned);
+			break;
+		case NPC_ENSLAVED_SOUL:
+			m_uiSoulSummonedCount++;
 			break;
 		}
 
@@ -234,7 +237,6 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
 	void DoNotifySouldDead()
 	{
 		++m_uiSoulDeathCount;
-
 		// Prepare to summon the essence
 		if (m_uiSoulDeathCount == MAX_ENSLAVED_SOULS)
 		{
@@ -306,7 +308,6 @@ struct MANGOS_DLL_DECL boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
 				{
 					if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ENSLAVED_SOUL) == CAST_OK)
 					{
-						++m_uiSoulSummonedCount;
 						m_uiSummonSoulTimer = 500;
 					}
 				}

@@ -42,6 +42,14 @@ enum
 	NPC_SPIRIT_OF_OLUM              = 23411,
 	NPC_SPIRIT_OF_UDALO             = 23410,
 
+	NPC_MISTYC						= 22845,
+	NPC_STORMCALLER					= 22846,
+	NPC_BATTLELORD					= 22844,
+	NPC_PRIMALIST					= 22847,
+	NPC_FERAL_SPIRIT				= 22849,
+	NPC_STORM_FURY					= 22848,
+	NPC_ASHTONGUE_STALKER			= 23374,
+
 	GO_NAJENTUS_GATE                = 185483,
 	GO_SUPREMUS_DOORS               = 185882,
 	GO_SHADE_OF_AKAMA               = 185478,
@@ -87,6 +95,7 @@ private:
 	std::string m_strInstData;
 
 	GuidList m_lChannelersGuidList;
+	GuidList m_lAkamaFriendsGuidList;
 	GuidVector m_vCreatureGeneratorGuidVector;
 	GuidVector m_vGlaiveTargetGuidVector;
 };

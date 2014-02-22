@@ -95,6 +95,17 @@ void instance_black_temple::OnCreatureCreate(Creature* pCreature)
 	case NPC_GLAIVE_TARGET:
 		m_vGlaiveTargetGuidVector.push_back(pCreature->GetObjectGuid());
 		break;
+	case NPC_MISTYC:
+	case NPC_STORMCALLER:
+	case NPC_BATTLELORD:
+	case NPC_PRIMALIST:
+	case NPC_FERAL_SPIRIT:
+	case NPC_STORM_FURY:
+	case NPC_ASHTONGUE_STALKER:
+		m_lAkamaFriendsGuidList.push_back(pCreature->GetObjectGuid());
+		if(GetData(TYPE_SHADE) == DONE)
+			pCreature->setFaction(35);
+		break;
 	}
 }
 
@@ -118,8 +129,8 @@ void instance_black_temple::OnObjectCreate(GameObject* pGo)
 			pGo->SetGoState(GO_STATE_ACTIVE);
 		break;
 	case GO_PRE_SHAHRAZ_DOOR:                           // Door leading to Mother Shahraz
-		if (m_auiEncounter[TYPE_SHADE] == DONE && m_auiEncounter[TYPE_GOREFIEND] == DONE && m_auiEncounter[TYPE_BLOODBOIL] == DONE && m_auiEncounter[TYPE_RELIQUIARY] == DONE)
-			pGo->SetGoState(GO_STATE_ACTIVE);
+	/*	if (m_auiEncounter[TYPE_SHADE] == DONE && m_auiEncounter[TYPE_GOREFIEND] == DONE && m_auiEncounter[TYPE_BLOODBOIL] == DONE && m_auiEncounter[TYPE_RELIQUIARY] == DONE)
+			pGo->SetGoState(GO_STATE_ACTIVE);*/
 		break;
 	case GO_POST_SHAHRAZ_DOOR:                          // Door after shahraz
 		if (m_auiEncounter[TYPE_SHAHRAZ] == DONE)
@@ -170,8 +181,19 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
 				}
 			}
 		}
+
 		if (uiData == DONE)
+		{
 			DoOpenPreMotherDoor();
+
+			for (GuidList::const_iterator itr = m_lAkamaFriendsGuidList.begin(); itr != m_lAkamaFriendsGuidList.end(); ++itr)
+			{
+				if (Creature* pFriends = instance->GetCreature(*itr))
+				{
+					pFriends->setFaction(35);
+				}
+			}
+		}
 		break;
 	case TYPE_GOREFIEND:
 		m_auiEncounter[uiType] = uiData;
@@ -248,8 +270,8 @@ uint32 instance_black_temple::GetData(uint32 uiType) const
 
 void instance_black_temple::DoOpenPreMotherDoor()
 {
-	if (GetData(TYPE_SHADE) == DONE && GetData(TYPE_GOREFIEND) == DONE && GetData(TYPE_BLOODBOIL) == DONE && GetData(TYPE_RELIQUIARY) == DONE)
-		DoUseDoorOrButton(GO_PRE_SHAHRAZ_DOOR);
+	/*if (GetData(TYPE_SHADE) == DONE && GetData(TYPE_GOREFIEND) == DONE && GetData(TYPE_BLOODBOIL) == DONE && GetData(TYPE_RELIQUIARY) == DONE)
+		DoUseDoorOrButton(GO_PRE_SHAHRAZ_DOOR);*/
 }
 
 void instance_black_temple::DoSpawnAkamaIfCan()
