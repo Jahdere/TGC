@@ -70,7 +70,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
 void PetAI::AttackStart(Unit* u)
 {
-    if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
+    if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET) || m_creature->isCharmedOwnedByPlayerOrPlayer())
         return;
 
     if (m_creature->Attack(u, true))
