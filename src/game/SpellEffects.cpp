@@ -2319,6 +2319,9 @@ void Spell::EffectTriggerSpellWithValue(SpellEffectIndex eff_idx)
 	}
 
 	int32 bp = damage;
+	if(m_spellInfo->Id == 40872)
+		error_log("********* DAMAGE IMMOLATION %u *********", damage);
+
 	m_caster->CastCustomSpell(unitTarget, triggered_spell_id, &bp, &bp, &bp, true, m_CastItem , NULL, m_originalCasterGUID, m_spellInfo);
 }
 
@@ -4097,8 +4100,9 @@ void Spell::DoSummonGuardian(SpellEffectIndex eff_idx, uint32 forceFaction)
 
 
 		//Exception Gardien Elementaire / Feu Shaman totem  @Kordbc
-		if(spawnCreature->GetEntry() == 15352 || spawnCreature->GetEntry() == 15438)
+		if(spawnCreature->GetEntry() == 15352 || spawnCreature->GetEntry() == 15438 || spawnCreature->GetEntry() == 23371)
 		{
+			error_log("**********y o *******");
 			spawnCreature->SetCreateHealth(cInfo->maxhealth);
 			spawnCreature->SetCreateMana(cInfo->maxmana);
 			spawnCreature->SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(cInfo->armor));
@@ -4869,7 +4873,7 @@ void Spell::EffectInterruptCast(SpellEffectIndex /*eff_idx*/)
 		{
 			SpellEntry const* curSpellInfo = spell->m_spellInfo;
 			// check if we can interrupt spell
-			if ((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+			if (((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE) || curSpellInfo->Id == 41426) // Spirit Chock ??
 			{
 				unitTarget->ProhibitSpellSchool(GetSpellSchoolMask(curSpellInfo), GetSpellDuration(m_spellInfo));
 				unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
