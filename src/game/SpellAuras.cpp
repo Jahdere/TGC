@@ -1979,13 +1979,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 							target->RemoveAurasDueToSpell(31970);
 						return;
 					}
-				case 32045:								// Soul Charge
-				case 32051:
-				case 32052:
-					{
-						GetHolder()->SetAuraCharges(GetHolder()->GetStackAmount());							
-						return;
-					}
 				case 33326:                             // Stolen Soul Dispel
 					{
 						target->RemoveAurasDueToSpell(32346);
@@ -4402,6 +4395,10 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
 void Aura::HandleAuraModDmgImmunity(bool apply, bool /*Real*/)
 {
 	GetTarget()->ApplySpellImmune(GetId(), IMMUNITY_DAMAGE, m_modifier.m_miscvalue, apply);
+
+	// Spite
+	if(!apply && GetId() == 41376)
+		GetCaster()->CastSpell(GetTarget(), 41377, true, NULL, this);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
@@ -4601,6 +4598,15 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 
 		switch (spellProto->SpellFamilyName)
 		{
+		case SPELLFAMILY_GENERIC:
+			{
+				if(spellProto->Id == 40953)
+				{					
+					int32 dmg = m_currentBasePoints;
+					error_log("*********** DAMAGE TICK %u ***********", m_currentBasePoints);
+				}
+			break;
+			}
 		case SPELLFAMILY_WARRIOR:
 			{
 				// Rend
@@ -6101,10 +6107,9 @@ void Aura::PeriodicTick()
 			// Aura of Anger (ROS)
 			if(spellProto->Id == 41337)
 			{
-				if(Aura* AuraAngerEff0 = GetHolder()->GetAuraByEffectIndex(GetEffIndex()))
-					AuraAngerEff0->GetHolder()->SetStackAmount(GetAuraTicks() + 1);
+				pdamage = GetBasePoints() * GetAuraTicks();
 				if(Aura* AuraAngerEff1 = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1))
-					AuraAngerEff1->GetHolder()->SetStackAmount(GetAuraTicks());
+					AuraAngerEff1->GetHolder()->SetStackAmount(AuraAngerEff1->GetHolder()->GetStackAmount() + 1);
 			}
 
 			// As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
