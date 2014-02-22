@@ -762,6 +762,23 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
 	return true;
 }
 
+void BattleGroundQueue::DropOldMatchIfCan(GroupQueueInfo* group)
+{
+	uint32 timeInQueue = WorldTimer::getMSTimeDiff(group->JoinTime, WorldTimer::getMSTime());
+
+	// Each 5 min in Queue , drop an old fight
+	ArenaTeam* arenaTeam = sObjectMgr.GetArenaTeamById(group->ArenaTeamId);
+	if(!arenaTeam->GetFoughtTeamList().empty())
+	{
+		uint32 countOldTeam = arenaTeam->GetFoughtTeamList().size();
+
+		//Custom calcul , all 4mn in queue we drop an old team. Starting at 2mn.
+		uint32 timerNextDrop = (10 - countOldTeam) * 240 + 120;		
+		if(timeInQueue < timerNextDrop)
+			arenaTeam->DropOldFight();
+	}
+}
+
 /*
 this method is called when group is inserted, or player / group is removed from BG Queue - there is only one player's status changed, so we don't use while(true) cycles to invite whole queue
 it must be called after fully adding the members of a group to ensure group joining
@@ -992,7 +1009,11 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 			m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup(group1, MaxPlayersPerTeam);
 			m_SelectionPools[BG_TEAM_HORDE].AddGroup(group2, MaxPlayersPerTeam);
 		}
-
+		else
+		{
+			DropOldMatchIfCan(group1);
+			DropOldMatchIfCan(group2);
+		}
 		// if we have 2 teams, then start new arena and invite players!
 		if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount())
 		{
