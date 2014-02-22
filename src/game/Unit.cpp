@@ -2214,6 +2214,23 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 			CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
 			pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
 		}
+
+		// Aura of desire reflect 50% of all dmg
+		if(this->GetTypeId() != TYPEID_PLAYER && this->GetEntry() == 23419 && pCaster->HasAura(41350))
+		{
+			uint32 reflectDamage = RemainingDamage / 2;
+			SpellEntry const* DesireSpellInfo = sSpellStore.LookupEntry(41350);
+			if(reflectDamage)
+			{
+				uint32 reflect_absorb = 0;
+				pCaster->DealDamageMods(pCaster, reflectDamage, &reflect_absorb);
+
+				pCaster->SendSpellNonMeleeDamageLog(this, DesireSpellInfo->Id, reflectDamage, schoolMask, reflect_absorb, 0, false, 0, false);
+
+				CleanDamage cleanDamage = CleanDamage(reflectDamage, BASE_ATTACK, MELEE_HIT_NORMAL);
+				this->DealDamage(pCaster, reflectDamage, &cleanDamage, DIRECT_DAMAGE, schoolMask, DesireSpellInfo, false);
+			}
+		}
 	}
 
 	// Apply death prevention spells effects
@@ -5873,7 +5890,7 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
 */
 uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
-	if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE ) //|| spellProto->HasAttribute(SPELL_ATTR_EX3_UNK29)
+	if (!spellProto || !pVictim || damagetype == DIRECT_DAMAGE || spellProto->HasAttribute(SPELL_ATTR_EX3_UNK29))
 		return pdamage;
 
 	// For totems get damage bonus from owner (statue isn't totem in fact)
@@ -8983,13 +9000,12 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
 	if (procTriggered.empty())
 		return;
 
-	bool procSoulCharge = false;
 	// Handle effects proceed this time
 	for (ProcTriggeredList::const_iterator itr = procTriggered.begin(); itr != procTriggered.end(); ++itr)
 	{
 		// Some auras can be deleted in function called in this loop (except first, ofc)
 		SpellAuraHolder* triggeredByHolder = itr->triggeredByHolder;
-		if (triggeredByHolder->IsDeleted() || procSoulCharge)
+		if (triggeredByHolder->IsDeleted())
 			continue;
 
 		SpellProcEventEntry const* spellProcEvent = itr->spellProcEvent;
@@ -9040,20 +9056,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
 			}
 
 			anyAuraProc = true;
-
-			// Soul Charge Management , proc one by one
-			switch(triggeredByHolder->GetId())
-			{
-			case 32045:
-			case 32052:
-			case 32051:
-				{
-				if(procSuccess)
-					procSoulCharge = true;
-				}
-				break;
-			default:break;
-			}
 		}
 
 		// Remove charge (aura can be removed by triggers)
