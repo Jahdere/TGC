@@ -594,11 +594,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 			case 32051:
 			case 32052:
 				{
-					if(target->IsNonMeleeSpellCasted(true))
-						return SPELL_AURA_PROC_FAILED;
-
-					float chance = 40.0f;
-					if (!roll_chance_f(chance))
+					if(IsNonMeleeSpellCasted(true) && m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id != procSpell->Id)
 						return SPELL_AURA_PROC_FAILED;
 
 					switch(dummySpell->Id)
@@ -608,8 +604,15 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
 					case 32052: triggered_spell_id = 32053; break;
 					}
 
-					CastSpell(this, triggered_spell_id, false, NULL, triggeredByAura, this->GetObjectGuid());
-					return SPELL_AURA_PROC_OK;
+					if(procSpell->Id == triggered_spell_id)
+						return SPELL_AURA_PROC_FAILED;
+
+					if(triggeredByAura->GetHolder()->GetStackAmount() > 1)
+						triggeredByAura->GetHolder()->SetStackAmount(triggeredByAura->GetHolder()->GetStackAmount() - 1);
+					else
+						RemoveAurasDueToSpell(dummySpell->Id);
+					CastSpell(this, triggered_spell_id, false, NULL, triggeredByAura, GetObjectGuid());
+					return SPELL_AURA_PROC_FAILED;
 				}
 				// Mark of Malice
 			case 33493:
@@ -1710,8 +1713,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 			// case 40364: break;                   // Entangling Roots Sensor
 			// case 41054: break;                   // Copy Weapon
 			//    trigger_spell_id = 41055; break;
-			// case 41248: break;                   // Consuming Strikes
-			//    trigger_spell_id = 41249; break;
+		case 41248:	//Consuming Strikes
+			target = this;
+			trigger_spell_id = 41249;
+			basepoints[0] = damage;
+			break;                   
 			// case 43453: break:                   // Rune Ward
 			// case 43504: break;                   // Alterac Valley OnKill Proc Aura
 		case 43820:                                 // Charm of the Witch Doctor (Amani Charm of the Witch Doctor trinket)
