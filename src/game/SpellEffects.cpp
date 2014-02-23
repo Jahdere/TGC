@@ -369,16 +369,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 							damage = m_triggeredBySpellInfo->EffectBasePoints[effect_idx];
 						break;
 					}
-					//Aura of desire -> trigger spell proc effect , decrease mana max 5% 
-				case 41352:
-					{
-						if(unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetMaxPower(POWER_MANA) > 0)
-						{
-							uint32 mana_pool_diff =  ((Player*)unitTarget)->GetMaxPower(POWER_MANA) - ((((Player*)unitTarget)->GetManaBonusFromIntellect() + ((Player*)unitTarget)->GetCreateMana()) * 0.05);
-							((Player*)unitTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
-						}
-						break;
-					}
 				}
 				break;
 			}

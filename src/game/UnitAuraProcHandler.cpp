@@ -56,7 +56,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
 	&Unit::HandleNULLProc,                                  // 20 SPELL_AURA_OBS_MOD_HEALTH
 	&Unit::HandleNULLProc,                                  // 21 SPELL_AURA_OBS_MOD_MANA
 	&Unit::HandleModResistanceAuraProc,                     // 22 SPELL_AURA_MOD_RESISTANCE
-	&Unit::HandleNULLProc,                                  // 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL
+	&Unit::HandleProcTriggerSpellAuraProc,                  // 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL
 	&Unit::HandleNULLProc,                                  // 24 SPELL_AURA_PERIODIC_ENERGIZE
 	&Unit::HandleNULLProc,                                  // 25 SPELL_AURA_MOD_PACIFY
 	&Unit::HandleNULLProc,                                  // 26 SPELL_AURA_MOD_ROOT
@@ -1717,7 +1717,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 			target = this;
 			trigger_spell_id = 41249;
 			basepoints[0] = damage;
-			break;                   
+			break;
+		case 41350:
+			target = this;
+			trigger_spell_id = 41352;
+			basepoints[0] = int32(damage / 2);
+			break;
 			// case 43453: break:                   // Rune Ward
 			// case 43504: break;                   // Alterac Valley OnKill Proc Aura
 		case 43820:                                 // Charm of the Witch Doctor (Amani Charm of the Witch Doctor trinket)

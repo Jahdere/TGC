@@ -1566,7 +1566,11 @@ void Aura::TriggerSpell()
 					//                    // Prismatic Shield
 					//                    case 40879: break;
 				case 41350:				  // Aura of Desire
-					trigger_spell_id = 41352;
+					if(triggerTarget->GetTypeId() == TYPEID_PLAYER && triggerTarget->GetMaxPower(POWER_MANA) > 0)
+					{
+						uint32 mana_pool_diff =  ((Player*)triggerTarget)->GetMaxPower(POWER_MANA) - ((((Player*)triggerTarget)->GetManaBonusFromIntellect() + ((Player*)triggerTarget)->GetCreateMana()) * 0.05);
+						((Player*)triggerTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
+					}
 					break;
 					//                    // Dementia
 					//                    case 41404: break;
@@ -4605,7 +4609,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 					int32 dmg = m_currentBasePoints;
 					error_log("*********** DAMAGE TICK %u ***********", m_currentBasePoints);
 				}
-			break;
+				break;
 			}
 		case SPELLFAMILY_WARRIOR:
 			{
