@@ -816,6 +816,9 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
 		if (target.reflectResult == SPELL_MISS_REFLECT)     // Impossible reflect again, so simply deflect spell
 			target.reflectResult = SPELL_MISS_PARRY;
 
+		if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000008))	// Can't reflect a frozen trap, just deflect it
+			target.reflectResult = SPELL_MISS_PARRY;
+
 		// Increase time interval for reflected spells by 1.5
 		target.timeDelay += target.timeDelay >> 1;
 	}
