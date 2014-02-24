@@ -2214,23 +2214,6 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 			CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
 			pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
 		}
-
-		// Aura of desire reflect 50% of all dmg
-		if(this->GetTypeId() != TYPEID_PLAYER && this->GetEntry() == 23419 && pCaster->HasAura(41350))
-		{
-			uint32 reflectDamage = RemainingDamage / 2;
-			SpellEntry const* DesireSpellInfo = sSpellStore.LookupEntry(41350);
-			if(reflectDamage)
-			{
-				uint32 reflect_absorb = 0;
-				pCaster->DealDamageMods(pCaster, reflectDamage, &reflect_absorb);
-
-				pCaster->SendSpellNonMeleeDamageLog(this, DesireSpellInfo->Id, reflectDamage, schoolMask, reflect_absorb, 0, false, 0, false);
-
-				CleanDamage cleanDamage = CleanDamage(reflectDamage, BASE_ATTACK, MELEE_HIT_NORMAL);
-				this->DealDamage(pCaster, reflectDamage, &cleanDamage, DIRECT_DAMAGE, schoolMask, DesireSpellInfo, false);
-			}
-		}
 	}
 
 	// Apply death prevention spells effects
@@ -6524,6 +6507,26 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
 				return true;
 	}
 
+	// Special case for Shadowy Construct
+	switch(spellInfo->Id)
+	{
+	case 40175:
+	case 40157:
+	case 40325:
+	case 40314:
+		{
+		if(this->HasAura(40326))
+			return false;
+		else
+			return true;
+		break;
+		}
+	default:
+		if(this->HasAura(40326))
+			return true;
+		break;
+	}
+
 	return false;
 }
 
@@ -8658,6 +8661,8 @@ void CharmInfo::InitPossessCreateSpells()
 
 	if(m_unit->GetEntry() == 23109)
 		AddSpellToActionBar(40322, ACT_PASSIVE); // Exception case 5 spell (Spirit Shield , Teron)
+
+	m_unit->setFaction(TEMPFACTION_RESTORE_COMBAT_STOP);
 }
 
 void CharmInfo::InitCharmCreateSpells()
