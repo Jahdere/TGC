@@ -1581,7 +1581,6 @@ void Aura::TriggerSpell()
 						((Player*)triggerTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
 					}
 					break;
-					break;
 					//                    // Dementia
 					//                    case 41404: break;
 					//                    // Chaos Form
@@ -3881,6 +3880,10 @@ void Aura::HandleModStealth(bool apply, bool Real)
 void Aura::HandleInvisibility(bool apply, bool Real)
 {
 	Unit* target = GetTarget();
+
+	//Do not use invisibility effect during preparation
+	if(GetId() == 32727)
+		return;
 
 	if (apply)
 	{
