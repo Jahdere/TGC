@@ -56,6 +56,7 @@ enum
 	// SPELL_ATROPHY             = 40327,                   // Shadowy Constructs use this when they get within melee range of a player
 	SPELL_SHADOWY_CONSTRUCT     = 40326,
 	SPELL_SHADOW_BOLT			= 40185,
+	SPELL_PHYSICAL_IMMUNITY		= 34311,
 
 	NPC_DOOM_BLOSSOM			= 23123,
 	NPC_DOOM_BLOSSOM_TARGET		= 23124,
@@ -140,7 +141,7 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 		{
 		case NPC_SHADOWY_CONSTRUCT:
 			pSummoned->CastSpell(pSummoned, SPELL_SHADOWY_CONSTRUCT, true);
-			pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+			pSummoned->CastSpell(pSummoned, SPELL_PHYSICAL_IMMUNITY, true);
 			pSummoned->SetInCombatWithZone();
 			break;
 		case NPC_DOOM_BLOSSOM:
@@ -238,7 +239,7 @@ struct MANGOS_DLL_DECL npc_doomblossomAI : public ScriptedAI
 
 	void Reset() override 
 	{
-		m_uiShadowBoltTimer = urand(2000, 3000);;
+		m_uiShadowBoltTimer = 8000;
 		m_uiLoadTargetTimer = 500;		
 	}
 
@@ -266,8 +267,7 @@ struct MANGOS_DLL_DECL npc_doomblossomAI : public ScriptedAI
 		{
 			if(Creature* pTeron = GetClosestCreatureWithEntry(m_creature, NPC_TERON_GOREFIEND, 40.0f))
 			{
-				//if(Unit* pTarget = pTeron->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOW_BOLT, SELECT_FLAG_PLAYER))
-				if(Unit* pTarget = pTeron->getVictim())
+				if(Unit* pTarget = pTeron->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOW_BOLT, SELECT_FLAG_PLAYER))
 				{
 					if(DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
 					{
