@@ -1536,8 +1536,17 @@ void Aura::TriggerSpell()
 					//                    case 40041: break;
 					//                    // Knockdown Fel Cannon: The Aggro Check Aura
 					//                    case 40113: break;
-					//                    // Spirit Lance
-					//                    case 40157: break;
+				case 40157:								// Spirit Lance
+					GetModifier()->m_amount = 10 * GetStackAmount();
+					if(Aura* slowAura = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1))
+					{
+						slowAura->GetModifier()->m_amount += GetModifier()->m_amount;
+						slowAura->SetModifier(slowAura->GetModifier()->m_auraname, slowAura->GetModifier()->m_amount, slowAura->GetModifier()->periodictime, slowAura->GetModifier()->m_miscvalue);
+						target->UpdateSpeed(MOVE_RUN, true);
+						target->UpdateSpeed(MOVE_SWIM, true);
+						target->UpdateSpeed(MOVE_FLIGHT, true);
+					}					
+					break;
 				case 40398:                             // Demon Transform 2
 					switch (GetAuraTicks())
 					{
@@ -1571,6 +1580,7 @@ void Aura::TriggerSpell()
 						uint32 mana_pool_diff =  ((Player*)triggerTarget)->GetMaxPower(POWER_MANA) - ((((Player*)triggerTarget)->GetManaBonusFromIntellect() + ((Player*)triggerTarget)->GetCreateMana()) * 0.05);
 						((Player*)triggerTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
 					}
+					break;
 					break;
 					//                    // Dementia
 					//                    case 41404: break;
@@ -5993,10 +6003,10 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 		if (GetId() == 40251)
 		{
 			// Shadow Of Death Summon Skeleton & Spirit (Teron)
-			target->CastSpell(target, 40270, true);
-			target->CastSpell(target, 41948, true);
-			target->CastSpell(target, 41949, true);
-			target->CastSpell(target, 41950, true);
+			target->CastSpell(target, 40270, true, NULL, NULL, caster->GetObjectGuid());
+			target->CastSpell(target, 41948, true, NULL, NULL, caster->GetObjectGuid());
+			target->CastSpell(target, 41949, true, NULL, NULL, caster->GetObjectGuid());
+			target->CastSpell(target, 41950, true, NULL, NULL, caster->GetObjectGuid());
 			target->CastSpell(target, 40266, true);
 		}
 	}
