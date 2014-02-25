@@ -800,7 +800,7 @@ void ArenaTeam::DropOldFight()
 		// Trying to catch team opponent with a 200 rating diff
 		if(ArenaTeam* arenaTeamOpposent = sObjectMgr.GetArenaTeamById(*itr))
 		{
-			uint32 diffRating = teamRating - arenaTeamOpposent->GetRating();
+			int32 diffRating = teamRating - arenaTeamOpposent->GetRating();
 			if(diffRating < 200 && diffRating > -200)
 				oldTeamList.insert(*itr);
 		}
@@ -810,13 +810,13 @@ void ArenaTeam::DropOldFight()
 	if(!oldTeamList.empty())
 	{
 		FoughtTeamList::iterator itr = m_foughtTeamList.begin();
-		advance(m_foughtTeamList.begin(), urand(0, m_foughtTeamList.size() - 1));
+		advance(itr, urand(0, m_foughtTeamList.size() - 1));
 		m_foughtTeamList.erase(itr);
 	}
 	else
 	{
 		FoughtTeamList::iterator itr = m_foughtTeamList.begin();
-		advance(m_foughtTeamList.begin(), urand(0, m_foughtTeamList.size() - 1));
+		advance(itr, urand(0, m_foughtTeamList.size() - 1));
 		m_foughtTeamList.erase(itr);
 	}	
 }
