@@ -1580,9 +1580,20 @@ void Aura::TriggerSpell()
 						uint32 mana_pool_diff =  ((Player*)triggerTarget)->GetMaxPower(POWER_MANA) - ((((Player*)triggerTarget)->GetManaBonusFromIntellect() + ((Player*)triggerTarget)->GetCreateMana()) * 0.05);
 						((Player*)triggerTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
 					}
-					break;
-					//                    // Dementia
-					//                    case 41404: break;
+					break;				
+				case 41404:								// Dementia
+					switch(urand(0,1))
+					{
+					case 0:
+						target->CastSpell(target, 41409, true);
+						break;
+					case 1:
+						target->CastSpell(target, 41406, true);
+						break;
+					default:
+						break;
+					}
+					break;		  
 					//                    // Chaos Form
 					//                    case 41629: break;
 					//                    // Alert Drums
@@ -3880,10 +3891,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
 void Aura::HandleInvisibility(bool apply, bool Real)
 {
 	Unit* target = GetTarget();
-
-	//Do not use invisibility effect during preparation
-	if(GetId() == 32727)
-		return;
 
 	if (apply)
 	{
@@ -6900,10 +6907,17 @@ void Aura::HandleArenaPreparation(bool apply, bool Real)
 
 	if (apply)
 	{
+		/*// Remove invisibility applied by aura to let pets visibles for both players
+		HandleInvisibility(false,false);
+		// remove glow vision if player
+		if (target->GetTypeId() == TYPEID_PLAYER)
+		target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 1, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);*/
+
 		// max regen powers at start preparation
 		target->SetHealth(target->GetMaxHealth());
 		target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
 		target->SetPower(POWER_ENERGY, target->GetMaxPower(POWER_ENERGY));
+		target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 1, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
 	}
 	else
 	{
