@@ -134,6 +134,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 
 	GuidList m_lBrokenGUIDList;
 	GuidList m_lSorcerersGUIDList;
+	GuidList m_lDefenderGUIDList;
 
 	bool m_bHasYelledOnce;
 
@@ -156,6 +157,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 
 		m_lBrokenGUIDList.clear();
 		m_lSorcerersGUIDList.clear();
+		m_lDefenderGUIDList.clear();
 
 		DoCastSpellIfCan(m_creature, SPELL_STEALTH);
 		m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -195,7 +197,12 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 		{
 		case NPC_SHADE_OF_AKAMA:
 			m_uiPhase = PHASE_EPILOGUE;
-
+			// despawn all defender at this point
+			for (GuidList::const_iterator itr = m_lDefenderGUIDList.begin(); itr != m_lDefenderGUIDList.end(); ++itr)
+			{
+				if (Creature* pDefender = m_creature->GetMap()->GetCreature(*itr))
+					pDefender->ForcedDespawn();
+			}
 			m_creature->GetMotionMaster()->MovePoint(PHASE_EPILOGUE, afAkamaWP[1].m_fX, afAkamaWP[1].m_fY, afAkamaWP[1].m_fZ);
 			break;
 		case NPC_ASH_SORCERER:
@@ -220,6 +227,10 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 					}
 				}
 			}
+			break;
+		case NPC_ASH_DEFENDER:
+			// Decrease the defender counter
+			m_lDefenderGUIDList.remove(pVictim->GetObjectGuid());
 			break;
 		}
 	}
@@ -274,6 +285,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 			}
 		case NPC_ASH_DEFENDER:
 			pSummoned->AI()->AttackStart(m_creature);
+			m_lDefenderGUIDList.push_back(pSummoned->GetObjectGuid());
 			break;
 		default:
 			pSummoned->SetInCombatWithZone();
@@ -366,21 +378,31 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 
 		GuidVector vGeneratorsVect;
 		m_pInstance->GetGeneratorGuidVector(vGeneratorsVect);
-		Creature* pGenerator = m_creature->GetMap()->GetCreature(vGeneratorsVect[urand(0, 1)]);
-		if (!pGenerator)
-			return;
 
 		// Summon mobs by spell
 		if (uiSpellId)
+		{
+			Creature* pGenerator = m_creature->GetMap()->GetCreature(vGeneratorsVect[urand(0, 1)]);
+			if (!pGenerator)
+				return;
+
 			pGenerator->CastSpell(pGenerator, uiSpellId, true, NULL, NULL, m_creature->GetObjectGuid());
+		}
 		// Summon ashtongue pack
 		else
 		{
-			float fX, fY, fZ;
-			for (uint8 i = 0; i < countof(auiRandSpawnEntry); ++i)
+			for(int j = 0; j < 2; j++)
 			{
-				pGenerator->GetRandomPoint(pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), 5.0f, fX, fY, fZ);
-				m_creature->SummonCreature(auiRandSpawnEntry[i], fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+				Creature* pGenerator = m_creature->GetMap()->GetCreature(vGeneratorsVect[j]);
+				if (!pGenerator)
+					return;
+
+				float fX, fY, fZ;
+				for (uint8 i = 0; i < countof(auiRandSpawnEntry); ++i)
+				{
+					pGenerator->GetRandomPoint(pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), 5.0f, fX, fY, fZ);
+					m_creature->SummonCreature(auiRandSpawnEntry[i], fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+				}
 			}
 		}
 	}
@@ -451,7 +473,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 			if (m_uiSummonPackTimer < uiDiff)
 			{
 				DoSummonAshtongue();
-				m_uiSummonPackTimer = 35000;
+				m_uiSummonPackTimer = 45000;
 			}
 			else
 				m_uiSummonPackTimer -= uiDiff;
