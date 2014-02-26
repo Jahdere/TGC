@@ -1,0 +1,28 @@
+src/game/Unit.cpp
+@@ -6524,6 +6507,26 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
+  				return true;
+  	}
+  
++	// Special case for Shadowy Construct
++	switch(spellInfo->Id)
++	{
++	case 40175:
++	case 40157:
++	case 40325:
++	case 40314:
++		{
++		if(this->HasAura(40326))
++			return false;
++		else
++			return true;
++		break;
++		}
++	default:
++		if(this->HasAura(40326))
++			return true;
++		break;
++	}
++
+  	return false;
+  }
+  

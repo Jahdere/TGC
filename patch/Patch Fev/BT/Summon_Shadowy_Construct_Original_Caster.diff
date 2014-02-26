@@ -1,0 +1,16 @@
+src/game/SpellAuras.cpp	
+@@ -5993,10 +6003,10 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
+  		if (GetId() == 40251)
+  		{
+  			// Shadow Of Death Summon Skeleton & Spirit (Teron)
+-			target->CastSpell(target, 40270, true);
+-			target->CastSpell(target, 41948, true);
+-			target->CastSpell(target, 41949, true);
+-			target->CastSpell(target, 41950, true);
++			target->CastSpell(target, 40270, true, NULL, NULL, caster->GetObjectGuid());
++			target->CastSpell(target, 41948, true, NULL, NULL, caster->GetObjectGuid());
++			target->CastSpell(target, 41949, true, NULL, NULL, caster->GetObjectGuid());
++			target->CastSpell(target, 41950, true, NULL, NULL, caster->GetObjectGuid());
+  			target->CastSpell(target, 40266, true);
+  		}
+  	}

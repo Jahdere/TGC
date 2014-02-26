@@ -35,6 +35,9 @@ DELETE FROM spell_proc_event WHERE entry = 41034;
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES
 (41034, 127, 0, 0, 0, 0, 131072, 0, 0, 0, 0);
 
+#Teron DoomBlossom
+UPDATE creature_template SET ScriptName = 'npc_doomblossom' , AIName = '' WHERE entry = 23123;
+
 #Immune taunt (Naj'entus, Supremus, Teron and Shade of akama, Gurtogg):
 UPDATE creature_template SET flags_extra = 769 WHERE entry = 22898 OR entry = 22871 OR entry = 22887 OR entry =22841 OR entry = 22948;
 
@@ -42,36 +45,42 @@ UPDATE creature_template SET flags_extra = 769 WHERE entry = 22898 OR entry = 22
 UPDATE creature_template SET unit_flags = 32832 WHERE entry = 23232 OR entry = 23236 OR entry = 23235 OR entry = 23237;
 
 #Link Trashs
+DELETE FROM creature_linking WHERE guid = 12751 OR guid = 12758 OR guid = 12823 OR guid = 12757 OR guid = 12839;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12751', '12750', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12758', '12750', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12823', '12750', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12839', '12750', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12757', '12750', '3');
 
+DELETE FROM creature_linking WHERE guid = 12753 OR guid = 12842 OR guid = 12759 OR guid = 12825 OR guid = 12841;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12753', '12752', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12842', '12752', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12759', '12752', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12825', '12752', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12841', '12752', '3');
 
-INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12753', '12746', '3');
+DELETE FROM creature_linking WHERE guid = 12747 OR guid = 12833 OR guid = 12820 OR guid = 12755 OR guid = 12834;
+INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12747', '12746', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12833', '12746', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12820', '12746', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12755', '12746', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12834', '12746', '3');
 
+DELETE FROM creature_linking WHERE guid = 12749 OR guid = 12822 OR guid = 12837 OR guid = 12756 OR guid = 12838;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12749', '12748', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12822', '12748', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12837', '12748', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12756', '12749', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12838', '12749', '3');
 
+DELETE FROM creature_linking WHERE guid = 12744 OR guid = 12832 OR guid = 12754 OR guid = 12818 OR guid = 12831;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12744', '12745', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12832', '12745', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12754', '12745', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12818', '12744', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12831', '12744', '3');
 
+DELETE FROM creature_linking WHERE guid = 53227 OR guid = 53585 OR guid = 53235 OR guid = 53704 OR guid = 53211 OR guid = 53703;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53227', '53228', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53585', '53228', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53235', '53228', '3');
@@ -79,6 +88,7 @@ INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53704', 
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53703', '53228', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53211', '53228', '3');
 
+DELETE FROM creature_linking WHERE guid = 53234 OR guid = 53216 OR guid = 53700 OR guid = 53701 OR guid = 53215 OR guid = 52308 OR guid = 53617;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53234', '53233', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53216', '53233', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53700', '53233', '3');
@@ -87,6 +97,7 @@ INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53215', 
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52308', '53233', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53617', '53233', '3');
 
+DELETE FROM creature_linking WHERE guid = 53699 OR guid = 53214 OR guid = 53688 OR guid = 53231 OR guid = 53213 OR guid = 53207 OR guid = 53206;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53699', '53232', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53214', '53232', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53688', '53232', '3');
@@ -95,19 +106,23 @@ INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53213', 
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53207', '53232', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('53206', '53232', '3');
 
+DELETE FROM creature_linking WHERE guid = 12870 OR guid = 12874 OR guid = 12882;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12870', '12877', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12874', '12877', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12882', '12877', '3');
 
+DELETE FROM creature_linking WHERE guid = 52753 OR guid = 52752 OR guid = 52454 OR guid = 52758;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52753', '12871', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52752', '12871', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52454', '12871', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52758', '12871', '3');
 
+DELETE FROM creature_linking WHERE guid = 52745 OR guid = 52754 OR guid = 52744;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52745', '12883', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52754', '12883', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52744', '12883', '3');
 
+DELETE FROM creature_linking WHERE guid = 12876 OR guid = 12875 OR guid = 52442 OR guid = 52444 OR guid = 52756 OR guid = 52757;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12876', '12879', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12875', '12879', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52442', '12879', '3');
@@ -115,25 +130,30 @@ INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52444', 
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52756', '12879', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52757', '12879', '3');
 
+DELETE FROM creature_linking WHERE guid = 52746 OR guid = 12891 OR guid = 52747 OR guid = 12890;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52746', '52766', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12891', '52766', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52747', '52766', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12890', '52766', '3');
 
+DELETE FROM creature_linking WHERE guid = 12725 OR guid = 12722 OR guid = 12723 OR guid = 12724;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12725', '12726', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12722', '12726', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12723', '12726', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12724', '12726', '3');
 
+DELETE FROM creature_linking WHERE guid = 12880 OR guid = 12872 OR guid = 12873;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12880', '12881', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12872', '12881', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('12873', '12881', '3');
 
+DELETE FROM creature_linking WHERE guid = 52749 OR guid = 13232 OR guid = 52748 OR guid = 13231;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52749', '12878', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('13232', '12878', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52748', '12878', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('13231', '12878', '3');
 
+DELETE FROM creature_linking WHERE guid = 52751 OR guid = 13233 OR guid = 13234 OR guid = 52750;
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('52751', '52767', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('13233', '52767', '3');
 INSERT INTO `creature_linking` (`guid`, `master_guid`, `flag`) VALUES ('13234', '52767', '3');

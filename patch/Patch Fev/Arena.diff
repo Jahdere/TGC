@@ -1,0 +1,23 @@
+ src/game/BattleGround/BattleGroundMgr.cpp View
+ @@ -1002,6 +1002,8 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
+  			}
+  			if (group2)
+  				break;
++ 			else
++ 				DropOldMatchIfCan(group1);
+  		}
+  
+  		if (group1 && group2)
+@@ -1009,11 +1011,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
+  			m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup(group1, MaxPlayersPerTeam);
+  			m_SelectionPools[BG_TEAM_HORDE].AddGroup(group2, MaxPlayersPerTeam);
+  		}
+- 		else
+- 		{
+- 			DropOldMatchIfCan(group1);
+- 			DropOldMatchIfCan(group2);
+- 		}
++
+  		// if we have 2 teams, then start new arena and invite players!
+  		if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount())
+  		{

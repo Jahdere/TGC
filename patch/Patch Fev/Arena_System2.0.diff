@@ -1,0 +1,113 @@
+src/game/ArenaTeam.cpp  
+ void ArenaTeam::SetFoughtAgainst(uint32 opponentTeamId)
+ {
+
+-    //Erase one random entry if adding one would go below limit matches
+-
+-    if ((m_foughtTeamList.size() + 1) > sBattleGroundMgr.GetLimitMatches())
+-    {
+-        FoughtTeamList::iterator itr = m_foughtTeamList.begin();
+-        advance(m_foughtTeamList.begin(), urand(0, m_foughtTeamList.size() - 1));
+-        m_foughtTeamList.erase(itr);
+-    }
+-    m_foughtTeamList.insert(opponentTeamId);
++	//Erase one random entry if adding one would go below limit matches
++
++	if ((m_foughtTeamList.size() + 1) > sBattleGroundMgr.GetLimitMatches())
++		DropOldFight();
++
++	m_foughtTeamList.insert(opponentTeamId);
++}
++
++// Drop random old fight team in function of rating
++void ArenaTeam::DropOldFight()
++{
++	uint32 teamRating = GetRating();
++	FoughtTeamList oldTeamList;
++	for (FoughtTeamList::iterator itr = m_foughtTeamList.begin(); itr != m_foughtTeamList.end(); ++itr)
++	{
++		// Trying to catch team opponent with a 200 rating diff
++		if(ArenaTeam* arenaTeamOpposent = sObjectMgr.GetArenaTeamById(*itr))
++		{
++			uint32 diffRating = teamRating - arenaTeamOpposent->GetRating();
++			if(diffRating < 200 && diffRating > -200)
++				oldTeamList.insert(*itr);
++		}
++	}
++
++	//Drop the more interesting opponent team if exist
++	if(!oldTeamList.empty())
++	{
++		FoughtTeamList::iterator itr = m_foughtTeamList.begin();
++		advance(m_foughtTeamList.begin(), urand(0, m_foughtTeamList.size() - 1));
++		m_foughtTeamList.erase(itr);
++	}
++	else
++	{
++		FoughtTeamList::iterator itr = m_foughtTeamList.begin();
++		advance(m_foughtTeamList.begin(), urand(0, m_foughtTeamList.size() - 1));
++		m_foughtTeamList.erase(itr);
++	}	
+ }
+
+ src/game/ArenaTeam.h View
+ @@ -179,6 +179,7 @@ class ArenaTeam
+		bool HasFoughtAgainst(uint32 arenaTeamIdOpponent) { return m_foughtTeamList.find(arenaTeamIdOpponent) != m_foughtTeamList.end(); }
+		FoughtTeamList GetFoughtTeamList() const { return m_foughtTeamList; }
+		void SetFoughtAgainst(uint32 opponentTeamId);
++		void DropOldFight();
+
+		bool IsFighting() const;
+  
+
+src/game/BattleGround/BattleGroundMgr.h View
+@@ -86,6 +86,7 @@ class BattleGroundQueue
+        void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType = ARENA_TYPE_NONE, bool isRated = false, uint32 minRating = 0);
+  
+  		bool CanBattleAgainst(uint32 team_id1, uint32 team_id2);
++		void DropOldMatchIfCan(GroupQueueInfo* group);
+		void FillPlayersToBG(BattleGround* bg, BattleGroundBracketId bracket_id);
+		bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
+		bool CheckNormalMatch(BattleGround* bg_template, BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
+
+
+
+src/game/BattleGround/BattleGroundMgr.cpp View
+@@ -762,6 +762,23 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
+	return true;
+}
+  
++void BattleGroundQueue::DropOldMatchIfCan(GroupQueueInfo* group)
++{
++	uint32 timeInQueue = WorldTimer::getMSTimeDiff(group->JoinTime, WorldTimer::getMSTime());
++
++	// Each 5 min in Queue , drop an old fight
++	ArenaTeam* arenaTeam = sObjectMgr.GetArenaTeamById(group->ArenaTeamId);
++	if(!arenaTeam->GetFoughtTeamList().empty())
++	{
++		uint32 countOldTeam = arenaTeam->GetFoughtTeamList().size();
++
++		//Custom calcul , all 4mn in queue we drop an old team. Starting at 2mn.
++		uint32 timerNextDrop = (10 - countOldTeam) * 240 + 120;		
++		if(timeInQueue < timerNextDrop)
++			arenaTeam->DropOldFight();
++	}
++}
++
+  /*
+  this method is called when group is inserted, or player / group is removed from BG Queue - there is only one player's status changed, so we don't use while(true) cycles to invite whole queue
+  it must be called after fully adding the members of a group to ensure group joining
+@@ -992,7 +1009,11 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
+  			m_SelectionPools[BG_TEAM_ALLIANCE].AddGroup(group1, MaxPlayersPerTeam);
+  			m_SelectionPools[BG_TEAM_HORDE].AddGroup(group2, MaxPlayersPerTeam);
+  		}
++		else
++		{
++			DropOldMatchIfCan(group1);
++			DropOldMatchIfCan(group2);
++		}
+  		// if we have 2 teams, then start new arena and invite players!
+  		if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount())
+  		{
+
+

@@ -1,0 +1,55 @@
+src/game/SpellAuras.cpp View
+ @@ -1566,7 +1566,11 @@ void Aura::TriggerSpell()
+  					//                    // Prismatic Shield
+  					//                    case 40879: break;
+  				case 41350:				  // Aura of Desire
+-					trigger_spell_id = 41352;
++					if(triggerTarget->GetTypeId() == TYPEID_PLAYER && triggerTarget->GetMaxPower(POWER_MANA) > 0)
++					{
++						uint32 mana_pool_diff =  ((Player*)triggerTarget)->GetMaxPower(POWER_MANA) - ((((Player*)triggerTarget)->GetManaBonusFromIntellect() + ((Player*)triggerTarget)->GetCreateMana()) * 0.05);
++						((Player*)triggerTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
++					}
+  					break;
+  					//                    // Dementia
+  					//                    case 41404: break;
+ src/game/SpellEffects.cpp View
+ @@ -369,16 +369,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
+  							damage = m_triggeredBySpellInfo->EffectBasePoints[effect_idx];
+  						break;
+  					}
+-					//Aura of desire -> trigger spell proc effect , decrease mana max 5% 
+-				case 41352:
+-					{
+-						if(unitTarget->GetTypeId() == TYPEID_PLAYER && unitTarget->GetMaxPower(POWER_MANA) > 0)
+-						{
+-							uint32 mana_pool_diff =  ((Player*)unitTarget)->GetMaxPower(POWER_MANA) - ((((Player*)unitTarget)->GetManaBonusFromIntellect() + ((Player*)unitTarget)->GetCreateMana()) * 0.05);
+-							((Player*)unitTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
+-						}
+-						break;
+-					}
+  				}
+  				break;
+  			}
+ src/game/UnitAuraProcHandler.cpp View
+ @@ -56,7 +56,7 @@
+  	&Unit::HandleNULLProc,                                  // 20 SPELL_AURA_OBS_MOD_HEALTH
+  	&Unit::HandleNULLProc,                                  // 21 SPELL_AURA_OBS_MOD_MANA
+  	&Unit::HandleModResistanceAuraProc,                     // 22 SPELL_AURA_MOD_RESISTANCE
+-	&Unit::HandleNULLProc,                                  // 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL
++	&Unit::HandleProcTriggerSpellAuraProc,                  // 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL
+  	&Unit::HandleNULLProc,                                  // 24 SPELL_AURA_PERIODIC_ENERGIZE
+  	&Unit::HandleNULLProc,                                  // 25 SPELL_AURA_MOD_PACIFY
+  	&Unit::HandleNULLProc,                                  // 26 SPELL_AURA_MOD_ROOT
+ @@ -1717,7 +1717,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
+  			target = this;
+  			trigger_spell_id = 41249;
+  			basepoints[0] = damage;
+			break;
++		case 41350:
++			target = this;
++			trigger_spell_id = 41352;
++			basepoints[0] = int32(damage / 2);
++			break;
+  			// case 43453: break:                   // Rune Ward
+  			// case 43504: break;                   // Alterac Valley OnKill Proc Aura
+  		case 43820:                                 // Charm of the Witch Doctor (Amani Charm of the Witch Doctor trinket)

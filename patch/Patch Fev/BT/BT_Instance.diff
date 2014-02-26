@@ -1,0 +1,87 @@
+src/bindings/ScriptDev2/scripts/outland/black_temple/instance_black_temple.cpp View
+@@ -95,6 +95,17 @@ void instance_black_temple::OnCreatureCreate(Creature* pCreature)
+  	case NPC_GLAIVE_TARGET:
+  		m_vGlaiveTargetGuidVector.push_back(pCreature->GetObjectGuid());
+  		break;
++ 	case NPC_MISTYC:
++ 	case NPC_STORMCALLER:
++ 	case NPC_BATTLELORD:
++ 	case NPC_PRIMALIST:
++ 	case NPC_FERAL_SPIRIT:
++ 	case NPC_STORM_FURY:
++ 	case NPC_ASHTONGUE_STALKER:
++		m_lAkamaFriendsGuidList.push_back(pCreature->GetObjectGuid());
++		if(GetData(TYPE_SHADE) == DONE)
++			pCreature->setFaction(35);
++		break;
+  	}
+  }
+  
+ @@ -118,8 +129,8 @@ void instance_black_temple::OnObjectCreate(GameObject* pGo)
+  			pGo->SetGoState(GO_STATE_ACTIVE);
+  		break;
+  	case GO_PRE_SHAHRAZ_DOOR:                           // Door leading to Mother Shahraz
+- 		if (m_auiEncounter[TYPE_SHADE] == DONE && m_auiEncounter[TYPE_GOREFIEND] == DONE && m_auiEncounter[TYPE_BLOODBOIL] == DONE && m_auiEncounter[TYPE_RELIQUIARY] == DONE)
+- 			pGo->SetGoState(GO_STATE_ACTIVE);
++ 	/*	if (m_auiEncounter[TYPE_SHADE] == DONE && m_auiEncounter[TYPE_GOREFIEND] == DONE && m_auiEncounter[TYPE_BLOODBOIL] == DONE && m_auiEncounter[TYPE_RELIQUIARY] == DONE)
++ 			pGo->SetGoState(GO_STATE_ACTIVE);*/
+  		break;
+  	case GO_POST_SHAHRAZ_DOOR:                          // Door after shahraz
+  		if (m_auiEncounter[TYPE_SHAHRAZ] == DONE)
+@@ -170,8 +181,19 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
+  				}
+  			}
+  		}
+ +
+  		if (uiData == DONE)
+ +		{
+  			DoOpenPreMotherDoor();
++
++ 			for (GuidList::const_iterator itr = m_lAkamaFriendsGuidList.begin(); itr != m_lAkamaFriendsGuidList.end(); ++itr)
++ 			{
++ 				if (Creature* pFriends = instance->GetCreature(*itr))
++ 				{
++ 					pFriends->setFaction(35);
++ 				}
++ 			}
++ 		}
+  		break;
+  	case TYPE_GOREFIEND:
+  		m_auiEncounter[uiType] = uiData;
+@@ -248,8 +270,8 @@ uint32 instance_black_temple::GetData(uint32 uiType) const
+  
+  void instance_black_temple::DoOpenPreMotherDoor()
+  {
+- 	if (GetData(TYPE_SHADE) == DONE && GetData(TYPE_GOREFIEND) == DONE && GetData(TYPE_BLOODBOIL) == DONE && GetData(TYPE_RELIQUIARY) == DONE)
+- 		DoUseDoorOrButton(GO_PRE_SHAHRAZ_DOOR);
++ 	/*if (GetData(TYPE_SHADE) == DONE && GetData(TYPE_GOREFIEND) == DONE && GetData(TYPE_BLOODBOIL) == DONE && GetData(TYPE_RELIQUIARY) == DONE)
++ 		DoUseDoorOrButton(GO_PRE_SHAHRAZ_DOOR);*/
+  }
+  
+  void instance_black_temple::DoSpawnAkamaIfCan()
+
+
+src/bindings/ScriptDev2/scripts/outland/black_temple/black_temple.h View
+@@ -42,6 +42,14 @@ enum
+    NPC_SPIRIT_OF_OLUM              = 23411,
+    NPC_SPIRIT_OF_UDALO             = 23410,
+  
++   NPC_MISTYC            			= 22845,
++   NPC_STORMCALLER         		= 22846,
++   NPC_BATTLELORD         			= 22844,
++   NPC_PRIMALIST         			= 22847,
++   NPC_FERAL_SPIRIT       			= 22849,
++   NPC_STORM_FURY          		= 22848,
++   NPC_ASHTONGUE_STALKER     		= 23374,
++ 
+    GO_NAJENTUS_GATE                = 185483,
+    GO_SUPREMUS_DOORS               = 185882,
+    GO_SHADE_OF_AKAMA               = 185478,
+@@ -87,6 +95,7 @@ class MANGOS_DLL_DECL instance_black_temple : public ScriptedInstance
+    std::string m_strInstData;
+  
+    GuidList m_lChannelersGuidList;
++   GuidList m_lAkamaFriendsGuidList;
+    GuidVector m_vCreatureGeneratorGuidVector;
+    GuidVector m_vGlaiveTargetGuidVector;
+  };

@@ -1,0 +1,12 @@
+src/game/SpellAuras.cpp
+@@ -3882,6 +3881,10 @@ void Aura::HandleInvisibility(bool apply, bool Real)
+  {
+  	Unit* target = GetTarget();
+  
++	//Do not use invisibility effect during preparation
++	if(GetId() == 32727)
++		return;
++
+  	if (apply)
+  	{
+  		target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);

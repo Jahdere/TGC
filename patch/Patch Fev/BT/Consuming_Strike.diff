@@ -1,0 +1,15 @@
+src/game/UnitAuraProcHandler.cpp
+@@ -1710,8 +1713,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
+  			// case 40364: break;                   // Entangling Roots Sensor
+  			// case 41054: break;                   // Copy Weapon
+  			//    trigger_spell_id = 41055; break;
+-			// case 41248: break;                   // Consuming Strikes
+-			//    trigger_spell_id = 41249; break;
++		case 41248:	//Consuming Strikes
++			target = this;
++			trigger_spell_id = 41249;
++			basepoints[0] = damage;
++			break;                   
+  			// case 43453: break:                   // Rune Ward
+  			// case 43504: break;                   // Alterac Valley OnKill Proc Aura
+  		case 43820:        
