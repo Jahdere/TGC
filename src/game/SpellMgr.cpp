@@ -1970,8 +1970,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 					return false;
 
 				//Gangrerage Gurtogg
-				if ((spellInfo_1->Id == 40604  && spellInfo_2->Id == 40616) ||  
-					(spellInfo_2->Id == 40604  && spellInfo_1->Id == 40616))
+				if (spellInfo_1->SpellIconID == 1930)
 					return false;
 
 				//Unstable Currents vs Band of the Eternal Sage
