@@ -3794,6 +3794,14 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 				case SPELL_AURA_POWER_BURN_MANA:
 				case SPELL_AURA_PERIODIC_DUMMY:
 					break;
+				case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+					// Ferocious Inspiration can stack
+					if (foundHolder->GetSpellProto()->Id != 34456)
+					{
+						RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
+						stop = true;
+					}
+					break;
 				case SPELL_AURA_PERIODIC_ENERGIZE:      // all or self or clear non-stackable
 				default:                                // not allow
 					// can be only single (this check done at _each_ aura add
@@ -3811,13 +3819,16 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 	// normal spell or passive auras not stackable with other ranks
 	if (!IsPassiveSpell(aurSpellInfo) || !IsPassiveSpellStackableWithRanks(aurSpellInfo))
 	{
+		if( aurSpellInfo->Id == 34456)
+			error_log("**** TRY ADD AURA 4 ******");
 		if (!RemoveNoStackAurasDueToAuraHolder(holder))
 		{
 			delete holder;
 			return false;                                   // couldn't remove conflicting aura with higher rank
 		}
 	}
-
+	if( aurSpellInfo->Id == 34456)
+		error_log("**** TRY ADD AURA 5 ******");
 	// update tracked aura targets list (before aura add to aura list, to prevent unexpected remove recently added aura)
 	if (TrackedAuraType trackedType = holder->GetTrackedAuraType())
 	{
@@ -3873,7 +3884,6 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 			}
 		}
 	}
-
 	// add aura, register in lists and arrays
 	holder->_AddSpellAuraHolder();
 	m_spellAuraHolders.insert(SpellAuraHolderMap::value_type(holder->GetId(), holder));
@@ -6515,11 +6525,11 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
 	case 40325:
 	case 40314:
 		{
-		if(this->HasAura(40326))
-			return false;
-		else
-			return true;
-		break;
+			if(this->HasAura(40326))
+				return false;
+			else
+				return true;
+			break;
 		}
 	default:
 		if(this->HasAura(40326))
