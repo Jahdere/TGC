@@ -2309,8 +2309,6 @@ void Spell::EffectTriggerSpellWithValue(SpellEffectIndex eff_idx)
 	}
 
 	int32 bp = damage;
-	if(m_spellInfo->Id == 40872)
-		error_log("********* DAMAGE IMMOLATION %u *********", damage);
 
 	m_caster->CastCustomSpell(unitTarget, triggered_spell_id, &bp, &bp, &bp, true, m_CastItem , NULL, m_originalCasterGUID, m_spellInfo);
 }
@@ -5448,6 +5446,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 41131, true);
 					break;
 				}
+			/*case 41362:									// Shared Bonds
+				{
+					if(!unitTarget)
+						return;
+
+					m_caster->CastSpell(unitTarget, 41363, true);
+					break;
+				}*/
 			case 44876:                                 // Force Cast - Portal Effect: Sunwell Isle
 				{
 					if (!unitTarget)
@@ -6664,6 +6670,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 	if (damage < 0)
 		return;
 
+	pet->Relocate(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ());
 	pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
 	pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 	pet->SetDeathState(ALIVE);
