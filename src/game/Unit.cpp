@@ -2271,7 +2271,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 	}
 
 	CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
-	if(spellBinary)
+	//if(spellBinary)
 		damageInfo->resist = 0;
 	damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
 }
@@ -2584,6 +2584,10 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 {
 	uint32 spellLevel = spellProto->spellLevel;
 	if (spellLevel <= 0)
+		return 1.0f;
+
+	// Prayer of mind has no level penalty
+	if (spellProto->Id == 33110)
 		return 1.0f;
 
 	float LvlPenalty = 0.0f;
@@ -3819,16 +3823,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 	// normal spell or passive auras not stackable with other ranks
 	if (!IsPassiveSpell(aurSpellInfo) || !IsPassiveSpellStackableWithRanks(aurSpellInfo))
 	{
-		if( aurSpellInfo->Id == 34456)
-			error_log("**** TRY ADD AURA 4 ******");
 		if (!RemoveNoStackAurasDueToAuraHolder(holder))
 		{
 			delete holder;
 			return false;                                   // couldn't remove conflicting aura with higher rank
 		}
 	}
-	if( aurSpellInfo->Id == 34456)
-		error_log("**** TRY ADD AURA 5 ******");
 	// update tracked aura targets list (before aura add to aura list, to prevent unexpected remove recently added aura)
 	if (TrackedAuraType trackedType = holder->GetTrackedAuraType())
 	{
@@ -5858,22 +5858,24 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
 	// Default calculation
 	else if (benefit)
 		coeff = CalculateDefaultCoefficient(spellProto, damagetype);
-
+	error_log("****** BENEFIT %i *******", benefit);
+	error_log("****** COEF 1 %f *******", coeff);
 	if (benefit)
 	{
 		float LvlPenalty = CalculateLevelPenalty(spellProto);
-
+		error_log("****** PENALITY %f *******", LvlPenalty);
 		// Spellmod SpellDamage
 		if (Player* modOwner = GetSpellModOwner())
 		{
 			coeff *= 100.0f;
 			modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPELL_BONUS_DAMAGE, coeff);
 			coeff /= 100.0f;
+			error_log("****** COEF 2 %f *******", coeff);
 		}
 
-		total += int32(benefit * coeff * LvlPenalty);
+		total += int32(benefit * coeff * LvlPenalty);		
 	}
-
+	error_log("****** TOTAL %i *******", total);
 	return total;
 };
 
@@ -6018,11 +6020,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
 		DoneAdvertisedBenefit += ((Pet*)this)->GetBonusDamage();
 
 	// apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
-	// Fixe Consecration don't use AP Bonus @Kordbc
-	if(spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && spellProto->SpellFamilyFlags & UI64LIT(0X0000000000000020))
-		DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, false);
-	else
-		DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
+	DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
 
 	float tmpDamage = (int32(pdamage) + DoneTotal * int32(stack)) * DoneTotalMod;
 	// apply spellmod to Done damage (flat and pct)
