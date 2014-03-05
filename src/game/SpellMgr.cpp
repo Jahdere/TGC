@@ -4041,12 +4041,15 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 		{
 			// Freezing Trap
 			if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000008)))
-				return DIMINISHING_FREEZE;
+				return DIMINISHING_DISORIENT;
+			// Scatter shot
+			else if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000040000)))
+				return DIMINISHING_SCATTER;
 			break;
 		}
 	case SPELLFAMILY_WARLOCK:
 		{
-			// Fear
+			// Sedduction
 			if (spellproto->IsFitToFamilyMask(UI64LIT(0x40840000000)))
 				return DIMINISHING_FEAR;
 			// Curses/etc
@@ -4059,6 +4062,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 			// Cyclone
 			if (spellproto->IsFitToFamilyMask(UI64LIT(0x02000000000)))
 				return DIMINISHING_BLIND_CYCLONE;
+			// Nature's Grasp
+			else if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000200)))
+				return DIMINISHING_CONTROL_ROOT;
 			break;
 		}
 	case SPELLFAMILY_WARRIOR:
@@ -4066,6 +4072,13 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 			// Hamstring - limit duration to 10s in PvP
 			if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000002)))
 				return DIMINISHING_LIMITONLY;
+			break;
+		}
+	case SPELLFAMILY_MAGE:
+		{
+			// Dragon's Breath
+			if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000800000)))
+				return DIMINISHING_SCATTER;
 			break;
 		}
 	default:
@@ -4077,30 +4090,34 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 	if (!mechanic)
 		return DIMINISHING_NONE;
 
+	// Stun and Root
 	if (mechanic & (1 << (MECHANIC_STUN - 1)))
 		return triggered ? DIMINISHING_TRIGGER_STUN : DIMINISHING_CONTROL_STUN;
-	if (mechanic & (1 << (MECHANIC_SLEEP - 1)))
-		return DIMINISHING_SLEEP;
-	if (mechanic & (1 << (MECHANIC_POLYMORPH - 1)))
-		return DIMINISHING_POLYMORPH;
 	if (mechanic & (1 << (MECHANIC_ROOT - 1)))
 		return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
+	// Sleep, polymorph, sap / knockout and freeze
+	if (mechanic & (1 << (MECHANIC_SLEEP - 1)))
+		return DIMINISHING_DISORIENT;
+	if (mechanic & (1 << (MECHANIC_POLYMORPH - 1)))
+		return DIMINISHING_DISORIENT;
+	if (mechanic & (1 << (MECHANIC_FREEZE - 1)))
+		return DIMINISHING_DISORIENT;
+	if (mechanic & ((1 << (MECHANIC_KNOCKOUT - 1)) | (1 << (MECHANIC_SAPPED - 1))))
+		return DIMINISHING_DISORIENT;
+	//Fear & death coil
 	if (mechanic & (1 << (MECHANIC_FEAR - 1)))
 		return DIMINISHING_FEAR;
+	if (mechanic & (1 << (MECHANIC_HORROR - 1)))
+		return DIMINISHING_DEATHCOIL;
+	//Others
 	if (mechanic & (1 << (MECHANIC_CHARM - 1)))
 		return DIMINISHING_CHARM;
 	if (mechanic & (1 << (MECHANIC_SILENCE - 1)))
 		return DIMINISHING_SILENCE;
 	if (mechanic & (1 << (MECHANIC_DISARM - 1)))
 		return DIMINISHING_DISARM;
-	if (mechanic & (1 << (MECHANIC_FREEZE - 1)))
-		return DIMINISHING_FREEZE;
-	if (mechanic & ((1 << (MECHANIC_KNOCKOUT - 1)) | (1 << (MECHANIC_SAPPED - 1))))
-		return DIMINISHING_KNOCKOUT;
 	if (mechanic & (1 << (MECHANIC_BANISH - 1)))
 		return DIMINISHING_BANISH;
-	if (mechanic & (1 << (MECHANIC_HORROR - 1)))
-		return DIMINISHING_DEATHCOIL;
 
 	return DIMINISHING_NONE;
 }
@@ -4112,18 +4129,16 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
 	case DIMINISHING_CONTROL_STUN:
 	case DIMINISHING_TRIGGER_STUN:
 	case DIMINISHING_KIDNEYSHOT:
-	case DIMINISHING_SLEEP:
 	case DIMINISHING_CONTROL_ROOT:
 	case DIMINISHING_TRIGGER_ROOT:
 	case DIMINISHING_FEAR:
-	case DIMINISHING_WARLOCK_FEAR:
 	case DIMINISHING_CHARM:
-	case DIMINISHING_POLYMORPH:
-	case DIMINISHING_FREEZE:
-	case DIMINISHING_KNOCKOUT:
 	case DIMINISHING_BLIND_CYCLONE:
 	case DIMINISHING_BANISH:
 	case DIMINISHING_LIMITONLY:
+	case DIMINISHING_DISORIENT:
+	case DIMINISHING_DEATHCOIL:
+	case DIMINISHING_SCATTER:
 		return true;
 	default:
 		return false;
@@ -4140,19 +4155,16 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
 	case DIMINISHING_TRIGGER_STUN:
 	case DIMINISHING_KIDNEYSHOT:
 		return DRTYPE_ALL;
-	case DIMINISHING_SLEEP:
 	case DIMINISHING_CONTROL_ROOT:
 	case DIMINISHING_TRIGGER_ROOT:
 	case DIMINISHING_FEAR:
 	case DIMINISHING_CHARM:
-	case DIMINISHING_POLYMORPH:
 	case DIMINISHING_SILENCE:
 	case DIMINISHING_DISARM:
 	case DIMINISHING_DEATHCOIL:
-	case DIMINISHING_FREEZE:
 	case DIMINISHING_BANISH:
-	case DIMINISHING_WARLOCK_FEAR:
-	case DIMINISHING_KNOCKOUT:
+	case DIMINISHING_DISORIENT:
+	case DIMINISHING_SCATTER:
 		return DRTYPE_PLAYER;
 	default:
 		break;
