@@ -5446,13 +5446,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 41131, true);
 					break;
 				}
-			/*case 41362:									// Shared Bonds
+				/*case 41362:									// Shared Bonds
 				{
-					if(!unitTarget)
-						return;
+				if(!unitTarget)
+				return;
 
-					m_caster->CastSpell(unitTarget, 41363, true);
-					break;
+				m_caster->CastSpell(unitTarget, 41363, true);
+				break;
 				}*/
 			case 44876:                                 // Force Cast - Portal Effect: Sunwell Isle
 				{

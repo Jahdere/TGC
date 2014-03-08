@@ -1590,8 +1590,8 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
 	// Taunt immunity special flag check
 	if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NOT_TAUNTABLE)
 	{		
-		// Special case, Gurtogg is immune taunt , but not immune to Taunt Gurtogg spell effect 
-		if (GetEntry() == 22948 && spellInfo->Id == 40603)
+		// Gurtogg & ROS special check
+		if (spellInfo->Id == 40603 || spellInfo->Id == 41295)
 			return false;
 
 		// Taunt aura apply check

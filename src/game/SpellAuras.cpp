@@ -1688,41 +1688,50 @@ void Aura::TriggerSpell()
 				break;
 			}
 
-			//            case SPELLFAMILY_HUNTER:
-			//            {
-			//                switch(auraId)
-			//                {
-			//                    // Frost Trap Aura
-			//                    case 13810:
-			//                        return;
-			//                    // Rizzle's Frost Trap
-			//                    case 39900:
-			//                        return;
-			//                    // Tame spells
-			//                    case 19597:         // Tame Ice Claw Bear
-			//                    case 19676:         // Tame Snow Leopard
-			//                    case 19677:         // Tame Large Crag Boar
-			//                    case 19678:         // Tame Adult Plainstrider
-			//                    case 19679:         // Tame Prairie Stalker
-			//                    case 19680:         // Tame Swoop
-			//                    case 19681:         // Tame Dire Mottled Boar
-			//                    case 19682:         // Tame Surf Crawler
-			//                    case 19683:         // Tame Armored Scorpid
-			//                    case 19684:         // Tame Webwood Lurker
-			//                    case 19685:         // Tame Nightsaber Stalker
-			//                    case 19686:         // Tame Strigid Screecher
-			//                    case 30100:         // Tame Crazed Dragonhawk
-			//                    case 30103:         // Tame Elder Springpaw
-			//                    case 30104:         // Tame Mistbat
-			//                    case 30647:         // Tame Barbed Crawler
-			//                    case 30648:         // Tame Greater Timberstrider
-			//                    case 30652:         // Tame Nightstalker
-			//                        return;
-			//                    default:
-			//                        break;
-			//                }
-			//                break;
-			//            }
+		case SPELLFAMILY_HUNTER:
+			{
+				switch(auraId)
+				{
+					// Frost Trap Aura
+				case 13810:
+					{
+						error_log("******* YO FREEEZZEEE **********");
+						/*if(Aura* frostAura = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_0))
+						{
+							target->UpdateSpeed(MOVE_RUN, true);
+							target->UpdateSpeed(MOVE_SWIM, true);
+							target->UpdateSpeed(MOVE_FLIGHT, true);
+						}					
+						return;*/
+					}
+					//                    // Rizzle's Frost Trap
+					//                    case 39900:
+					//                        return;
+					//                    // Tame spells
+					//                    case 19597:         // Tame Ice Claw Bear
+					//                    case 19676:         // Tame Snow Leopard
+					//                    case 19677:         // Tame Large Crag Boar
+					//                    case 19678:         // Tame Adult Plainstrider
+					//                    case 19679:         // Tame Prairie Stalker
+					//                    case 19680:         // Tame Swoop
+					//                    case 19681:         // Tame Dire Mottled Boar
+					//                    case 19682:         // Tame Surf Crawler
+					//                    case 19683:         // Tame Armored Scorpid
+					//                    case 19684:         // Tame Webwood Lurker
+					//                    case 19685:         // Tame Nightsaber Stalker
+					//                    case 19686:         // Tame Strigid Screecher
+					//                    case 30100:         // Tame Crazed Dragonhawk
+					//                    case 30103:         // Tame Elder Springpaw
+					//                    case 30104:         // Tame Mistbat
+					//                    case 30647:         // Tame Barbed Crawler
+					//                    case 30648:         // Tame Greater Timberstrider
+					//                    case 30652:         // Tame Nightstalker
+					//                        return;
+				default:
+					break;
+				}
+				break;
+			}
 		case SPELLFAMILY_SHAMAN:
 			{
 				switch (auraId)
@@ -6141,8 +6150,8 @@ void Aura::PeriodicTick()
 			if (target->GetTypeId() == TYPEID_PLAYER)
 				pdamage -= ((Player*)target)->GetDotDamageReduction(pdamage);
 			target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
-			if(IsSpellBinary(spellProto, pCaster))
-				resist = 0;
+			/*if(IsSpellBinary(spellProto, pCaster))
+				resist = 0;*/
 
 			DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
 				GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
