@@ -3315,6 +3315,9 @@ void SpellMgr::LoadSpellCustomAttr()
 			spellInfo->AttributesEx = SPELL_ATTR_EX_UNK9;
 			spellInfo->AttributesEx2 = SPELL_ATTR_EX2_UNK20;	
 			break;
+		case 33110:                 // Prayer of mending (wrong level for penalty calculation)
+            spellInfo->spellLevel = 68;
+            break;
 		default:
 			break;
 		}

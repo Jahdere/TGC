@@ -2586,10 +2586,6 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 	if (spellLevel <= 0)
 		return 1.0f;
 
-	// Prayer of mind has no level penalty
-	if (spellProto->Id == 33110)
-		return 1.0f;
-
 	float LvlPenalty = 0.0f;
 
 	if (spellLevel < 20)
@@ -5858,24 +5854,24 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int3
 	// Default calculation
 	else if (benefit)
 		coeff = CalculateDefaultCoefficient(spellProto, damagetype);
-	error_log("****** BENEFIT %i *******", benefit);
-	error_log("****** COEF 1 %f *******", coeff);
+	/*error_log("****** BENEFIT %i *******", benefit);
+	error_log("****** COEF 1 %f *******", coeff);*/
 	if (benefit)
 	{
 		float LvlPenalty = CalculateLevelPenalty(spellProto);
-		error_log("****** PENALITY %f *******", LvlPenalty);
+		//error_log("****** PENALITY %f *******", LvlPenalty);
 		// Spellmod SpellDamage
 		if (Player* modOwner = GetSpellModOwner())
 		{
 			coeff *= 100.0f;
 			modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPELL_BONUS_DAMAGE, coeff);
 			coeff /= 100.0f;
-			error_log("****** COEF 2 %f *******", coeff);
+			//error_log("****** COEF 2 %f *******", coeff);
 		}
 
 		total += int32(benefit * coeff * LvlPenalty);		
 	}
-	error_log("****** TOTAL %i *******", total);
+	//error_log("****** TOTAL %i *******", total);
 	return total;
 };
 
@@ -6344,11 +6340,8 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
 
 	// apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
 	DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
-	sLog.outError("******** DONE HEAL TOTAL AFTER COEF : %u *********", DoneTotal);
-	sLog.outError("******** STACK : %u *********", stack);
 	// use float as more appropriate for negative values and percent applying
 	float heal = (healamount + DoneTotal * int32(stack)) * DoneTotalMod;
-	sLog.outError("******** DONE HEAL TOTAL AFTER STACK : %f *********", heal);
 	// apply spellmod to Done amount
 	if (Player* modOwner = GetSpellModOwner())
 		modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
