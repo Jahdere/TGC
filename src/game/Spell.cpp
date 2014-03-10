@@ -6295,6 +6295,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if(!m_caster->HasInArc(1.22f, target))
 			return false;
 		break;
+	case 40870:											// Fatal attraction (Shahrazz)
+		if(!target->HasAura(41001))
+			return false;
+		break;
 	default: break;
 	}
 
