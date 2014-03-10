@@ -79,9 +79,12 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 	uint32 m_uiShriekTimer;
 	uint32 m_uiRandomYellTimer;
 	uint32 m_uiBerserkTimer;
+	uint32 m_uicheckDistanceTimer;
 	uint8 m_uiCurrentBeam;
 
 	bool m_bIsEnraged;
+
+	GuidList lFatalAttractionGUIDList;
 
 	void Reset() override
 	{
@@ -92,10 +95,12 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 		m_uiShriekTimer             = 30000;
 		m_uiRandomYellTimer         = urand(70000, 110000);
 		m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
+		m_uicheckDistanceTimer		= 0;
 
 		m_bIsEnraged                = false;
 
 		DoCastSpellIfCan(m_creature, SPELL_SABER_LASH_PROC);
+		lFatalAttractionGUIDList.clear();		
 	}
 
 	void Aggro(Unit* /*pWho*/) override
@@ -125,6 +130,57 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 		DoScriptText(SAY_DEATH, m_creature);
 	}
 
+	void SpellHitTarget(Unit* pUnit, const SpellEntry* pSpellEntry) override
+	{
+		if(pSpellEntry->Id == SPELL_FATAL_ATTRACTION)
+			lFatalAttractionGUIDList.push_back(pUnit->GetObjectGuid());
+	}
+
+	// This function check if all player with fatal attraction debuff, are farther than 25 yards each
+	bool CleanFatalAttraction()
+	{
+		bool canClean = true;
+
+		for (GuidList::const_iterator itr = lFatalAttractionGUIDList.begin(); itr != lFatalAttractionGUIDList.end(); ++itr)
+		{
+			if(Unit* pPlayer = m_creature->GetMap()->GetUnit(*itr))
+			{
+				for (GuidList::const_iterator iter = lFatalAttractionGUIDList.begin(); iter != lFatalAttractionGUIDList.end(); ++iter)
+				{
+					if (*itr != *iter)
+					{
+						if(Unit* pPlayerCheck = m_creature->GetMap()->GetUnit(*iter))
+						{
+							// If a player is in 25yards range, dont clean
+							if(pPlayer->IsWithinDist(pPlayerCheck, 25.0f))
+							{
+								canClean = false;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			if(!canClean)
+				break;
+		}
+
+		// if everybody are farther than 25 yards each , then remove fatal attraction
+		if(canClean)
+		{
+			for (GuidList::const_iterator itr = lFatalAttractionGUIDList.begin(); itr != lFatalAttractionGUIDList.end(); ++itr)
+			{
+				if(Unit* pPlayerClean = m_creature->GetMap()->GetUnit(*itr))
+					pPlayerClean->RemoveAurasDueToSpell(41001);
+			}
+
+			lFatalAttractionGUIDList.clear();
+		}
+
+		return canClean;
+	}
+
 	void UpdateAI(const uint32 uiDiff) override
 	{
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -139,6 +195,19 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 			}
 		}
 
+		//Clean fatal attraction
+		if(m_uicheckDistanceTimer)
+		{
+			if(m_uicheckDistanceTimer <= uiDiff)
+			{
+				if(CleanFatalAttraction())
+					m_uicheckDistanceTimer = 0;
+				else
+					m_uicheckDistanceTimer = 1000;
+			}else
+				m_uicheckDistanceTimer -= uiDiff;
+		}
+
 		// Randomly cast one beam.
 		if (m_uiBeamTimer < uiDiff)
 		{
@@ -146,7 +215,7 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 			{
 				uint8 uiNextBeam = (m_uiCurrentBeam + urand(1, 3)) % 4;
 				m_uiCurrentBeam = uiNextBeam;
-				m_uiBeamTimer = urand(10000, 13000);
+				m_uiBeamTimer = 9000;
 			}
 		}
 		else
@@ -172,6 +241,7 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 				case 2: DoScriptText(SAY_SPELL_3, m_creature); break;
 				}
 				m_uiFatalAttractionTimer = urand(30000, 40000);
+				m_uicheckDistanceTimer = 1000;
 			}
 		}
 		else
