@@ -1341,6 +1341,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					m_caster->CastSpell(unitTarget, 41001, true);
 					return;
 				}
+			case 40870:									// Fatal Attraction explosion
+				{
+					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+						return;
+
+					m_caster->CastSpell(unitTarget, 40871, true);
+					return;
+				}
 			case 40962:                                 // Blade's Edge Terrace Demon Boss Summon Branch
 				{
 					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
