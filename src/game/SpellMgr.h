@@ -197,7 +197,7 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
 inline bool IsSealSpell(SpellEntry const* spellInfo)
 {
 	// Collection of all the seal family flags. No other paladin spell has any of those.
-	return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0x000004000A000200)) &&
+	return (spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0x000004000A000200)) || spellInfo->Id == 41469 ) &&
 		// avoid counting target triggered effect as seal for avoid remove it or seal by it.
 		spellInfo->EffectImplicitTargetA[0] == TARGET_SELF;
 }
