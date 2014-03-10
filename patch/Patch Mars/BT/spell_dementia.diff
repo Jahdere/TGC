@@ -1,0 +1,25 @@
+src/game/SpellAuras.cpp View
+@@ -1580,9 +1580,20 @@ void Aura::TriggerSpell()
+  						uint32 mana_pool_diff =  ((Player*)triggerTarget)->GetMaxPower(POWER_MANA) - ((((Player*)triggerTarget)->GetManaBonusFromIntellect() + ((Player*)triggerTarget)->GetCreateMana()) * 0.05);
+  						((Player*)triggerTarget)->SetMaxPower(POWER_MANA, mana_pool_diff);
+  					}
+-					break;
+-					//                    // Dementia
+-					//                    case 41404: break;
++					break;				
++				case 41404:								// Dementia
++					switch(urand(0,1))
++					{
++					case 0:
++						target->CastSpell(target, 41409, true);
++						break;
++					case 1:
++						target->CastSpell(target, 41406, true);
++						break;
++					default:
++						break;
++					}
++					break;		  
+  					//                    // Chaos Form
+  					//                    case 41629: break;
+  					//                    // Alert Drums

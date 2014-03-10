@@ -1,0 +1,16 @@
+src/game/Unit.cpp View
+ @@ -3794,6 +3794,14 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
+  				case SPELL_AURA_POWER_BURN_MANA:
+  				case SPELL_AURA_PERIODIC_DUMMY:
+  					break;
++				case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
++					// Ferocious Inspiration can stack
++					if (foundHolder->GetSpellProto()->Id != 34456)
++					{
++						RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
++						stop = true;
++					}
++					break;
+  				case SPELL_AURA_PERIODIC_ENERGIZE:      // all or self or clear non-stackable
+  				default:                                // not allow
+  					// can be only single (this check done at _each_ aura add

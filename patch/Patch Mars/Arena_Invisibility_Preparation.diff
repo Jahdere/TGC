@@ -1,0 +1,18 @@
+src/game/SpellAuras.cpp
+@@ -6900,10 +6907,17 @@ void Aura::HandleArenaPreparation(bool apply, bool Real)
+  
+  	if (apply)
+  	{
++		// Remove invisibility applied by aura to let pets visibles for both players
++		HandleInvisibility(false,false);
++		// remove glow vision if player
++		if (target->GetTypeId() == TYPEID_PLAYER)
++			target->RemoveByteFlag(PLAYER_FIELD_BYTES2, 1, PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
++
+  		// max regen powers at start preparation
+  		target->SetHealth(target->GetMaxHealth());
+  		target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
+  		target->SetPower(POWER_ENERGY, target->GetMaxPower(POWER_ENERGY));
+  	}
+  	else
+  	{

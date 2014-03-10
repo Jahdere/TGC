@@ -1,0 +1,12 @@
+src/game/Unit.cpp View
+@@ -2586,6 +2586,10 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
+  	if (spellLevel <= 0)
+  		return 1.0f;
+  
++	// Prayer of mind has no level penalty
++	if (spellProto->Id == 33110)
++		return 1.0f;
++
+  	float LvlPenalty = 0.0f;
+  
+  	if (spellLevel < 20)

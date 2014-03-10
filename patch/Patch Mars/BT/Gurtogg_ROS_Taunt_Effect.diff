@@ -1,0 +1,13 @@
+src/game/Creature.cpp View
+@@ -1589,7 +1589,11 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
+  
+  	// Taunt immunity special flag check
+  	if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NOT_TAUNTABLE)
+	{		
++		// Gurtogg & ROS special check
++		if (spellInfo->Id == 40603 || spellInfo->Id == 41295)
++			return false;
++
+  		// Taunt aura apply check
+  		if (spellInfo->Effect[index] == SPELL_EFFECT_APPLY_AURA)
+  		{

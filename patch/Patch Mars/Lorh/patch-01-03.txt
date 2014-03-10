@@ -1,0 +1,52 @@
+Black Temple :
+
+Akama:
+- Les adds devraient pop des deux portes en meme temps
+
+Gurtogg :
+- Fixe de la gangrerage
+
+Trash :
+- Les Mande-Wyrm Gueule de dragon devraient correctement utiliser Fixate
+
+
+Classes :
+
+Priest :
+- Prière de guérison devrait prendre en compte correctement le bonus soin
+
+Hunter :
+- Inspiration féroce devrait être stackable
+- Le pet devrait être rez au pied du chasseur
+
+Paladin :
+- Sceau de piété ne devrait plus pouvoir être dispell par un stun war
+
+
+Pvp :
+- Refonte des Diminishing Return 
+- Retrait du flou pendant la préparation en arène, ce qui devrait permettre de voir les pets
+
+
+Général :
+-Fixe d'un bug qui permettait aux pet de s'attaquer soit même
+
+Liste des différentes modifications concernant le coefficient de la prise en compte du spell :
+ - Récupération (druide) : +4% par tick
+ - Eclair (Shaman) : +8%
+ - Choc de flamme (Mage) : -7% à l'impact, -10% par tick
+ - Bouclier de mana (Mage) : -30%
+ - Flamme sacrée (Prêtre) : + 25% à l'impact
+ - Toucher Vampirique (Prêtre) : -20%
+ - Immolation (Démoniste) : -7% par tick
+ - Pluie de feu (Démoniste) : -65% par tick
+A noté qu'il est possible que certains spell aient aient déja subis ces modifications depuis quelques jours.
+
+
+Fixe des CD internes concernants certains items qui n'en possédaient pas :
+- Robe de la mascarade (45sec)
+- Robe des anciens scribes (45sec)
+- Diamant tonneterre de perspicacité (15sec)
+- Marque de défiance
+- Lame de sorcellerie (15sec)
+
