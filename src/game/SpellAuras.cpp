@@ -5143,6 +5143,16 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 						target->SetHealth(1);
 					target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 				}
+
+				// Action don't affect threat level during Fel Rage
+				if(GetId() == 40604 && target->GetTypeId() == TYPEID_PLAYER)
+				{
+					int32 value = 127; // For all spell school
+					float modifier = -100.0f; // -100% threat during fel rage
+					for (int8 x = 0; x < MAX_SPELL_SCHOOL; ++x)
+						if (value & int32(1 << x))
+							ApplyPercentModFloatVar(target->m_threatModifier[x], modifier, apply);
+				}
 			}
 			return;
 		}
@@ -6151,7 +6161,7 @@ void Aura::PeriodicTick()
 				pdamage -= ((Player*)target)->GetDotDamageReduction(pdamage);
 			target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
 			/*if(IsSpellBinary(spellProto, pCaster))
-				resist = 0;*/
+			resist = 0;*/
 
 			DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
 				GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
