@@ -5416,6 +5416,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
+			case 40486:									// Eject Gurtogg
+				{
+					if(!unitTarget)
+						return;
+
+					if (m_caster->getThreatManager().getThreat(unitTarget))
+						m_caster->getThreatManager().modifyThreatPercent(unitTarget, -40);
+					return;
+				}
 			case 40892:									// Fixated
 				{
 					if(!unitTarget)

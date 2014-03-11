@@ -167,11 +167,7 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
 			if (m_uiEjectTimer < uiDiff)
 			{
 				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_1) == CAST_OK)
-				{
-					// Script effect: reduce threat on main target
-					m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
 					m_uiEjectTimer = 15000;
-				}
 			}
 			else
 				m_uiEjectTimer -= uiDiff;
@@ -230,7 +226,7 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
 		{
 			if (m_bIsPhase1)
 			{
-				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FEL_RAGE_PLAYER_1, SELECT_FLAG_PLAYER))
+				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_FEL_RAGE_PLAYER_1, SELECT_FLAG_PLAYER))
 				{
 					// Buff self
 					if (DoCastSpellIfCan(m_creature, SPELL_FEL_RAGE) == CAST_OK)
@@ -253,11 +249,6 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
 						m_uiAcidGeyserTimer  = 1000;
 						m_uiPhaseChangeTimer = 30000;
 					}
-				}
-				else
-				{
-					// Try again if no target selected
-					m_uiPhaseChangeTimer = 1000;
 				}
 			}
 			else
