@@ -160,8 +160,8 @@ void instance_black_temple::SetData(uint32 uiType, uint32 uiData)
 		break;
 	case TYPE_SUPREMUS:
 		m_auiEncounter[uiType] = uiData;
-		/*if (uiData == DONE)
-			DoUseDoorOrButton(GO_SUPREMUS_DOORS);*/
+		if (uiData == DONE)
+			DoUseDoorOrButton(GO_SUPREMUS_DOORS);
 		break;
 	case TYPE_SHADE:
 		m_auiEncounter[uiType] = uiData;
