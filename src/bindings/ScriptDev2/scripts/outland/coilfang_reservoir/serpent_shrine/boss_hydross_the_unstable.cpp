@@ -110,6 +110,18 @@ struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
             m_pInstance->SetData(TYPE_HYDROSS_EVENT, IN_PROGRESS);
     }
 
+	void MoveInLineOfSight(Unit* pWho) override
+	{
+		if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
+			m_creature->IsWithinDistInMap(pWho, 45.0f))
+		{
+			pWho->SetInCombatWith(m_creature);
+			m_creature->AddThreat(pWho);
+		}
+
+		ScriptedAI::MoveInLineOfSight(pWho);
+	}
+
     void KilledUnit(Unit* /*pVictim*/) override
     {
         if (m_bCorruptedForm)
