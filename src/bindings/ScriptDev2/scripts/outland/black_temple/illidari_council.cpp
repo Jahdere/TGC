@@ -261,13 +261,13 @@ struct MANGOS_DLL_DECL mob_illidari_councilAI : public ScriptedAI
 
 	void UpdateAI(const uint32 uiDiff) override
 	{
-		// Make the council members health equal every 2-3 secs
+		// Make the council members health equal every sec
 		if (m_bEventBegun && !m_bEventEnd)
 		{
 			if (m_uiEquivalencyTimer < uiDiff)
 			{
 				if (DoCastSpellIfCan(m_creature, SPELL_EMPYREAL_EQUIVALENCY) == CAST_OK)
-					m_uiEquivalencyTimer = urand(2000, 3000);
+					m_uiEquivalencyTimer = 1000;
 			}
 			else
 				m_uiEquivalencyTimer -= uiDiff;
