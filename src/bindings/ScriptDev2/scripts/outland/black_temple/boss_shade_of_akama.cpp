@@ -137,6 +137,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 	GuidList m_lDefenderGUIDList;
 
 	bool m_bHasYelledOnce;
+	bool m_bCanSpawnSorcerer;
 
 	void Reset() override
 	{
@@ -154,6 +155,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 		m_uiChannelersDead          = 0;
 
 		m_bHasYelledOnce            = false;
+		m_bCanSpawnSorcerer			= true;
 
 		m_lBrokenGUIDList.clear();
 		m_lSorcerersGUIDList.clear();
@@ -224,6 +226,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 						float fX, fY, fZ;
 						m_creature->GetContactPoint(pShade, fX, fY, fZ);
 						pShade->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+						m_bCanSpawnSorcerer = false;
 					}
 				}
 			}
@@ -268,7 +271,7 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 				{
 					if (Creature* pShade = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADE_OF_AKAMA))
 					{
-						pShade->GetNearPoint(pShade, fX, fY, fZ, 0, 20.0f, pShade->GetAngle(pSummoned));
+						pShade->GetNearPoint(pShade, fX, fY, fZ, 5.0f, 10.0f, pShade->GetAngle(pSummoned));
 						pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
 					}
 				}
@@ -459,15 +462,18 @@ struct MANGOS_DLL_DECL npc_akamaAI : public ScriptedAI, private DialogueHelper
 			else
 				m_uiSummonDefenderTimer -= uiDiff;
 
-			if (m_lSorcerersGUIDList.size() <= m_uiChannelersDead)
+			if(m_bCanSpawnSorcerer)
 			{
-				if (m_uiSummonSorcererTimer < uiDiff)
+				if (m_lSorcerersGUIDList.size() <= m_uiChannelersDead)
 				{
-					DoSummonAshtongue(SPELL_SUMMON_SORCERER);
-					m_uiSummonSorcererTimer = urand(20000, 30000);
+					if (m_uiSummonSorcererTimer < uiDiff)
+					{
+						DoSummonAshtongue(SPELL_SUMMON_SORCERER);
+						m_uiSummonSorcererTimer = urand(20000, 30000);
+					}
+					else
+						m_uiSummonSorcererTimer -= uiDiff;
 				}
-				else
-					m_uiSummonSorcererTimer -= uiDiff;
 			}
 
 			if (m_uiSummonPackTimer < uiDiff)
