@@ -5433,6 +5433,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(m_caster, 40893, true);
 					return;
 				}
+			case 40904:									// Draw Soul
+				{
+					if(!unitTarget)
+						return;
+
+					unitTarget->CastSpell(m_caster, 40903, true, NULL, NULL, m_caster->GetObjectGuid());
+					return;
+				}
 			case 41055:                                 // Copy Weapon
 				{
 					if (m_caster->GetTypeId() != TYPEID_UNIT || !unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
