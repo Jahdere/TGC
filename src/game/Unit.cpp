@@ -2479,7 +2479,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
 	// check if attack comes from behind, nobody can parry or block if attacker is behind
 	if (!from_behind)
 	{
-		if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK))
+		if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK)
+			|| !(((Creature*)this)->GetCreatureType() == CREATURE_TYPE_ELEMENTAL && GetMeleeDamageSchoolMask() != SPELL_SCHOOL_MASK_NORMAL))
 		{
 			tmp = block_chance;
 			if ((tmp > 0)                                   // check if unit _can_ block
@@ -2819,6 +2820,12 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 		tmp += parryChance;
 		if (roll < tmp)
 			return SPELL_MISS_PARRY;
+	}
+
+	if (this->GetTypeId() == TYPEID_UNIT && !IsSpellHaveEffect(spell, SPELL_EFFECT_SCHOOL_DAMAGE))
+	{
+		if (pVictim->IsSpellBlocked(this, spell, attType))
+			return SPELL_MISS_BLOCK;
 	}
 
 	return SPELL_MISS_NONE;
