@@ -377,7 +377,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* pVictim, SpellAuraHolder* holder, S
 		modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
 	}
 
-	error_log("******* PROC spell : %u, CHANCE %f *********", spellProto->Id, chance);
+	//error_log("******* PROC spell : %u, CHANCE %f *********", spellProto->Id, chance);
 	return roll_chance_f(chance);
 }
 
@@ -2203,10 +2203,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 			break;
 		}
 	}
-	error_log("****** AURA PROC OK COOLDOWN %u **********", cooldown);
+	//error_log("****** AURA PROC OK COOLDOWN %u **********", cooldown);
 	if (cooldown && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(trigger_spell_id))
 	{
-		error_log("****** AURA PROC FAIL COOLDOWN %u **********", ((Player*)this)->GetSpellCooldownDelay(trigger_spell_id));
+		//error_log("****** AURA PROC FAIL COOLDOWN %u **********", ((Player*)this)->GetSpellCooldownDelay(trigger_spell_id));
 		return SPELL_AURA_PROC_FAILED;
 	}
 
@@ -2227,7 +2227,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 	else
 		CastSpell(target, trigger_spell_id, true, castItem, triggeredByAura);
 
-	error_log("****** AURA PROC OK COOLDOWN %u **********", cooldown);
+	//error_log("****** AURA PROC OK COOLDOWN %u **********", cooldown);
 
 	if (cooldown && GetTypeId() == TYPEID_PLAYER)
 		((Player*)this)->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + cooldown);
