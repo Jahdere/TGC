@@ -2477,10 +2477,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
 
 	// block chances
 	// check if attack comes from behind, nobody can parry or block if attacker is behind
-	if (!from_behind)
+	// magic melee dmg can't be blocked
+	if (!from_behind && GetMeleeDamageSchoolMask() == SPELL_SCHOOL_MASK_NORMAL)
 	{
-		if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK)
-			|| !(((Creature*)this)->GetCreatureType() == CREATURE_TYPE_ELEMENTAL && GetMeleeDamageSchoolMask() != SPELL_SCHOOL_MASK_NORMAL))
+		if (pVictim->GetTypeId() == TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK))
 		{
 			tmp = block_chance;
 			if ((tmp > 0)                                   // check if unit _can_ block
