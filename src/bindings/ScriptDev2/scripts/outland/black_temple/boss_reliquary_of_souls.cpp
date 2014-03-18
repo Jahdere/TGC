@@ -364,14 +364,14 @@ struct MANGOS_DLL_DECL essence_base_AI : public ScriptedAI
 
 		uiDamage = 0;
 
+		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		m_creature->RemoveAllAurasOnDeath();
 		m_creature->InterruptNonMeleeSpells(true);
 		m_creature->SetHealth(0);
 		m_creature->StopMoving();
 		m_creature->ClearComboPointHolders();        
 		m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-		m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+		m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);		
 		m_creature->ClearAllReactives();
 		m_creature->GetMotionMaster()->Clear();
 
