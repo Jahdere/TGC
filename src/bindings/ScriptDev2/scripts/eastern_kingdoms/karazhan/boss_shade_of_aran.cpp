@@ -307,10 +307,10 @@ struct MANGOS_DLL_DECL boss_aranAI : public ScriptedAI
         {
             CanCastResult spellResult = CAST_OK;
 
-            switch (urand(0, 1))
+            switch (0)
             {
                 case 0:
-                    spellResult = DoCastSpellIfCan(m_creature, SPELL_COUNTERSPELL);
+					spellResult = DoCastSpellIfCan(m_creature, SPELL_COUNTERSPELL, CAST_TRIGGERED);
                     break;
                 case 1:
                     if (Unit* pUnit = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
@@ -318,7 +318,7 @@ struct MANGOS_DLL_DECL boss_aranAI : public ScriptedAI
                     break;
             }
             if (spellResult == CAST_OK)
-                m_uiSecondarySpellTimer = urand(5000, 20000);
+                m_uiSecondarySpellTimer = 2000;
         }
         else
             m_uiSecondarySpellTimer -= uiDiff;
