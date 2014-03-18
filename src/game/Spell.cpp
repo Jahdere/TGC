@@ -1982,6 +1982,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			case SPELL_EFFECT_PERSISTENT_AREA_AURA:
 				break;
 			case SPELL_EFFECT_SUMMON:
+				// Flame Crash
+				if(m_spellInfo->Id == 40832)
+					targetUnitMap.clear();
+
 				targetUnitMap.push_back(m_caster);
 				break;
 			default:
@@ -6301,6 +6305,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		break;
 	case 40870:											// Fatal attraction (Shahrazz)
 		if(!target->HasAura(41001))
+			return false;
+		break;
+	case 40832:											// Flame Crash (Illidan)
+		if(target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == 22917)
 			return false;
 		break;
 	default: break;
