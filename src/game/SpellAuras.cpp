@@ -2048,6 +2048,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 					if (roll_chance_i(20))              // backfire stun
 						target->CastSpell(target, 51581, true, NULL, this);
 					return;
+				case 39908:								// Eye blast
+					target->CastSpell(target, 40017, true, NULL, this);
+					target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+					return;
 				case 43873:                             // Headless Horseman Laugh
 					target->PlayDistanceSound(11965);
 					return;
@@ -4717,8 +4721,11 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 	else
 	{
 		// Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-		if (spellProto->Id == 41917)
-			target->CastSpell(target, 41915, true);
+		if (spellProto->Id == 41917 || spellProto->Id == 41914)
+		{
+			if (m_removeMode == AURA_REMOVE_BY_EXPIRE || m_removeMode == AURA_REMOVE_BY_DEATH)
+				target->CastSpell(target, 41915, true, NULL, NULL, GetCasterGuid());
+		}
 		// Skeleton Shot - Summoning Skeleton if target die
 		else if (spellProto->Id == 41171)
 		{
@@ -6153,6 +6160,13 @@ void Aura::PeriodicTick()
 				pdamage = GetBasePoints() * GetAuraTicks();
 				if(Aura* AuraAngerEff1 = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1))
 					AuraAngerEff1->GetHolder()->SetStackAmount(AuraAngerEff1->GetHolder()->GetStackAmount() + 1);
+			}
+
+			// Agonizing Flames (~ +5% each ticks)
+			if (spellProto->Id == 40932)
+			{
+				if(GetAuraTicks() > 1)
+					pdamage = uint32(GetBasePoints() * ( 1 + (GetAuraTicks() * 0.05)));
 			}
 
 			// As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
