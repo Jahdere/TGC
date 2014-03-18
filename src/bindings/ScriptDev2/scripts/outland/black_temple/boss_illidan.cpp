@@ -584,11 +584,6 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			pSummoned->SetFacingToObject(m_creature);
 			m_creature->SetTargetGuid(pSummoned->GetObjectGuid());
 			break;
-		case NPC_PARASITIC_SHADOWFIEND:
-			pSummoned->SetInCombatWithZone();
-			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, (const SpellEntry*) 0, SELECT_FLAG_PLAYER))
-				pSummoned->AI()->AttackStart(pTarget);
-			break;
 		}
 	}
 
@@ -1534,6 +1529,8 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 
 		pClosestGlaive = NULL;
 		pFarthestGlaive = NULL;
+
+		m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
 	}
 
 	void JustSummoned(Creature* pSummoned) override
