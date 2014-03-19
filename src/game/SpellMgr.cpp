@@ -2046,6 +2046,15 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
 				break;
 			}
+		case SPELLFAMILY_PRIEST:
+			{
+				// Renew vs Renewal (Priest T4 2p)
+				if ((spellInfo_1->SpellFamilyFlags & UI64LIT(0x00000000000040) && spellInfo_2->Id == 37563) ||
+					(spellInfo_2->SpellFamilyFlags & UI64LIT(0x00000000000040) && spellInfo_1->Id == 37563))
+					return false;
+
+				break;
+			}
 		case SPELLFAMILY_POTION:
 			{
 				//Pierre Alchi vs Sayge @Kordbc
@@ -2212,6 +2221,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 				((spellInfo_2->SpellFamilyFlags & UI64LIT(0x200000)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x8000))))
 				return false;
 		}
+
+		// Renew vs Renewal (Priest T4 2p)
+		if ((spellInfo_1->SpellFamilyFlags & UI64LIT(0x00000000000040) && spellInfo_2->Id == 37563) ||
+			(spellInfo_2->SpellFamilyFlags & UI64LIT(0x00000000000040) && spellInfo_1->Id == 37563))
+			return false;
+
 		break;
 	case SPELLFAMILY_DRUID:
 		if (spellInfo_2->SpellFamilyName == SPELLFAMILY_DRUID)
@@ -3316,8 +3331,8 @@ void SpellMgr::LoadSpellCustomAttr()
 			spellInfo->AttributesEx2 = SPELL_ATTR_EX2_UNK20;	
 			break;
 		case 33110:                 // Prayer of mending (wrong level for penalty calculation)
-            spellInfo->spellLevel = 68;
-            break;
+			spellInfo->spellLevel = 68;
+			break;
 		default:
 			break;
 		}
