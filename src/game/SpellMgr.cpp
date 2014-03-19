@@ -4037,6 +4037,10 @@ void SpellMgr::CheckUsedSpells(char const* table)
 
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered)
 {
+	if(triggered)
+		error_log("********* TRIGGERED OK ***********");
+	else
+		error_log("******** NOT TRIGGERED **********");
 	// Explicit Diminishing Groups
 	switch (spellproto->SpellFamilyName)
 	{
@@ -4044,6 +4048,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
 		// some generic arena related spells have by some strange reason MECHANIC_TURN
 		if (spellproto->Mechanic == MECHANIC_TURN)
 			return DIMINISHING_NONE;
+
+		// Blacksmithing weapon
+		if (spellproto->Id == 34510)
+			triggered = true;
 		break;
 	case SPELLFAMILY_ROGUE:
 		{
