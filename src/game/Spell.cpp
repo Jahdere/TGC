@@ -1981,11 +1981,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			{
 			case SPELL_EFFECT_PERSISTENT_AREA_AURA:
 				break;
-			case SPELL_EFFECT_SUMMON:
-				// Flame Crash
-				if(m_spellInfo->Id == 40832)
-					targetUnitMap.clear();
-
+			case SPELL_EFFECT_SUMMON:ch
 				targetUnitMap.push_back(m_caster);
 				break;
 			default:
@@ -6242,6 +6238,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if (m_spellInfo->Id != 20577)                   // Cannibalize
 			break;
 		// fall through
+	case SPELL_EFFECT_SUMMON:
+		if (m_spellInfo->Id == 40832 && target != m_caster)					// Flame Crash
+			return false;
+		break;
 	case SPELL_EFFECT_RESURRECT_NEW:
 		// player far away, maybe his corpse near?
 		if (target != m_caster && !target->IsWithinLOSInMap(m_caster))
