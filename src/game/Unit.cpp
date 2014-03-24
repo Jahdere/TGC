@@ -2031,6 +2031,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 					// always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
 					continue;
 				}
+
+				// Shadow of death absorb 100% of dmg during 55s and not 100 flat dmg (Override class effect)
+				if (spellProto->Id == 40251)				 
+					RemainingDamage = 0;
 				break;
 			}
 		case SPELLFAMILY_PRIEST:
@@ -4464,7 +4468,6 @@ void Unit::RemoveAura(Aura* Aur, AuraRemoveMode mode)
 	{
 		m_modAuras[Aur->GetModifier()->m_auraname].remove(Aur);
 	}
-
 	// Set remove mode
 	Aur->SetRemoveMode(mode);
 
@@ -4542,6 +4545,7 @@ void Unit::RemoveAllAurasOnDeath()
 	{
 		if (!iter->second->IsPassive() && !iter->second->IsDeathPersistent())
 		{
+			error_log("****** RemoveAllAurasOnDeath **********");
 			RemoveSpellAuraHolder(iter->second, AURA_REMOVE_BY_DEATH);
 			iter = m_spellAuraHolders.begin();
 		}
