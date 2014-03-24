@@ -1981,7 +1981,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			{
 			case SPELL_EFFECT_PERSISTENT_AREA_AURA:
 				break;
-			case SPELL_EFFECT_SUMMON:ch
+			case SPELL_EFFECT_SUMMON:
 				targetUnitMap.push_back(m_caster);
 				break;
 			default:
