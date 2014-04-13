@@ -47,6 +47,10 @@ enum
 	// spell used by eagles
 	SPELL_EAGLE_SWOOP       = 44732,
 
+	// spell used by Tempest mob
+	SPELL_CHAIN_LIGHTNING	= 43435,
+	SPELl_THUNDERCLAP		= 44033,
+
 	NPC_SOARING_EAGLE       = 24858,
 	MAX_EAGLE_COUNT         = 6,
 };
@@ -304,6 +308,185 @@ CreatureAI* GetAI_mob_soaring_eagle(Creature* pCreature)
 	return new mob_soaring_eagleAI(pCreature);
 }
 
+struct AddPosSpawn {
+	float m_fX, m_fY, m_fZ;
+};
+
+static const AddPosSpawn aPositionSpawn[2] = 
+{
+	{280.807f, 1379.943f, 49.321f},	// Eagle position
+	{193.848f, 1438.121f, 15.108f}, // Warrior position   
+};
+
+// This mob handle the gauntlet event
+struct MANGOS_DLL_DECL mob_amanashi_tempestAI : public ScriptedAI
+{
+	mob_amanashi_tempestAI(Creature* pCreature) : ScriptedAI(pCreature)
+	{
+		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		Reset();
+	}
+
+	ScriptedInstance* m_pInstance;
+
+	uint32 m_uiSpawnTimer;
+	uint32 m_uiThunderClapTimer;
+	
+	void Reset() override
+	{
+		m_uiSpawnTimer = 20000;
+		m_uiThunderClapTimer = 5000;
+	}
+
+	void JustDied(Unit* pKiller) override
+	{
+		if (m_pInstance)
+			m_pInstance->SetData(TYPE_EVENT_GAUNTLET, DONE);
+	}
+
+	void JustReachedHome() override
+	{
+		if (m_pInstance)
+			m_pInstance->SetData(TYPE_EVENT_GAUNTLET, FAIL);
+	}
+
+	void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
+	{
+
+	if (uiMotionType != POINT_MOTION_TYPE || !uiPointId || pSummoned->isDead())
+		return;
+
+		if (uiPointId == POINT_ID_FAIL_GAUNTLET)
+		{
+			if(m_pInstance)
+				m_pInstance->SetData(TYPE_EVENT_GAUNTLET, FAIL);
+		}
+
+		
+	}
+
+	// Stock all summon
+	void JustSummoned(Creature* pSummoned) override
+	{
+		switch(pSummoned->GetEntry())
+		{
+		case NPC_EAGLE:
+			{
+				pSummoned->SetWalk(false);
+				pSummoned->GetMotionMaster()->MovePoint(POINT_ID_FAIL_GAUNTLET, aPositionSpawn[1].m_fX, aPositionSpawn[1].m_fY, aPositionSpawn[1].m_fZ);
+				break;
+			}
+		case NPC_WARRIOR:
+			{
+				pSummoned->SetWalk(false);
+				pSummoned->GetMotionMaster()->MovePoint(0, aPositionSpawn[0].m_fX, aPositionSpawn[0].m_fY, aPositionSpawn[0].m_fZ);
+				break;
+			}
+		default:break;
+		}
+	}
+
+	// Summon 5 or 6 eagles
+	void DoSummonEagles()
+	{
+		int8 countMaxEagles = urand(5,6);
+		for(int8 i = 0; i < countMaxEagles; i++)
+		{
+			float m_fX, m_fY, m_fZ;
+			m_creature->GetRandomPoint(aPositionSpawn[0].m_fX, aPositionSpawn[0].m_fY, aPositionSpawn[0].m_fZ, 10.0f, m_fX, m_fY, m_fZ);
+			m_creature->SummonCreature(NPC_EAGLE, m_fX, m_fY, m_fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+		}
+	}
+
+	// Summon 2 warriors
+	void DoSummonWarriors()
+	{
+		for(int8 i = 0; i < 2; i++)
+		{
+			float m_fX, m_fY, m_fZ;
+			m_creature->GetRandomPoint(aPositionSpawn[1].m_fX, aPositionSpawn[1].m_fY, aPositionSpawn[1].m_fZ, 10.0f, m_fX, m_fY, m_fZ);
+			m_creature->SummonCreature(NPC_WARRIOR, m_fX, m_fY, m_fZ, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0);
+		}
+	}
+
+	void UpdateAI(const uint32 uiDiff) override
+	{
+		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+		{
+			if(m_pInstance)
+			{
+				if(m_pInstance->GetData(TYPE_EVENT_GAUNTLET) == IN_PROGRESS)
+				{
+					if(m_uiSpawnTimer < uiDiff)
+					{
+						DoSummonEagles();
+						DoSummonWarriors();
+						m_uiSpawnTimer = urand(15000, 25000);
+					}
+					else
+						m_uiSpawnTimer -= uiDiff;
+				}
+			}
+			return;
+		}
+
+		if (m_uiThunderClapTimer < uiDiff)
+		{
+			if(DoCastSpellIfCan(m_creature->getVictim(), SPELl_THUNDERCLAP) == CAST_OK)
+				m_uiThunderClapTimer = urand(15000 , 25000);
+		}
+		else
+			m_uiThunderClapTimer -= uiDiff;
+
+		DoMeleeAttackIfReady();
+	}
+};
+
+CreatureAI* GetAI_mob_amanashi_tempest(Creature* pCreature)
+{
+	return new mob_amanashi_tempestAI(pCreature);
+}
+
+// This mob launch the event and run away
+struct MANGOS_DLL_DECL mob_amanashi_lookoutAI : public ScriptedAI
+{
+	mob_amanashi_lookoutAI(Creature* pCreature) : ScriptedAI(pCreature)
+	{
+		m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+		Reset();
+	}
+
+	ScriptedInstance* m_pInstance;
+
+	void Reset() override {}
+	void Aggro(Unit* /*pWho*/) override
+	{
+		if (m_pInstance)
+			m_pInstance->SetData(TYPE_EVENT_GAUNTLET, IN_PROGRESS);
+		m_creature->SetWalk(false);
+		m_creature->GetMotionMaster()->MovePoint(POINT_ID_LOOKOUT, aPositionSpawn[0].m_fX, aPositionSpawn[0].m_fY, aPositionSpawn[0].m_fZ);
+	}
+
+	void MovementInform(uint32 uiType, uint32 uiPointId) override
+	{
+		if (uiType != POINT_MOTION_TYPE || !uiPointId)
+			return;
+
+		if(uiPointId == POINT_ID_LOOKOUT)
+			m_creature->ForcedDespawn();		
+	}
+
+	// Do-Nothing-Just-Run
+	void AttackStart(Unit* /*pWho*/) override { }
+	void UpdateAI(const uint32 /*uiDiff*/) override { }	
+};
+
+CreatureAI* GetAI_mob_amanashi_lookout(Creature* pCreature)
+{
+	return new mob_amanashi_lookoutAI(pCreature);
+}
+
+
 void AddSC_boss_akilzon()
 {
 	Script* pNewScript;
@@ -316,5 +499,15 @@ void AddSC_boss_akilzon()
 	pNewScript = new Script;
 	pNewScript->Name = "mob_soaring_eagle";
 	pNewScript->GetAI = &GetAI_mob_soaring_eagle;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "mob_amanashi_tempest";
+	pNewScript->GetAI = &GetAI_mob_amanashi_tempest;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "mob_amanashi_lookout";
+	pNewScript->GetAI = &GetAI_mob_amanashi_lookout;
 	pNewScript->RegisterSelf();
 }

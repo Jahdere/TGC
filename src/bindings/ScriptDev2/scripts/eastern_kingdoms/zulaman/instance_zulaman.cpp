@@ -105,6 +105,10 @@ void instance_zulaman::OnCreatureCreate(Creature* pCreature)
 		else if (pCreature->GetPositionZ() > 41.0f)
 			m_aNalorakkEvent[3].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
 		break;
+	case NPC_WARRIOR:
+	case NPC_EAGLE:
+		lMobGauntletEventGUIDList.push_back(pCreature->GetObjectGuid());
+		break;
 	}
 }
 
@@ -134,7 +138,16 @@ void instance_zulaman::OnCreatureDeath(Creature* pCreature)
 				}
 			}
 		}
-		break;
+	case NPC_LOOKOUT:
+	case NPC_WIND_WALKER:
+	case NPC_PROTECTOR:
+	case NPC_TEMPEST:
+		{
+			if(GetData(TYPE_EVENT_GAUNTLET) == IN_PROGRESS)
+				lMobGauntletEventGUIDList.push_back(pCreature->GetObjectGuid());
+			break;
+		}
+
 	}
 }
 
@@ -204,7 +217,9 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
 		if (uiData == SPECIAL)
 		{
 			++m_uiGongCount;
-			if (m_uiGongCount == 5)
+			//if (m_uiGongCount == 5)
+			error_log("********* GongCount : %u **********", m_uiGongCount);
+			if (m_uiGongCount == 1)		// Mode debug
 				m_auiEncounter[TYPE_EVENT_RUN] = uiData;
 			return;
 		}
@@ -252,6 +267,31 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
 			}
 		}
 		m_auiEncounter[uiType] = uiData;
+		break;
+	case TYPE_EVENT_GAUNTLET:
+		m_auiEncounter[uiType] = uiData;
+		// Respawn all mob event when Gauntlet fail
+		if(uiData == FAIL)
+		{
+			for (GuidList::const_iterator itr = lMobGauntletEventGUIDList.begin(); itr != lMobGauntletEventGUIDList.end(); ++itr)
+			{
+				if(Creature* pTemp = instance->GetCreature(*itr))
+				{
+					switch(pTemp->GetEntry())
+					{
+					case NPC_WARRIOR:
+					case NPC_EAGLE:
+						pTemp->ForcedDespawn();
+						break;
+					default:
+						if(!pTemp->isAlive() || !pTemp->IsDespawned())
+							pTemp->Respawn();
+						break;
+					}
+
+				}
+			}
+		}
 		break;
 	case TYPE_NALORAKK:
 		if (uiData == DONE)
@@ -367,6 +407,7 @@ uint32 instance_zulaman::GetData(uint32 uiType) const
 	{
 	case TYPE_EVENT_RUN:
 	case TYPE_AKILZON:
+	case TYPE_EVENT_GAUNTLET:
 	case TYPE_NALORAKK:
 	case TYPE_JANALAI:
 	case TYPE_HALAZZI:
@@ -393,12 +434,13 @@ void instance_zulaman::SendNextBearWave(Unit* pTarget)
 
 			// For the first wave we need to make them jump to the ground before attacking
 			// Jump movement is not working on 2.4.3 yet
-			/*if (!m_uiBearEventPhase)
+			if (!m_uiBearEventPhase)
 			{
-			float fX, fY, fZ;
-			pTemp->GetRandomPoint(35.31f, 1412.24f, 2.04f, 3.0f, fX, fY, fZ);
-			pTemp->GetMotionMaster()->MoveJump(fX, fY, fZ, pTemp->GetSpeed(MOVE_RUN)*2, 5.0f);
-			}*/
+				float fX, fY, fZ;
+				pTemp->GetRandomPoint(35.31f, 1412.24f, 2.04f, 3.0f, fX, fY, fZ);
+				//pTemp->GetMotionMaster()->MoveJump(fX, fY, fZ, pTemp->GetSpeed(MOVE_RUN)*2, 5.0f);
+				pTemp->Relocate(fX, fY, fZ);
+			}
 		}
 	}
 

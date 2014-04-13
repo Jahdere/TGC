@@ -45,6 +45,7 @@ enum InstanceZA
 
 	TYPE_RAND_VENDOR_1      = 8,
 	TYPE_RAND_VENDOR_2      = 9,
+	TYPE_EVENT_GAUNTLET		= 10,
 
 	NPC_AKILZON             = 23574,
 	NPC_NALORAKK            = 23576,
@@ -58,6 +59,14 @@ enum InstanceZA
 	NPC_TRIBES_MAN          = 23582,
 	NPC_AXETHROWER          = 23542,
 	NPC_WARBRINGER          = 23580,
+
+	// Akil'zon event npcs
+	NPC_LOOKOUT				= 24175,
+	NPC_WIND_WALKER			= 24179,
+	NPC_PROTECTOR			= 24180,
+	NPC_TEMPEST				= 24549,
+	NPC_WARRIOR				= 24225,
+	NPC_EAGLE				= 24159,
 
 	// Malacrass companions
 	NPC_ALYSON              = 24240,
@@ -117,6 +126,12 @@ enum RunEventSteps
 	RUN_DONE                = 3,
 	RUN_PROGRESS            = 4,
 	RUN_FAIL_SOON           = 5
+};
+
+enum MovePoint
+{
+	POINT_ID_FAIL_GAUNTLET = 1,
+	POINT_ID_LOOKOUT	   = 2
 };
 
 struct TimeEventNpcInfo
@@ -191,6 +206,8 @@ private:
 	NalorakkTrashInfo m_aNalorakkEvent[MAX_BEAR_WAVES];
 	uint8 m_uiBearEventPhase;
 	bool m_bIsBearPhaseInProgress;
+
+	GuidList lMobGauntletEventGUIDList;
 };
 
 #endif
