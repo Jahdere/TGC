@@ -1,0 +1,9 @@
+src/game/Unit.cpp View
+@@ -2477,10 +2477,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
+  
+  	// block chances
+  	// check if attack comes from behind, nobody can parry or block if attacker is behind
+-	if (!from_behind)
++	// magic melee dmg can't be blocked
++	if (!from_behind && GetMeleeDamageSchoolMask() == SPELL_SCHOOL_MASK_NORMAL)
+  	{

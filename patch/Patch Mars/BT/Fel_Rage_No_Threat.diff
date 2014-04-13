@@ -1,0 +1,18 @@
+src/game/SpellAuras.cpp View
+@@ -5143,6 +5143,16 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
+  						target->SetHealth(1);
+  					target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+  				}
++
++				// Action don't affect threat level during Fel Rage
++				if(GetId() == 40604 && target->GetTypeId() == TYPEID_PLAYER)
++				{
++					int32 value = 127; // For all spell school
++					float modifier = -100.0f; // -100% threat during fel rage
++					for (int8 x = 0; x < MAX_SPELL_SCHOOL; ++x)
++						if (value & int32(1 << x))
++							ApplyPercentModFloatVar(target->m_threatModifier[x], modifier, apply);
++				}
+  			}
+  			return;
+  		}

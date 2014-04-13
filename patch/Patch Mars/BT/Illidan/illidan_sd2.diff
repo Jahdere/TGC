@@ -1,0 +1,489 @@
+src/bindings/ScriptDev2/scripts/outland/black_temple/boss_illidan.cpp View
+@@ -137,7 +137,7 @@ enum
+	// Misc Summoned
+	SPELL_FLAME_CRASH_EFFECT        = 40836,                // Firey blue ring of circle that the other flame crash summons
+	SPELL_EYE_BLAST_TRIGGER         = 40017,                // This summons Demon Form every few seconds and deals ~20k damage in its radius
+-	// SPELL_DEMON_FIRE             = 40029,                // Blue fire trail left by Eye Blast. Deals 2k per second if players stand on it.
++	SPELL_DEMON_FIRE                = 40029,                // Blue fire trail left by Eye Blast. Deals 2k per second if players stand on it.
+	SPELL_BLAZE_EFFECT              = 40610,                // Green flame on the ground, triggers damage (5k) every few seconds
+
+	// Blade of Azzinoth
+@@ -156,6 +156,9 @@ enum
+	SPELL_CONSUME_SOUL              = 41080,                // Once the Shadow Demons reach their target, they use this to kill them
+	SPELL_PARALYZE                  = 41083,                // Shadow Demons cast this on their target
+
++	// Shadowfiend
++	SPELL_PARASITIC					        = 41914,
++
+	// Cage spells
+	SPELL_CAGE_TRAP_PERIODIC        = 40760,                // purpose unk
+	SPELL_CAGE_TRAP_DUMMY           = 40761,                // purpose unk
+@@ -165,11 +168,11 @@ enum
+	/************** Creature Summons **************/
+	NPC_ILLIDARI_ELITE              = 23226,                // attacks Akama on the stairs
+	NPC_FLAME_CRASH                 = 23336,                // has aura 40836
+-	// NPC_PARASITIC_SHADOWFIEND    = 23498,                // has aura 41913 (in c_t_a)
++	NPC_PARASITIC_SHADOWFIEND		    = 23498,                // has aura 41913 (in c_t_a)
+	NPC_BLADE_OF_AZZINOTH           = 22996,                // has aura 41997 and summons 22997 on spawn
+	NPC_FLAME_OF_AZZINOTH           = 22997,
+	NPC_ILLIDAN_TARGET              = 23070,                // the eye blast target - has aura 40017
+-	// NPC_DEMON_FIRE               = 23069,                // has aura 40029 (in EventAI)
++	NPC_DEMON_FIRE					        = 23069,				        // has aura 40029
+	NPC_BLAZE                       = 23259,                // has aura 40610
+	NPC_SHADOW_DEMON                = 23375,
+	// NPC_CAGE_TRAP_DISTURB_TRIGGER = 23304,
+
+@@ -440,10 +445,10 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+		};
+
+		uiDamage = 0;
++		m_creature->RemoveAllAurasOnDeath();
+		m_creature->InterruptNonMeleeSpells(true);
+		m_creature->SetHealth(1);
+-		m_creature->StopMoving();
+-		m_creature->RemoveAllAurasOnDeath();
++		m_creature->StopMoving();		
+		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+		m_creature->ClearAllReactives();
+
+@@ -526,7 +531,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+			// Resume combat and attack Maiev
+			m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+			m_creature->SetTargetGuid(m_creature->getVictim()->GetObjectGuid());
+-			SetCombatMovement(false);
++			SetCombatMovement(true);
+			m_creature->GetMotionMaster()->Clear();
+			m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+			if (m_pInstance)
+@@ -545,7 +550,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+		switch (pSummoned->GetEntry())
+		{
+		case NPC_FLAME_CRASH:
+-			pSummoned->CastSpell(pSummoned, SPELL_FLAME_CRASH_EFFECT, false);
++			pSummoned->CastSpell(pSummoned, SPELL_FLAME_CRASH_EFFECT, false, NULL, NULL, m_creature->GetObjectGuid());
+			break;
+		case NPC_BLADE_OF_AZZINOTH:
+			pSummoned->CastSpell(pSummoned, SPELL_RANGE_MARKER, true);
+@@ -554,10 +559,13 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+			break;
+		case NPC_ILLIDAN_TARGET:
+			pSummoned->SetWalk(false);
+-			pSummoned->CastSpell(pSummoned, SPELL_EYE_BLAST_TRIGGER, true);
++			pSummoned->SetInCombatWithZone();
+			pSummoned->GetMotionMaster()->MovePoint(0, m_fTargetMoveX, m_fTargetMoveY, m_fTargetMoveZ);
+			DoCastSpellIfCan(pSummoned, SPELL_EYE_BLAST_DUMMY, CAST_TRIGGERED);
+			break;
++		case NPC_DEMON_FIRE:
++			pSummoned->CastSpell(pSummoned, SPELL_DEMON_FIRE, true, NULL, NULL, m_creature->GetObjectGuid());
++			break;
+		case NPC_SHADOW_DEMON:
+			pSummoned->CastSpell(pSummoned, SPELL_SHADOW_DEMON_PASSIVE, true);
+			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARALYZE, SELECT_FLAG_PLAYER))
+@@ -623,11 +636,51 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+		return true;
+	}
+
++	// Custom threat management
++	bool SelectHostileTarget()
++	{
++		Unit* pTarget = NULL;
++
++		// No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
++		if (!m_creature->getThreatManager().isThreatListEmpty())
++			pTarget = m_creature->getThreatManager().getHostileTarget();
++
++		if (pTarget)
++		{
++			if (m_creature->HasAura(SPELL_DEMON_FORM))
++			{
++				// Prevent exploit by LOS
++				if(!m_creature->IsWithinLOSInMap(pTarget))
++				{
++					m_creature->GetMotionMaster()->Clear();
++					m_creature->GetMotionMaster()->MoveChase(pTarget);
++				}
++
++				// Custom Threat, show top aggro during this phase
++				ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
++				for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
++				{
++					if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
++					{
++						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && !pNewTarget->HasAura(30300))
++						{
++							AttackStart(pNewTarget);
++							return true;
++						}
++					}
++				}
++			}
++		}
++
++		// Will call EnterEvadeMode if fit
++		return m_creature->SelectHostileTarget();
++	}
++
+	void UpdateAI(const uint32 uiDiff) override
+	{
+		DialogueUpdate(uiDiff);
+
+-		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
++		if (!SelectHostileTarget() || !m_creature->getVictim())
+			return;
+
+		// Make Akama evade combat at 85%
+@@ -845,7 +898,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+				{
+					if (DoCastSpellIfCan(pTarget, SPELL_DARK_BARRAGE) == CAST_OK)
+-						m_uiDarkBarrageTimer = 45000;
++						m_uiDarkBarrageTimer = 40000;
+				}
+			}
+			else
+@@ -855,7 +908,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+			{
+				if (DoCastEyeBlastIfCan())
+				{
+-					m_uiEyeBlastTimer = urand(35000, 45000);
++					m_uiEyeBlastTimer = 30000;
+					m_uiFireballTimer = 15000;
+				}
+			}
+@@ -903,12 +956,10 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+				m_uiShadowDemonTimer -= uiDiff;
+
+			if (m_uiShadowBlastTimer < uiDiff)
+-			{
+-				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
+-				{
+-					if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BLAST) == CAST_OK)
+-						m_uiShadowBlastTimer = urand(2000, 3000);
+-				}
++			{	
++				// TOPAGGRO is victim in SelectHostileTarget during this phase
++				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BLAST) == CAST_OK)
++					m_uiShadowBlastTimer = urand(2000, 3000);
+			}
+			else
+				m_uiShadowBlastTimer -= uiDiff;
+@@ -940,7 +991,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+								pBlade->ForcedDespawn(500);
+							}
+						}
+-						m_uiLandTimer = 5000;
++						m_uiLandTimer = 2000;
+						break;
+					case 1:
+						// Set the equipment and land
+@@ -948,7 +999,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+
+						m_creature->SetLevitate(false);
+						m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+-						m_uiLandTimer = 2000;
++						m_uiLandTimer = 3000;
+						break;
+					case 2:
+						// Start phase 3
+@@ -983,6 +1034,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
+					}
+					else
+					{
++						DoResetThreat();
+						m_uiPhase = m_uiPrevPhase;
+						m_uiEnrageTimer = 40000;
+						m_uiTransformTimer = 60000;
+@@ -1456,25 +1508,38 @@ struct MANGOS_DLL_DECL npc_cage_trap_triggerAI : public ScriptedAI
+
+struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
+{
+-	npc_flame_of_azzinothAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
++	npc_flame_of_azzinothAI(Creature* pCreature) : ScriptedAI(pCreature) {
++		m_pInstance = (instance_black_temple*)pCreature->GetInstanceData();
++		Reset();
++	}
++
++	instance_black_temple* m_pInstance;
+
++	uint32 m_uiLoadGlaiveTimer;
+	uint32 m_uiFlameBlastTimer;
+	uint32 m_uiSummonBlazeTimer;
+	uint32 m_uiChargeTimer;
+	uint32 m_uiWrathCheckTimer;
+
++	Creature* pClosestGlaive;
++	Creature* pFarthestGlaive;
++
+	void Reset() override
+	{
+		m_uiFlameBlastTimer  = 10000;
+		m_uiSummonBlazeTimer = 0;
+		m_uiChargeTimer      = 5000;
+		m_uiWrathCheckTimer  = 1000;
++		m_uiLoadGlaiveTimer	 = 1000;
++
++		pClosestGlaive = NULL;
++		pFarthestGlaive = NULL;
+	}
+
+	void JustSummoned(Creature* pSummoned) override
+	{
+		if (pSummoned->GetEntry() == NPC_BLAZE)
+-			pSummoned->CastSpell(pSummoned, SPELL_BLAZE_EFFECT, false);
++			pSummoned->CastSpell(pSummoned, SPELL_BLAZE_EFFECT, false, NULL, NULL, m_creature->GetObjectGuid());
+	}
+
+	void UpdateAI(const uint32 uiDiff) override
+@@ -1484,10 +1549,10 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
+
+		if (m_uiFlameBlastTimer < uiDiff)
+		{
+-			if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_BLAST) == CAST_OK)
++			if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BLAST) == CAST_OK)
+			{
+				m_uiFlameBlastTimer = 10000;
+-				m_uiSummonBlazeTimer = 3000;
++				m_uiSummonBlazeTimer = 2000;
+			}
+		}
+		else
+@@ -1504,49 +1569,91 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
+				m_uiSummonBlazeTimer -= uiDiff;
+		}
+
++		if (m_uiLoadGlaiveTimer)
++		{
++			if(m_uiLoadGlaiveTimer <= uiDiff)
++			{
++				GuidVector vTargetsVect;
++				m_pInstance->GetGlaiveTargetGuidVector(vTargetsVect);
++
++				Creature* pGlaive1 = m_creature->GetMap()->GetCreature(vTargetsVect[0]);
++				Creature* pGlaive2 = m_creature->GetMap()->GetCreature(vTargetsVect[1]);
++				if (pGlaive1 && pGlaive2)
++				{
++					if(m_creature->GetDistance(pGlaive1) > m_creature->GetDistance(pGlaive2))
++					{
++						pClosestGlaive = pGlaive2;
++						pFarthestGlaive = pGlaive1;
++					}
++					else
++					{
++						pClosestGlaive = pGlaive1;
++						pFarthestGlaive = pGlaive2;
++					}						
++					m_uiLoadGlaiveTimer = 0;
++				}
++			}
++			else
++				m_uiLoadGlaiveTimer -= uiDiff;
++		}		
++
+		// Workaround for broken aura 41997; the creature should enrage if not within dist of 30 from summoner
+		// This should be done by checking if aura 41997 is removed from self, when getting out of range
+		if (m_uiWrathCheckTimer)
+		{
+			if (m_uiWrathCheckTimer <= uiDiff)
+-			{
+-				if (GetClosestCreatureWithEntry(m_creature, NPC_BLADE_OF_AZZINOTH, 30.0f))
+-					m_uiWrathCheckTimer = 1000;
+-				else
++			{				
++
++				if(pClosestGlaive)
+				{
+-					if (DoCastSpellIfCan(m_creature, SPELL_UNCAGED_WRATH, CAST_TRIGGERED) == CAST_OK)
+-						m_uiWrathCheckTimer = 0;
++					if (m_creature->IsWithinDistInMap(pClosestGlaive, 30.0f))
++						m_uiWrathCheckTimer = 1000;
++					else
++					{
++						if (DoCastSpellIfCan(m_creature, SPELL_UNCAGED_WRATH, CAST_TRIGGERED) == CAST_OK)
++							m_uiWrathCheckTimer = 0;
++					}
+				}
+			}
+			else
+				m_uiWrathCheckTimer -= uiDiff;
+		}
+
+-		// Try to find a suitable target to charge
+		if (m_uiChargeTimer < uiDiff)
+		{
+			std::vector<Unit*> suitableTargets;
+			ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+-			for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
++			if(pClosestGlaive && pFarthestGlaive)
+			{
+-				if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
++				for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+				{
+-					if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 30.0f))
+-						suitableTargets.push_back(pTarget);
++					if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
++					{
++						// Check If any raid member is farther away than 30 yards from *both* Blades
++						if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(pClosestGlaive, 30.0f) && !pTarget->IsWithinDist(pFarthestGlaive, 30.0f))
++							suitableTargets.push_back(pTarget);
++					}
+				}
+			}
+
+			if (suitableTargets.empty())
+-				m_uiChargeTimer = 3000;
++				m_uiChargeTimer = 2000;
+			else
+			{
+				Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
+
+				if (pTarget)
+				{
+-					if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
++					DoResetThreat();
++					if (DoCastSpellIfCan(pTarget, SPELL_CHARGE, CAST_TRIGGERED) == CAST_OK)
++					{
+						m_uiChargeTimer = urand(5000, 10000);
++						if (DoCastSpellIfCan(m_creature, SPELL_UNCAGED_WRATH, CAST_TRIGGERED) == CAST_OK)
++							m_uiWrathCheckTimer = 0;
++					}
++
++
+				}
+			}
+		}
+@@ -1567,15 +1674,17 @@ struct MANGOS_DLL_DECL npc_shadow_demonAI : public ScriptedAI
+
+	ObjectGuid m_targetGuid;
+
+	void Reset() override {}
+
+	void AttackStart(Unit* pWho) override
+	{
+		// Function used to set target only - the npc doesn't really attack
+-		m_targetGuid = pWho->GetObjectGuid();
++		if(!m_targetGuid)		
++			m_targetGuid = pWho->GetObjectGuid();
+	}
+
+	void MoveInLineOfSight(Unit* /*pWho*/) override { }
++	void EnterEvadeMode() override	{ }
+
+	void JustDied(Unit* /*pKiller*/) override
+	{
+@@ -1595,7 +1704,7 @@ struct MANGOS_DLL_DECL npc_shadow_demonAI : public ScriptedAI
+		}
+	}
+
+-	void UpdateAI(const uint32 /*uiDiff*/) override { }
++	void UpdateAI(const uint32 uiDiff) override { }
+};
+
+/*######
+@@ -1648,6 +1757,74 @@ struct MANGOS_DLL_DECL npc_blade_of_azzinothAI : public ScriptedAI
+	void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
++/*######
++## npc_illidan_target
++######*/
++
++struct MANGOS_DLL_DECL npc_illidan_targetAI : public ScriptedAI
++{
++	npc_illidan_targetAI(Creature* pCreature) : ScriptedAI(pCreature)
++	{
++		Reset();
++	}
++
++	void Reset() override {}
++	// Do-Nothing-Just-Run
++	void AttackStart(Unit* /*pWho*/) override { }
++	void MoveInLineOfSight(Unit* /*pWho*/) override { }
++	void UpdateAI(const uint32 /*uiDiff*/) override { }
++};
++
++/*######
++## npc_shadowfiend 
++######*/
++
++struct MANGOS_DLL_DECL npc_shadowfiendAI : public ScriptedAI
++{
++	npc_shadowfiendAI(Creature* pCreature) : ScriptedAI(pCreature)
++	{
++		Reset();
++	}
++
++	uint32 m_uiStartFightTimer;
++
++	void Reset() override 
++	{
++		m_uiStartFightTimer = 2000;
++	}
++
++	void AttackStart(Unit* pWho) override
++	{
++		if(!m_uiStartFightTimer)
++			ScriptedAI::AttackStart(pWho);
++	}
++
++	void MoveInLineOfSight(Unit* /*pWho*/) override { }
++	void UpdateAI(const uint32 uiDiff) override 
++	{
++		// Do Nothing during 2 sec , then attack a random target
++		if(m_uiStartFightTimer)
++		{
++			if(m_uiStartFightTimer <= uiDiff)
++			{
++				m_creature->SetInCombatWithZone();
++				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARASITIC, SELECT_FLAG_PLAYER))
++				{
++					AttackStart(pTarget);
++					m_uiStartFightTimer = 0;
++				}
++			}
++			else
++				m_uiStartFightTimer -= uiDiff;
++		}
++
++		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
++			return;
++
++		DoMeleeAttackIfReady();
++	}
++};
++
+CreatureAI* GetAI_boss_illidan_stormrage(Creature* pCreature)
+{
+	return new boss_illidan_stormrageAI(pCreature);
+@@ -1683,6 +1860,16 @@ CreatureAI* GetAI_npc_blade_of_azzinoth(Creature* pCreature)
+	return new npc_blade_of_azzinothAI(pCreature);
+}
+
++CreatureAI* GetAI_npc_illidan_target(Creature* pCreature)
++{
++	return new npc_illidan_targetAI(pCreature);
++}
++
++CreatureAI* GetAI_npc_shadowfiend(Creature* pCreature)
++{
++	return new npc_shadowfiendAI(pCreature);
++}
++
+void AddSC_boss_illidan()
+{
+	Script* pNewScript;
+@@ -1723,4 +1910,14 @@ void AddSC_boss_illidan()
+	pNewScript->Name = "mob_shadow_demon";
+	pNewScript->GetAI = &GetAI_npc_shadow_demon;
+	pNewScript->RegisterSelf();
++
++	pNewScript = new Script;
++	pNewScript->Name = "npc_illidan_target";
++	pNewScript->GetAI = &GetAI_npc_illidan_target;
++	pNewScript->RegisterSelf();
++
++	pNewScript = new Script;
++	pNewScript->Name = "npc_shadowfiend";
++	pNewScript->GetAI = &GetAI_npc_shadowfiend;
++	pNewScript->RegisterSelf();
+}

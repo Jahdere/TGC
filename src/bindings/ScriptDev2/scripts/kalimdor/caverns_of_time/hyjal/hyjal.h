@@ -45,6 +45,7 @@ enum
 	NPC_FROST                   = 17907,
 	NPC_GIANT                   = 17908,
 	NPC_STALK                   = 17916,
+	NPC_DOOMGUARD				= 17864,
 
 	// Helpers for summon NPC_GIANT
 	NPC_GIANT_HELPER			= 18242,

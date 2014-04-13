@@ -1,0 +1,15 @@
+src/game/SpellAuras.cpp View
+@@ -6155,6 +6162,13 @@ void Aura::PeriodicTick()
+  					AuraAngerEff1->GetHolder()->SetStackAmount(AuraAngerEff1->GetHolder()->GetStackAmount() + 1);
+  			}
+  
++			// Agonizing Flames (~ +5% each ticks)
++			if (spellProto->Id == 40932)
++			{
++				if(GetAuraTicks() > 1)
++					pdamage = uint32(GetBasePoints() * ( 1 + (GetAuraTicks() * 0.05)));
++			}
++
+  			// As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
+  			// Reduce dot damage from resilience for players
+  			if (target->GetTypeId() == TYPEID_PLAYER)

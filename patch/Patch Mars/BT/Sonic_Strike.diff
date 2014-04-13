@@ -1,0 +1,12 @@
+src/game/Spell.cpp View
+ @@ -2429,6 +2429,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
+  				m_targets.setDestination(x, y, m_caster->GetPositionZ());
+  			}
+  
++			// Sonic Strike don't hit caster
++			if(m_spellInfo->Id == 41168)
++				break;
++
+  			targetUnitMap.push_back(m_caster);
+  			break;
+  		}

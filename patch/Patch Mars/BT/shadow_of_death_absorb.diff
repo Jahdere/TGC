@@ -1,0 +1,12 @@
+ src/game/Unit.cpp View
+ @@ -2031,6 +2031,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
+  					// always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
+  					continue;
+  				}
++
++				// Shadow of death absorb 100% of dmg during 55s and not 100 flat dmg (Override class effect)
++				if (spellProto->Id == 40251)				 
++					RemainingDamage = 0;
+  				break;
+  			}
+  		case SPELLFAMILY_PRIEST:

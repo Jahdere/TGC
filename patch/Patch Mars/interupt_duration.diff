@@ -1,0 +1,11 @@
+src/game/SpellEffects.cpp View
+@@ -4863,7 +4863,8 @@ void Spell::EffectInterruptCast(SpellEffectIndex /*eff_idx*/)
+  			// check if we can interrupt spell
+  			if (((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE) || curSpellInfo->Id == 41426) // Spirit Chock ??
+  			{
+-				unitTarget->ProhibitSpellSchool(GetSpellSchoolMask(curSpellInfo), GetSpellDuration(m_spellInfo));
++				int32 duration = unitTarget->CalculateAuraDuration(m_spellInfo, m_negativeEffectMask, GetSpellDuration(m_spellInfo), GetCaster());
++				unitTarget->ProhibitSpellSchool(GetSpellSchoolMask(curSpellInfo), duration);
+  				unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
+  			}
+  		}

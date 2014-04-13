@@ -1,0 +1,8 @@
+@@ -6242,6 +6238,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
+  		if (m_spellInfo->Id != 20577)                   // Cannibalize
+  			break;
+  		// fall through
++	case SPELL_EFFECT_SUMMON:
++		if (m_spellInfo->Id == 40832 && target != m_caster)					// Flame Crash
++			return false;
++		break;

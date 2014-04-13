@@ -1,0 +1,25 @@
+Teron (important): 
+Pourquoi Immunity_Shadowy_Construct.diff ne fonctionne pas ? (patch février)
+
+Pb : Nerf le boss , et rend son down invalidable à l'heure actuelle
+
+
+Talent Ignite Mage (important mais contournable via respé si le raid est honnête) :
+http://thegeekcrusade-serveur.com/forums/viewtopic.php?f=7&t=2757
+
+Pb : Un boss sur deux à BT augmente les dmg du raid d'un certains % , cette augmentation est anormalement appliquée sur l'ignite lui permettant d'infliger d'énormes dégats
+->force le raid à faire respé les mages dans certains cas pour éviter le bug abuse.
+
+
+Council Illidari (important mais peut attendre encore un peu)
+Ia "mob_illidari_council" : Spam le spell 41333 qui met à jour les HP de chaque boss du conceil (ils sont quatres et partagent les dmg reçus)
+Ne marche pas sur TGC
+
+Pb : Les damages infligés par le raid ne sont pas divisés entre les quatres boss. Il suffit donc de tomber un peu plus d'un million hp pour que les 3 autres meurent.
+
+
+
+Akama Event (important mais peut attendre encore un peu)
+Une fois le Council Illidari down, Akama doit pop et suivre un event script dans boss_illidan.cpp (IA : "npc_akama_illidan")
+
+Pb : Actuellement Akama pop directement devant la porte au dessus, et ne lance aucun event. Il rend donc l'accessibilité au combat d'Illidan impossible.

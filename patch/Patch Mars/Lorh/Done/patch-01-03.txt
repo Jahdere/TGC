@@ -1,0 +1,57 @@
+
+
+
+Black Temple : 
+
+Ouverture de la suite de BT :
+
+Script de Shahraz / Conceil Illidari / Illidan
+
+Akama:
+- Fixe d'un bug visuel lors de la transition P1 -> P2
+
+Gurtogg :
+- La personne sous gangrerage ne devrait plus générer d'aggro
+
+ROS :
+- Fixe d'un bug empêchait le changement de phase
+
+Trash :
+- Fixe du spell Sonic Strike
+
+Supremus :
+- La porte devrait s'ouvrir correctement une fois Supremus mort
+
+Teron :
+- Shadow of Death ne devrait plus s'enlever prématurément
+- Fixe des immunités des shadowy construct
+- Fixe d'un exploit qui empechait le pop des shadowy construct
+
+
+Hyjal :
+- Fixe d'un exploit qui permettait de temporiser les vagues pour ensuite affronter directement le boss affilié
+
+
+SSC :
+Hydross :
+- Fixe de la distance d'aggro (~45 yards)
+- Ajout des élémentaires qui se balade devant hydross
+
+
+Classes :
+Priest :
+- Prière de guérison devrait prendre en compte correctement le bonus soin et devrait rebondir seulement lorsque la cible subit des dégats réels (ne prend donc plus en compte les dégats absorbés)
+
+Hunter :
+- Inspiration féroce devrait pouvoir se cumuler
+
+Paladin :
+- Sceau de piété ne devrait plus pouvoir être dispell par un stun war
+
+War :
+- Le proc masse (talent) et le proc masse de l'arme forge devraient partager le meme DR
+
+Général :
+- Les effets de réduction silence / cooldown devraient être correctement pris en compte
+- Les créatures utilisant des attaques de melée de type magique ne pourront plus être bloquées
+- Fixe de certains lags graphique lors des déplacements des mobs (Lorh)

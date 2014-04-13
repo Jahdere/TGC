@@ -1,0 +1,11 @@
+UPDATE  `creature_template` SET  `unit_flags` =  '33685504',  `speed_run` = '0',  `speed_walk` = '0'  WHERE  `creature_template`.`entry` =23336;
+UPDATE  `creature_template` SET  `unit_flags` =  '33685504',  `speed_run` = '0',  `speed_walk` = '0'  WHERE  `creature_template`.`entry` =23259;
+UPDATE  `creature_template` SET  `unit_flags` =  '33685504',  `speed_run` = '0',  `speed_walk` = '0'  WHERE  `creature_template`.`entry` =23069;
+UPDATE  `creature_template` SET  `unit_flags` =  '33685504',  `speed_run` = '0',  `speed_walk` = '0'  WHERE  `creature_template`.`entry` =22996;
+UPDATE  `creature_template` SET  `unit_flags` =  '33554434' WHERE  `creature_template`.`entry` =22968;
+UPDATE  `creature_template` SET  `ScriptName` =  'npc_illidan_target', `modelid_3` =  '11686', `modelid_1` =  '11686' WHERE  `creature_template`.`entry` =23070;
+UPDATE  `creature_template` SET  `ScriptName` =  'npc_shadowfiend' WHERE  `creature_template`.`entry` =23498;
+UPDATE  `creature_template` SET  `minhealth` =  '500000', `maxhealth` = '500000'  WHERE  `creature_template`.`entry` =23197;
+UPDATE  `creature_template` SET  `flags_extra` =  '0' WHERE  `creature_template`.`entry` =23412;
+UPDATE  `creature_model_info` SET  `bounding_radius` =  '4' WHERE  `creature_model_info`.`modelid` =21135;
+UPDATE  `creature_template` SET  `maxdmg` =  '13529', `mindmg` =  '11221' WHERE  `creature_template`.`entry` =22997;

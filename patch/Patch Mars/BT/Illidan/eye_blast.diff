@@ -1,0 +1,12 @@
+src/game/SpellAuras.cpp View
+@@ -2048,6 +2048,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
+					if (roll_chance_i(20))              // backfire stun
+						target->CastSpell(target, 51581, true, NULL, this);
+					return;
++				case 39908:								// Eye blast
++					target->CastSpell(target, 40017, true, NULL, this);
++					target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
++					return;
+				case 43873:                             // Headless Horseman Laugh
+					target->PlayDistanceSound(11965);
+					return;

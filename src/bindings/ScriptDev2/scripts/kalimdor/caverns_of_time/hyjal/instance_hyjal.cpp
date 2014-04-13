@@ -119,6 +119,10 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* pCreature)
 	case NPC_TAUREN:
 		lGardsHordeGUIDList.push_back(pCreature->GetObjectGuid());
 		break;
+	case NPC_DOOMGUARD:
+		pCreature->SetInCombatWithZone();
+		break;
+	default:break;
 	}
 }
 

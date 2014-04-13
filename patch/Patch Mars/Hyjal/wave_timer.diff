@@ -1,0 +1,22 @@
+src/bindings/ScriptDev2/scripts/kalimdor/caverns_of_time/hyjal/hyjalAI.cpp View
+ @@ -727,8 +727,19 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
+  	if (!m_bIsEventInProgress)
+  		return;
+  
+-	if (m_bIsSummoningWaves)
++	if (m_bIsSummoningWaves && m_pInstance)
+	{
++		if (m_uiWaveMoveTimer < uiDiff)
++ 		{
++ 			// Skip the master timer, and start next wave in 5. Clear the list, it should not be any here now.
++ 			if (!m_pInstance->GetData(TYPE_TRASH_COUNT))
++ 				m_uiNextWaveTimer = std::min(m_uiNextWaveTimer, (uint32)5000);
++ 
++ 			m_uiWaveMoveTimer = 10000;
++ 		}
++ 		else
++ 			m_uiWaveMoveTimer -= uiDiff;
++
+  		if (m_uiNextWaveTimer < uiDiff)
+  			SummonNextWave();
+  		else

@@ -1,0 +1,117 @@
+src/bindings/ScriptDev2/scripts/outland/black_temple/illidari_council.cpp View
+@@ -364,10 +364,10 @@ struct MANGOS_DLL_DECL boss_gathios_the_shattererAI : public boss_illidari_counc
+
+	void Reset() override
+	{
+-		m_uiConsecrationTimer       = 40000;
++		m_uiConsecrationTimer       = 30000;
+		m_uiHammerOfJusticeTimer    = 10000;
+-		m_uiSealTimer               = 40000;
+-		m_uiAuraTimer               = 90000;
++		m_uiSealTimer               = 15000;
++		m_uiAuraTimer               = 45000;
+		m_uiBlessingTimer           = 60000;
+		m_uiJudgmentTimer           = 0;
+	}
+@@ -423,10 +423,8 @@ struct MANGOS_DLL_DECL boss_gathios_the_shattererAI : public boss_illidari_counc
+		{
+			if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_SEAL_OF_COMMAND : SPELL_SEAL_OF_BLOOD) == CAST_OK)
+			{
+-				m_uiSealTimer = 40000;
+-
+-				if (urand(0, 1))
+-					m_uiJudgmentTimer = urand(4000, 7000);
++				m_uiSealTimer = 30000;
++				m_uiJudgmentTimer = 8000;
+			}
+		}
+		else
+@@ -440,12 +438,20 @@ struct MANGOS_DLL_DECL boss_gathios_the_shattererAI : public boss_illidari_counc
+		else
+			m_uiAuraTimer -= uiDiff;
+
+		if (m_uiJudgmentTimer)
+		{
+			if (m_uiJudgmentTimer <= uiDiff)
+			{
+-				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_JUDGMENT) == CAST_OK)
+-					m_uiJudgmentTimer = 0;
++				if(urand(0,1))
++				{
++					if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_JUDGMENT) == CAST_OK)
++					{
++						m_uiJudgmentTimer = 0;
++						m_uiSealTimer = 15000;
++					}
++				}
++				else
++					m_uiJudgmentTimer = 8000;
+			}
+			else
+				m_uiJudgmentTimer -= uiDiff;
+@@ -516,8 +522,24 @@ struct MANGOS_DLL_DECL boss_high_nethermancer_zerevorAI : public boss_illidari_c
+
+		if (m_uiArcaneExplosionTimer < uiDiff)
+		{
+-			if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
+-				m_uiArcaneExplosionTimer = urand(5000, 15000);
++			std::vector<Unit*> suitableTargets;
++			ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
++			ThreatList::const_iterator itr = threatList.begin();
++
++			for (itr; itr != threatList.end(); ++itr)
++			{
++				if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
++				{
++					if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDist(m_creature, 10.0f))
++					{
++						if(DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION) == CAST_OK)
++							m_uiArcaneExplosionTimer = urand(5000, 15000);
++						break;
++					}
++					else
++						m_uiArcaneExplosionTimer = 1000;
++				}
++			}				
+		}
+		else
+			m_uiArcaneExplosionTimer -= uiDiff;
+@@ -588,7 +610,7 @@ struct MANGOS_DLL_DECL boss_lady_malandeAI : public boss_illidari_councilAI
+			m_creature->AddThreat(pWho);
+			m_creature->SetInCombatWith(pWho);
+			pWho->SetInCombatWith(m_creature);
+-			DoStartMovement(pWho, 20.0f);
++			DoStartMovement(pWho, 15.0f);
+		}
+	}
+
+@@ -717,18 +739,24 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
+		if (m_uiDeadlyPoisonTimer < uiDiff)
+		{
+			if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEADLY_POISON) == CAST_OK)
++			{
+				m_uiDeadlyPoisonTimer = urand(4000, 7000);
++				m_uiEnvenomTimer = 4000;
++			}
+		}
+		else
+			m_uiDeadlyPoisonTimer -= uiDiff;
+
+-		if (m_uiEnvenomTimer < uiDiff)
++		if (m_uiEnvenomTimer)
+		{
+-			if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENVENOM) == CAST_OK)
+-				m_uiEnvenomTimer = 5000;
++			if (m_uiEnvenomTimer <= uiDiff)
++			{
++				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENVENOM) == CAST_OK)
++					m_uiEnvenomTimer = 0;
++			}
++			else
++				m_uiEnvenomTimer -= uiDiff;
+		}
+-		else
+-			m_uiEnvenomTimer -= uiDiff;
+
+		if (m_uiVanishTimer < uiDiff)
+		{

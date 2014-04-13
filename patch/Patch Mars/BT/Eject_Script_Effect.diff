@@ -1,0 +1,32 @@
+src/bindings/ScriptDev2/scripts/outland/black_temple/boss_bloodboil.cpp View
+@@ -167,11 +167,7 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
+			if (m_uiEjectTimer < uiDiff)
+			{
+				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EJECT_1) == CAST_OK)
+-				{
+-					// Script effect: reduce threat on main target
+-					m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -40);
+					m_uiEjectTimer = 15000;
+-				}
+			}
+			else
+				m_uiEjectTimer -= uiDiff;
+
+
+src/game/SpellEffects.cpp View
+@@ -5416,6 +5416,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
+  					unitTarget->CastSpell(unitTarget, 39968, true, NULL, NULL, m_caster->GetObjectGuid());
+  					return;
+  				}
++			case 40486:									// Eject Gurtogg
++				{
++					if(!unitTarget)
++						return;
++
++					if (m_caster->getThreatManager().getThreat(unitTarget))
++						m_caster->getThreatManager().modifyThreatPercent(unitTarget, -40);
++					return;
++				}
+  			case 40892:									// Fixated
+  				{
+  					if(!unitTarget)
