@@ -369,6 +369,19 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 							damage = m_triggeredBySpellInfo->EffectBasePoints[effect_idx];
 						break;
 					}
+				case 43657:	// Electrical Storm (+400 dmg each tick)
+					{
+						Unit::AuraList const& mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+						for (Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+						{
+							if ((*i)->GetId() == 43648)
+							{
+								damage += (*i)->GetAuraTicks() * 400;
+								error_log("********** DAMAGE STORM ELECTRIC %i **************", damage);
+							}
+						}
+						break;
+					}
 				}
 				break;
 			}
@@ -2473,6 +2486,21 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
 				pet->CastSpell(pet, 28305, true);
 			return;
 		}
+		// Mangle
+		/*case 44955:
+		{
+		if(m_caster->GetTypeId() == TYPEID_UNIT)
+		error_log("********* CASTER IS MONSTER *********");
+		else
+		error_log("********* CASTER IS MONSTER *********");
+
+		if(unitTarget->GetTypeId() == TYPEID_UNIT)
+		error_log("********* UNIT IS MONSTER *********");
+		else
+		error_log("********* UNIT IS MONSTER *********");
+		//unitTarget->CastSpell(unitTarget, 44955, true, m_CastItem, NULL, m_originalCasterGUID);
+		break;
+		}*/
 	case 44949:
 		// triggered spell have same category
 		if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -2527,6 +2555,10 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
 		// Note: not exist spells with weapon req. and IsSpellHaveCasterSourceTargets == true
 		// so this just for speedup places in else
 		caster = IsSpellWithCasterSourceTargetsOnly(spellInfo) ? unitTarget : m_caster;
+		if(caster == m_caster)
+			error_log("******* YO CASTER ********** ");
+		else
+			error_log("******** YO TARGET ********* ");
 	}
 
 	caster->CastSpell(unitTarget, spellInfo, true, m_CastItem, NULL, m_originalCasterGUID, m_spellInfo);
@@ -2963,6 +2995,15 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 						m_caster->RemoveAurasDueToSpell(45062);
 
 					addhealth += damageAmount;
+				}
+			}
+
+			//Libram of the lightbringer
+			if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & UI64LIT(0x80000000))
+			{ 
+				if(Aura* dummyAura = m_caster->GetDummyAura(34231))
+				{
+					addhealth += dummyAura->GetModifier()->m_amount;
 				}
 			}
 		}
@@ -5490,6 +5531,21 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 				m_caster->CastSpell(unitTarget, 41363, true);
 				break;
 				}*/
+			case 43648:									// Electrical Storm levitate visual
+				if (!unitTarget)
+					return;
+
+				unitTarget->CastSpell(unitTarget, 44007, true);
+				unitTarget->CastSpell(unitTarget, 11010, true);	// Levitate
+				unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ() + 15.0f);
+				break;
+			case 43658:									// Electrical Visuel
+				unitTarget->CastSpell(unitTarget, 43653, true);
+				unitTarget->CastSpell(unitTarget, 43654, true);				
+				unitTarget->CastSpell(unitTarget, 43655, true);
+				unitTarget->CastSpell(unitTarget, 43656, true);
+				unitTarget->CastSpell(unitTarget, 43659, true);
+				break;
 			case 44876:                                 // Force Cast - Portal Effect: Sunwell Isle
 				{
 					if (!unitTarget)
