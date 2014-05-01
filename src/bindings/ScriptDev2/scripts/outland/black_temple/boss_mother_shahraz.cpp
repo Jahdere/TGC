@@ -117,9 +117,12 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 			m_pInstance->SetData(TYPE_SHAHRAZ, FAIL);
 	}
 
-	void KilledUnit(Unit* /*pVictim*/) override
+	void KilledUnit(Unit* pVictim) override
 	{
 		DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+
+		if (pVictim->GetTypeId() == TYPEID_PLAYER)
+			lFatalAttractionGUIDList.remove(pVictim->GetObjectGuid());
 	}
 
 	void JustDied(Unit* /*pKiller*/) override
@@ -141,22 +144,22 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 	{
 		bool canClean = true;
 
-		for (GuidList::const_iterator itr = lFatalAttractionGUIDList.begin(); itr != lFatalAttractionGUIDList.end(); ++itr)
+		for (GuidList::const_iterator itr = lFatalAttractionGUIDList.begin(); itr != lFatalAttractionGUIDList.end() && canClean; ++itr)
 		{
 			if(Unit* pPlayer = m_creature->GetMap()->GetUnit(*itr))
 			{
-				for (GuidList::const_iterator iter = lFatalAttractionGUIDList.begin(); iter != lFatalAttractionGUIDList.end(); ++iter)
+				GuidList::const_iterator iter = itr;
+				++iter;
+
+				for (; iter != lFatalAttractionGUIDList.end(); ++iter)
 				{
-					if (*itr != *iter)
+					if(Unit* pPlayerCheck = m_creature->GetMap()->GetUnit(*iter))
 					{
-						if(Unit* pPlayerCheck = m_creature->GetMap()->GetUnit(*iter))
+						// If a player is in 25yards range, dont clean
+						if(pPlayer->IsWithinDist(pPlayerCheck, 25.0f))
 						{
-							// If a player is in 25yards range, dont clean
-							if(pPlayer->IsWithinDist(pPlayerCheck, 25.0f))
-							{
-								canClean = false;
-								break;
-							}
+							canClean = false;
+							break;
 						}
 					}
 				}
@@ -240,6 +243,8 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
 				case 1: DoScriptText(SAY_SPELL_2, m_creature); break;
 				case 2: DoScriptText(SAY_SPELL_3, m_creature); break;
 				}
+
+				lFatalAttractionGUIDList.clear();
 				m_uiFatalAttractionTimer = urand(30000, 40000);
 				m_uicheckDistanceTimer = 1000;
 			}
