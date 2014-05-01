@@ -218,7 +218,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult* arenaTeamDataResult)
 	m_stats.rank         = fields[14].GetUInt32();
 
 	// Set Old Matches List
-	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT loser_tid, winner_tid FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') ORDER BY id DESC LIMIT %u", m_TeamId, m_TeamId, sBattleGroundMgr.GetLimitMatches());
+	QueryResult* result_matches = CharacterDatabase.PQuery("SELECT loser_tid, winner_tid FROM character_arena_result WHERE (loser_tid = '%u' OR winner_tid = '%u') ORDER BY end DESC LIMIT %u", m_TeamId, m_TeamId, sBattleGroundMgr.GetLimitMatches());
 	if(result_matches)
 	{
 		do{
@@ -800,14 +800,15 @@ void ArenaTeam::DropOldFight()
 		// Trying to catch team opponent with a 200 rating diff
 		if(ArenaTeam* arenaTeamOpposent = sObjectMgr.GetArenaTeamById(*itr))
 		{
-			int32 diffRating = teamRating - arenaTeamOpposent->GetRating();
-			if(diffRating < 200 && diffRating > -200)
+			uint32 diffRating = teamRating - arenaTeamOpposent->GetRating();
+			uint32 maxRating = sBattleGroundMgr.GetMaxRatingDifference();
+			if(diffRating < maxRating && diffRating > maxRating * -1)
 				oldTeamList.insert(*itr);
 		}
 	}
 
 	//Drop the more interesting opponent team if exist
-	if(!oldTeamList.empty())
+	if(oldTeamList.size() > 1)
 	{
 		FoughtTeamList::iterator itr = m_foughtTeamList.begin();
 		advance(itr, urand(0, m_foughtTeamList.size() - 1));

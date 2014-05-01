@@ -1211,6 +1211,8 @@ void World::SetInitialWorldSettings()
     sGuildMgr.LoadGuilds();
 
     sLog.outString("Loading ArenaTeams...");
+	sBattleGroundMgr.InitLimitMatches();
+	m_timers[WUPDATE_LIMIT_MATCHES].SetInterval(DAY * IN_MILLISECONDS);
     sObjectMgr.LoadArenaTeams();
 
     sLog.outString("Loading Groups...");
@@ -1326,8 +1328,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
     sBattleGroundMgr.InitAutomaticArenaPointDistribution();
-	sBattleGroundMgr.InitLimitMatches();
-	m_timers[WUPDATE_LIMIT_MATCHES].SetInterval(DAY * IN_MILLISECONDS);
 
     ///- Initialize Outdoor PvP
     sLog.outString("Starting Outdoor PvP System");
