@@ -1348,18 +1348,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 				}
 			case 40869:                                 // Fatal Attraction
 				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+					if (!unitTarget)
 						return;
-
-					m_caster->CastSpell(unitTarget, 41001, true);
+					unitTarget->CastSpell(unitTarget, 41001, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
 			case 40870:									// Fatal Attraction explosion
 				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget != m_caster)
 						return;
 
-					m_caster->CastSpell(unitTarget, 40871, true);
+					m_caster->CastSpell(m_caster, 40871, true);
 					return;
 				}
 			case 40962:                                 // Blade's Edge Terrace Demon Boss Summon Branch
@@ -5537,7 +5536,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
 				unitTarget->CastSpell(unitTarget, 44007, true);
 				unitTarget->CastSpell(unitTarget, 11010, true);	// Levitate
-				unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ() + 15.0f);
+				((Player*)unitTarget)->NearTeleportTo(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ() + 15.0f, unitTarget->GetOrientation());
 				break;
 			case 43658:									// Electrical Visuel
 				unitTarget->CastSpell(unitTarget, 43653, true);

@@ -579,6 +579,15 @@ void Spell::FillTargetMap()
 					break;
 				}
 				break;
+			case TARGET_ALL_ENEMY_IN_AREA:
+				switch (m_spellInfo->EffectImplicitTargetB[i])
+				{
+				case TARGET_RANDOM_NEARBY_LOC:
+					tmpUnitLists[i] = tmpUnitLists[0];
+					SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i]);
+					break;
+				}
+				break;
 			default:
 				switch (m_spellInfo->EffectImplicitTargetB[i])
 				{
@@ -1521,6 +1530,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			if ((m_spellInfo->EffectImplicitTargetA[effIndex] == targetMode && m_spellInfo->EffectImplicitTargetB[effIndex] == TARGET_NONE) ||
 				(m_spellInfo->EffectImplicitTargetB[effIndex] == targetMode && (IsPositiveSpell(m_spellInfo) || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SUMMON)))
 				targetUnitMap.push_back(m_caster);
+			error_log("****** TARGET UNIT MAP 2 %u *********", targetUnitMap.size());
 			break;
 		}
 	case TARGET_RANDOM_NEARBY_DEST:
@@ -1710,7 +1720,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 				if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
 				{
 					m_targets.setUnitTarget(pUnitTarget);
-					targetUnitMap.push_back(pUnitTarget);
+					targetUnitMap.push_back(pUnitTarget)
 				}
 			}
 			else
@@ -1814,6 +1824,16 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 						targetUnitMap.resize(unMaxTargets);
 					}
 					break;
+				}
+			case 40869:								// Fatal attraction
+				{
+					for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
+					{
+						if((*itr)->HasAura(43690))
+							targetUnitMap.erase(itr++);
+						else
+							++itr;
+					}
 				}
 			}
 		}
@@ -6780,16 +6800,18 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
 			case 45976:                                 // Open Portal (SWP, M'uru)
 			case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
 			case 41150:									// Fear Illidari Nightlord (Black temple)
+			//case 40869:
 				unMaxTargets = 1;
 				break;
 			case 10258:                                 // Awaken Vault Warder (Uldaman)
 			case 28542:                                 // Life Drain (Naxx, Sapphiron)
+			case 40869:
 				unMaxTargets = 2;
 				break;
 			case 30004:                                 // Flame Wreath (Karazhan, Shade of Aran)
 			case 31298:                                 // Sleep (Hyjal Summit, Anetheron)
 			case 39992:                                 // Needle Spine Targeting (BT, Warlord Najentus)
-			case 40869:                                 // Fatal Attraction (BT, Mother Shahraz)
+				//case 40869:                                 // Fatal Attraction (BT, Mother Shahraz)
 			case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
 			case 41376:                                 // Spite (BT, Reliquary of Souls)
 				unMaxTargets = 3;
