@@ -1574,6 +1574,13 @@ void Aura::TriggerSpell()
 					//                    case 40867: break;
 					//                    // Prismatic Shield
 					//                    case 40879: break;
+				case 41296:								// Prevent passiv trigger Aura of suffering
+					if(Unit* m_caster = GetCaster())
+					{
+						if(!m_caster->GetHealthPercent() == 0.0f)
+							return;
+					}
+					break;
 				case 41350:				  // Aura of Desire
 					if(triggerTarget->GetTypeId() == TYPEID_PLAYER && triggerTarget->GetMaxPower(POWER_MANA) > 0)
 					{
@@ -1698,9 +1705,9 @@ void Aura::TriggerSpell()
 						error_log("******* YO FREEEZZEEE **********");
 						/*if(Aura* frostAura = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_0))
 						{
-							target->UpdateSpeed(MOVE_RUN, true);
-							target->UpdateSpeed(MOVE_SWIM, true);
-							target->UpdateSpeed(MOVE_FLIGHT, true);
+						target->UpdateSpeed(MOVE_RUN, true);
+						target->UpdateSpeed(MOVE_SWIM, true);
+						target->UpdateSpeed(MOVE_FLIGHT, true);
 						}					
 						return;*/
 					}
@@ -4256,6 +4263,11 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
 		{
 			if (GetStackAmount() >= 5 && !target->HasAura(33652))
 				target->CastSpell(target, 33652, true);
+		}
+		else if(GetId() == 40157)
+		{
+			error_log("******** SPIRIT LANCE REFRESH ************");
+			GetHolder()->RefreshHolder();
 		}
 	}
 
