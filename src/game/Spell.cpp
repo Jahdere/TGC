@@ -1720,7 +1720,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 				if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
 				{
 					m_targets.setUnitTarget(pUnitTarget);
-					targetUnitMap.push_back(pUnitTarget)
+					targetUnitMap.push_back(pUnitTarget);
 				}
 			}
 			else
@@ -6329,6 +6329,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		break;
 	case 40832:											// Flame Crash (Illidan)
 		if(target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == 22917)
+			return false;
+		break;
+	case 40251:											// Shadow of Death
+		if(target->HasAura(40251))
 			return false;
 		break;
 	default: break;
