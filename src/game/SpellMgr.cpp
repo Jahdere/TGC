@@ -3333,6 +3333,10 @@ void SpellMgr::LoadSpellCustomAttr()
 		case 33110:                 // Prayer of mending (wrong level for penalty calculation)
 			spellInfo->spellLevel = 68;
 			break;
+		case 41452:					// Chromatic + Devotion aura (illidari council)
+		case 41453:
+			spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA_FRIEND;
+			break;
 		default:
 			break;
 		}
