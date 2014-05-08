@@ -1577,7 +1577,7 @@ void Aura::TriggerSpell()
 				case 41296:								// Prevent passiv trigger Aura of suffering
 					if(Unit* m_caster = GetCaster())
 					{
-						if(!m_caster->GetHealthPercent() == 0.0f)
+						if(!m_caster->GetHealth())
 							return;
 					}
 					break;
