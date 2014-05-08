@@ -1725,7 +1725,21 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 			}
 			else
 			{
-				Unit* pUnitTarget = m_targets.getUnitTarget();
+				Unit* pUnitTarget = NULL;
+				switch(m_spellInfo->Id)
+				{
+				// Shahraz Beam
+				case 40827:
+				case 40859:
+				case 40860:
+				case 40861:
+					pUnitTarget = m_caster->SelectRandomUnfriendlyTarget((Unit*)0, radius);
+				break;
+				default:
+					pUnitTarget = m_targets.getUnitTarget();
+					break;
+				}
+				
 				WorldObject* originalCaster = GetAffectiveCasterObject();
 				if (!pUnitTarget || !originalCaster)
 					break;
@@ -1747,17 +1761,17 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 				}
 
 				if (tempTargetUnitMap.empty())
-					break;
+					break;				
 
 				tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
 
 				if (*tempTargetUnitMap.begin() == pUnitTarget)
-					tempTargetUnitMap.erase(tempTargetUnitMap.begin());
+					tempTargetUnitMap.erase(tempTargetUnitMap.begin());						
 
 				targetUnitMap.push_back(pUnitTarget);
 				uint32 t = unMaxTargets - 1;
 				Unit* prev = pUnitTarget;
-				UnitList::iterator next = tempTargetUnitMap.begin();
+				UnitList::iterator next = tempTargetUnitMap.begin();	
 
 				while (t && next != tempTargetUnitMap.end())
 				{
@@ -6805,7 +6819,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
 			case 45976:                                 // Open Portal (SWP, M'uru)
 			case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
 			case 41150:									// Fear Illidari Nightlord (Black temple)
-			//case 40869:
+				//case 40869:
 				unMaxTargets = 1;
 				break;
 			case 10258:                                 // Awaken Vault Warder (Uldaman)
