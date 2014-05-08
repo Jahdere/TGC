@@ -412,6 +412,14 @@ struct MANGOS_DLL_DECL boss_gathios_the_shattererAI : public boss_illidari_counc
 		else
 			m_uiBlessingTimer -= uiDiff;
 
+		if (m_uiAuraTimer < uiDiff)
+		{
+			if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_DEVOTION_AURA : SPELL_CHROMATIC_AURA) == CAST_OK)
+				m_uiAuraTimer = 60000;
+		}
+		else
+			m_uiAuraTimer -= uiDiff;
+
 		if (m_uiConsecrationTimer < uiDiff)
 		{
 			if (DoCastSpellIfCan(m_creature, SPELL_CONSECRATION) == CAST_OK)
@@ -441,14 +449,6 @@ struct MANGOS_DLL_DECL boss_gathios_the_shattererAI : public boss_illidari_counc
 		}
 		else
 			m_uiSealTimer -= uiDiff;
-
-		if (m_uiAuraTimer < uiDiff)
-		{
-			if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_DEVOTION_AURA : SPELL_CHROMATIC_AURA) == CAST_OK)
-				m_uiAuraTimer = 90000;
-		}
-		else
-			m_uiAuraTimer -= uiDiff;
 
 		if(m_uiJudgmentTimer)
 		{
