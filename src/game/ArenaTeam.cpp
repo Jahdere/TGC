@@ -810,9 +810,12 @@ void ArenaTeam::DropOldFight()
 	//Drop the more interesting opponent team if exist
 	if(oldTeamList.size() > 1)
 	{
-		FoughtTeamList::iterator itr = m_foughtTeamList.begin();
-		advance(itr, urand(0, m_foughtTeamList.size() - 1));
-		m_foughtTeamList.erase(itr);
+		FoughtTeamList::iterator itr = oldTeamList.begin();
+		advance(itr, urand(0, oldTeamList.size() - 1));
+		FoughtTeamList::iterator iter = m_foughtTeamList.find(*itr);
+		if (iter != m_foughtTeamList.end())
+			m_foughtTeamList.erase(iter);
+
 	}
 	else
 	{
