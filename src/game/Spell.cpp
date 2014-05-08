@@ -1834,6 +1834,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 						else
 							++itr;
 					}
+					break;
 				}
 			}
 		}
