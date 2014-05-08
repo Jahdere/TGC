@@ -1,0 +1,36 @@
+src/game/Spell.cpp View
+@@ -579,6 +579,15 @@ void Spell::FillTargetMap()
+  					break;
+  				}
+  				break;
++			case TARGET_ALL_ENEMY_IN_AREA:
++				switch (m_spellInfo->EffectImplicitTargetB[i])
++				{
++				case TARGET_RANDOM_NEARBY_LOC:
++					tmpUnitLists[i] = tmpUnitLists[0];
++					SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i]);
++					break;
++				}
++				break;
+  			default:
+  				switch (m_spellInfo->EffectImplicitTargetB[i])
+  				{
+
+@@ -1815,6 +1825,16 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
+  					}
+  					break;
+  				}
++			case 40869:								// Fatal attraction
++				{
++					for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
++					{
++						if((*itr)->HasAura(43690))
++							targetUnitMap.erase(itr++);
++						else
++							++itr;
++					}
++				}
+  			}
+  		}
+  		break;
+	case TARGET_AREAEFFECT_INSTANT:

@@ -1,0 +1,15 @@
+src/game/SpellAuras.cpp View
+@@ -1574,6 +1574,13 @@ void Aura::TriggerSpell()
+  					//                    case 40867: break;
+  					//                    // Prismatic Shield
+  					//                    case 40879: break;
++				case 41296:								// Prevent passiv trigger Aura of suffering
++					if(Unit* m_caster = GetCaster())
++					{
++						if(m_caster->GetHealthPercent() == 0.0f)
++							return;
++					}
++					break;
+  				case 41350:				  // Aura of Desire
+  					if(triggerTarget->GetTypeId() == TYPEID_PLAYER && triggerTarget->GetMaxPower(POWER_MANA) > 0)
+  					{

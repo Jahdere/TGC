@@ -1,0 +1,15 @@
+src/game/SpellEffects.cpp
+@@ -2965,6 +2997,15 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
+					addhealth += damageAmount;
+				}
+			}
++
++			//Libram of the lightbringer
++			if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & UI64LIT(0x80000000))
++			{ 
++				if(Aura* dummyAura = m_caster->GetDummyAura(34231))
++				{
++					addhealth += dummyAura->GetModifier()->m_amount;
++				}
++			}
+  		}

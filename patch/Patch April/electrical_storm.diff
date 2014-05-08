@@ -1,0 +1,13 @@
+src/game/SpellEffects.cpp
+@@ -5490,6 +5531,21 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
+  				m_caster->CastSpell(unitTarget, 41363, true);
+  				break;
+  				}*/
++			case 43658:									// Electrical Visuel
++				unitTarget->CastSpell(unitTarget, 43653, true);
++				unitTarget->CastSpell(unitTarget, 43654, true);				
++				unitTarget->CastSpell(unitTarget, 43655, true);
++				unitTarget->CastSpell(unitTarget, 43656, true);
++				unitTarget->CastSpell(unitTarget, 43659, true);
++				break;
+  			case 44876:                                 // Force Cast - Portal Effect: Sunwell Isle

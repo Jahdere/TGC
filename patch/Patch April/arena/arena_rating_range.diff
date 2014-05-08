@@ -1,0 +1,77 @@
+src/game/BattleGround/BattleGroundMgr.cpp View
+@@ -765,16 +765,16 @@ bool BattleGroundQueue::CanBattleAgainst(uint32 team_id1, uint32 team_id2)
+void BattleGroundQueue::DropOldMatchIfCan(GroupQueueInfo* group)
+{
+	uint32 timeInQueue = WorldTimer::getMSTimeDiff(group->JoinTime, WorldTimer::getMSTime());
+-
+	// Each 5 min in Queue , drop an old fight
+	ArenaTeam* arenaTeam = sObjectMgr.GetArenaTeamById(group->ArenaTeamId);
+	if(!arenaTeam->GetFoughtTeamList().empty())
+	{
+		uint32 countOldTeam = arenaTeam->GetFoughtTeamList().size();
+
+-		//Custom calcul , all 4mn in queue we drop an old team. Starting at 2mn.
+-		uint32 timerNextDrop = (10 - countOldTeam) * 240 + 120;		
+-		if(timeInQueue < timerNextDrop)
++		// Waiting timer to drop an old match and increase chance to proc a match
++		// 30s penality for each next drop
++		uint32 timerNextDrop = (10 - countOldTeam) * 30000 + 30000;
++		if(timeInQueue > timerNextDrop)
+			arenaTeam->DropOldFight();
+	}
+}
+@@ -928,20 +928,21 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
+		// found out the minimum and maximum ratings the newly added team should battle against
+		// arenaRating is the rating of the latest joined team, or 0
+		// 0 is on (automatic update call) and we must set it to team's with longest wait time
++		uint32 arenaRatingDiff = 0;
++		GroupQueueInfo* front1 = NULL;
++		GroupQueueInfo* front2 = NULL;
++		if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty())
++		{
++			front1 = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].front();
++			arenaRating = front1->ArenaTeamRating;
++		}
++		if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty())
++		{
++			front2 = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].front();
++			arenaRating = front2->ArenaTeamRating;
++		}
+		if (!arenaRating)
+		{
+-			GroupQueueInfo* front1 = NULL;
+-			GroupQueueInfo* front2 = NULL;
+-			if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty())
+-			{
+-				front1 = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].front();
+-				arenaRating = front1->ArenaTeamRating;
+-			}
+-			if (!m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty())
+-			{
+-				front2 = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].front();
+-				arenaRating = front2->ArenaTeamRating;
+-			}
+			if (front1 && front2)
+			{
+				if (front1->JoinTime < front2->JoinTime)
+@@ -950,10 +951,17 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
+			else if (!front1 && !front2)
+				return; // queues are empty
+		}
++		else
++		{
++			// Size of RatingDiff increase by 50 each discardUpdate (~30s)
++			if(front2)
++				arenaRatingDiff = sBattleGroundMgr.GetMaxRatingDifference() + uint32(WorldTimer::getMSTimeDiff(front2->JoinTime, WorldTimer::getMSTime()) / 300 );
++			else if(front1)
++				arenaRatingDiff = sBattleGroundMgr.GetMaxRatingDifference() + uint32(WorldTimer::getMSTimeDiff(front1->JoinTime, WorldTimer::getMSTime()) / 300 );
++		}
+
+-		// set rating range
+-		uint32 arenaMinRating = (arenaRating <= sBattleGroundMgr.GetMaxRatingDifference()) ? 0 : arenaRating - sBattleGroundMgr.GetMaxRatingDifference();
+-		uint32 arenaMaxRating = arenaRating + sBattleGroundMgr.GetMaxRatingDifference();
++		uint32 arenaMinRating = (arenaRating <= arenaRatingDiff) ? 0 : arenaRating - arenaRatingDiff;
++		uint32 arenaMaxRating = arenaRating + arenaRatingDiff;
+		// if max rating difference is set and the time past since server startup is greater than the rating discard time
+		// (after what time the ratings aren't taken into account when making teams) then
+		// the discard time is current_time - time_to_discard, teams that joined after that, will have their ratings taken into account
