@@ -6312,6 +6312,23 @@ void Aura::PeriodicTick()
 			// ignore non positive values (can be result apply spellmods to aura damage
 			uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
+			//Harold's Rejuvenating Broach
+			if (m_spellAuraHolder->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+				m_spellAuraHolder->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000010))
+			{
+				Unit::AuraList const& mclassScritAuras = pCaster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+				for (Unit::AuraList::const_iterator j = mclassScritAuras.begin(); j != mclassScritAuras.end(); ++j)
+				{
+					switch((*j)->GetModifier()->m_miscvalue)
+					{
+					case 4953:
+						amount += uint32((*j)->GetModifier()->m_amount / GetAuraMaxTicks());
+						break;
+					default : break;
+					}
+				}
+			}
+
 			uint32 pdamage;
 
 			if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
