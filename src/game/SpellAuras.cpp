@@ -558,14 +558,6 @@ void AreaAura::Update(uint32 diff)
 						Unit* pet = caster->GetPet();
 						if (pet && caster->IsWithinDistInMap(pet, m_radius))
 							targets.push_back(pet);
-
-						// Gathios Aura (illidari council)
-						if(caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->GetEntry() == 22949)
-						{
-							MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(caster, m_radius);
-							MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-							Cell::VisitAllObjects(caster, searcher, m_radius);
-						}
 					}
 					break;
 				}
@@ -4521,6 +4513,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
 			//case 8167:		// Poison totem
 		case 8145:		// Seisme totem
 		case 6474:		// Earthbind Totem
+		case 38571:		// Spore Drop (Toxic spore bat)
 			TriggerSpell();
 			break;
 		}

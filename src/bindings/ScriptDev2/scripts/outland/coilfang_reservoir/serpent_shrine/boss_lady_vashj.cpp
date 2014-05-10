@@ -160,7 +160,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		m_uiCountSporebat			   = 1;			// @Lorh : Start with 2 sporebat, it will increase with time
 		m_uiEnchantedElemental_Pos     = 0;
 		m_uiShieldGeneratorDown        = 0;
-		m_uiPhase                      = PHASE_1;
+		m_uiPhase                      = PHASE_3;
 
 		m_bShielded = false;
 		m_bEntangle = false;
@@ -395,7 +395,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 				if(m_uiPersuasionTimer <= uiDiff)
 				{
 					if(DoCastSpellIfCan(m_creature, SPELL_PERSUASION) == CAST_OK)
-						m_uiPersuasionTimer = urand(30000, 40000);
+						m_uiPersuasionTimer = 45000;
 				}else
 					m_uiPersuasionTimer -= uiDiff;
 
@@ -448,7 +448,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 				if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
 					CastShootOrMultishot(m_creature->getVictim());
 
-				m_uiCheck_Timer = 1500;
+				m_uiCheck_Timer = 3000;
 			}else 
 				m_uiCheck_Timer -= uiDiff;
 		}
@@ -644,18 +644,18 @@ struct MANGOS_DLL_DECL mob_toxic_sporebatAI : public Scripted_NoMovementAI
 	ScriptedInstance* m_pInstance;
 
 	uint32 m_uiCheck_Timer;
+	uint32 m_uiToxicBolt_Timer;
 
 	void Reset()
 	{        
 		m_uiCheck_Timer = 1000;
+		m_uiToxicBolt_Timer = 6000;
 
 		//@Lorh : Set position here
 		float PosX, PosY, PosZ;
 		m_creature->GetRandomPoint(afSporebatPos[0], afSporebatPos[1], afSporebatPos[2], 44.0f, PosX, PosY, PosZ);
 		m_creature->Relocate(PosX, PosY,  afSporebatPos[2]);
-
-		// @Lorh : This aura cast toxic bolt every 15sec
-		DoCastSpellIfCan(m_creature, SPELL_TOXIC_BOLT_AURA, CAST_TRIGGERED);
+		m_creature->GetMotionMaster()->MoveRandomAroundPoint(afSporebatPos[0], afSporebatPos[1], m_creature->GetPositionZ(), 25.0f);		
 	}
 
 	void JustSummoned(Creature* pSummoned)
@@ -696,6 +696,17 @@ struct MANGOS_DLL_DECL mob_toxic_sporebatAI : public Scripted_NoMovementAI
 			m_uiCheck_Timer = 1000;
 		}else 
 			m_uiCheck_Timer -= uiDiff;
+
+		if(m_uiToxicBolt_Timer)
+		{
+			if(m_uiToxicBolt_Timer <= uiDiff)
+			{
+				if(DoCastSpellIfCan(m_creature, SPELL_TOXIC_BOLT_AURA, CAST_TRIGGERED) == CAST_OK)
+					m_uiToxicBolt_Timer = 0;
+			}
+			else
+				m_uiToxicBolt_Timer -= uiDiff;
+		}
 	}
 };
 

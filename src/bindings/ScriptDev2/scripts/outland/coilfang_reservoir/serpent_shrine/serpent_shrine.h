@@ -16,6 +16,11 @@ enum
     TYPE_LEOTHERAS_EVENT            = 3,
     TYPE_MOROGRIM_EVENT             = 4,
     TYPE_THELURKER_EVENT            = 5,
+	TYPE_VASHJ_PHASE3_CHECK			= 6,
+	TYPE_SHIELDGENERATOR1			= 7,
+	TYPE_SHIELDGENERATOR2			= 8,
+	TYPE_SHIELDGENERATOR3			= 9, 
+	TYPE_SHIELDGENERATOR4			= 10, 
 
     DATA_WATERSTATE_EVENT           = 1,                    // DO NOT CHANGE! Used by Acid. - used to check the mobs for the water event.
 
