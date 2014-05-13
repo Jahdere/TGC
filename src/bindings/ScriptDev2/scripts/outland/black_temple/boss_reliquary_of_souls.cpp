@@ -382,6 +382,9 @@ struct MANGOS_DLL_DECL essence_base_AI : public ScriptedAI
 		if (Creature* pReliquary = m_pInstance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
 			m_creature->GetMotionMaster()->MovePoint(1, pReliquary->GetPositionX(), pReliquary->GetPositionY(), pReliquary->GetPositionZ());
 
+		if (m_creature->GetEntry() == NPC_ESSENCE_SUFFERING)
+			m_creature->RemoveAurasDueToSpell(SPELL_SUFFERING_PASSIVE);
+
 		m_bIsPhaseFinished = true;
 
 		OnPhaseFinished();

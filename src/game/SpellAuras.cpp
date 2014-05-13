@@ -1574,13 +1574,6 @@ void Aura::TriggerSpell()
 					//                    case 40867: break;
 					//                    // Prismatic Shield
 					//                    case 40879: break;
-				case 41296:								// Prevent passiv trigger Aura of suffering
-					if(Unit* m_caster = GetCaster())
-					{
-						if(!m_caster->GetHealth())
-							return;
-					}
-					break;
 				case 41350:				  // Aura of Desire
 					if(triggerTarget->GetTypeId() == TYPEID_PLAYER && triggerTarget->GetMaxPower(POWER_MANA) > 0)
 					{
