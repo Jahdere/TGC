@@ -175,7 +175,7 @@ struct MANGOS_DLL_DECL boss_gurtogg_bloodboilAI : public ScriptedAI
 			if (m_uiAcidicWoundTimer < uiDiff)
 			{
 				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ACIDIC_WOUND) == CAST_OK)
-					m_uiAcidicWoundTimer = 10000;
+					m_uiAcidicWoundTimer = 2000;
 			}
 			else
 				m_uiAcidicWoundTimer -= uiDiff;
