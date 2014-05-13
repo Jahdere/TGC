@@ -2835,7 +2835,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 			return SPELL_MISS_PARRY;
 	}
 
-	if (this->GetTypeId() == TYPEID_UNIT && !IsSpellHaveEffect(spell, SPELL_EFFECT_SCHOOL_DAMAGE))
+	if (this->GetTypeId() == TYPEID_UNIT && !IsSpellHaveEffect(spell, SPELL_EFFECT_SCHOOL_DAMAGE) && !IsSpellHaveAura(SPELL_AURA_PERIODIC_DAMAGE))
 	{
 		if (pVictim->IsSpellBlocked(this, spell, attType))
 			return SPELL_MISS_BLOCK;
