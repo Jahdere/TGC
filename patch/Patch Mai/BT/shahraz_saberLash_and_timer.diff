@@ -1,0 +1,35 @@
+src/bindings/ScriptDev2/scripts/outland/black_temple/boss_mother_shahraz.cpp View
+@@ -88,7 +88,7 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
+  
+  	void Reset() override
+  	{
+- 		m_uiBeamTimer               = urand(5000, 10000);
++ 		m_uiBeamTimer               = 2000;
+  		m_uiCurrentBeam             = urand(0, 3);
+  		m_uiPrismaticShieldTimer    = 0;
+  		m_uiFatalAttractionTimer    = 25000;
+ @@ -98,8 +98,6 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
+  		m_uicheckDistanceTimer		= 0;
+  
+  		m_bIsEnraged                = false;
+
+- 		DoCastSpellIfCan(m_creature, SPELL_SABER_LASH_PROC);
+  		lFatalAttractionGUIDList.clear();		
+  	}
+  
+ @@ -109,6 +107,7 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
+  			m_pInstance->SetData(TYPE_SHAHRAZ, IN_PROGRESS);
+  
+  		DoScriptText(SAY_AGGRO, m_creature);
++ 		DoCastSpellIfCan(m_creature, SPELL_SABER_LASH_PROC);
+  	}
+
+@@ -218,7 +217,7 @@ struct MANGOS_DLL_DECL boss_shahrazAI : public ScriptedAI
+        {
+          uint8 uiNextBeam = (m_uiCurrentBeam + urand(1, 3)) % 4;
+          m_uiCurrentBeam = uiNextBeam;
+-         m_uiBeamTimer = 9000;
++         m_uiBeamTimer = 27000;
+        }
+      }
+      else

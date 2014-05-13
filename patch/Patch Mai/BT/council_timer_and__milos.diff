@@ -1,0 +1,93 @@
+src/bindings/ScriptDev2/scripts/outland/black_temple/illidari_council.cpp View
+@@ -345,6 +345,18 @@ struct MANGOS_DLL_DECL boss_illidari_councilAI : public ScriptedAI
+		int32 uHealTaken = (int32)uiHealedAmount;
+		m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, NULL, NULL, true);
+	}
++
++	void MoveInLineOfSight(Unit* pWho) override
++	{
++		if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
++			m_creature->IsWithinDistInMap(pWho, 40.0f) && m_creature->IsWithinLOSInMap(pWho))
++		{
++
++			// Set the player in combat with the boss
++			pWho->SetInCombatWith(m_creature);
++			m_creature->AddThreat(pWho);
++		}
++	}
+};
+
+/*######
+@@ -403,7 +415,7 @@ struct MANGOS_DLL_DECL boss_gathios_the_shattererAI : public boss_illidari_counc
+		if (m_uiConsecrationTimer < uiDiff)
+		{
+			if (DoCastSpellIfCan(m_creature, SPELL_CONSECRATION) == CAST_OK)
+-				m_uiConsecrationTimer = urand(10000, 15000);
++				m_uiConsecrationTimer = 30000;
+		}
+		else
+			m_uiConsecrationTimer -= uiDiff;
+@@ -544,22 +556,14 @@ struct MANGOS_DLL_DECL boss_high_nethermancer_zerevorAI : public boss_illidari_c
+		else
+			m_uiArcaneExplosionTimer -= uiDiff;
+
+-		if (m_uiArcaneBoltTimer < uiDiff)
+-		{
+-			if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BOLT) == CAST_OK)
+-				m_uiArcaneBoltTimer = 3000;
+-		}
+-		else
+-			m_uiArcaneBoltTimer -= uiDiff;
+-
+		if (m_uiBlizzardTimer < uiDiff)
+		{
+-			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
++			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BLIZZARD, SELECT_FLAG_PLAYER))
+			{
+				if (DoCastSpellIfCan(pTarget, SPELL_BLIZZARD) == CAST_OK)
+				{
+-					m_uiBlizzardTimer = urand(5000, 15000);
+-					m_uiFlamestrikeTimer += 5000;
++					m_uiBlizzardTimer = urand(12000, 15000);
++					m_uiFlamestrikeTimer += 7000;
+				}
+			}
+		}
+@@ -568,17 +572,25 @@ struct MANGOS_DLL_DECL boss_high_nethermancer_zerevorAI : public boss_illidari_c
+
+		if (m_uiFlamestrikeTimer < uiDiff)
+		{
+-			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
++			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FLAMESTRIKE, SELECT_FLAG_PLAYER))
+			{
+				if (DoCastSpellIfCan(pTarget, SPELL_FLAMESTRIKE) == CAST_OK)
+				{
+-					m_uiFlamestrikeTimer = urand(5000, 15000);
+-					m_uiBlizzardTimer += 5000;
++					m_uiFlamestrikeTimer = urand(12000, 15000);
++					m_uiBlizzardTimer += 7000;
+				}
+			}
+		}
+		else
+			m_uiFlamestrikeTimer -= uiDiff;
++
++		if (m_uiArcaneBoltTimer < uiDiff)
++		{
++			if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BOLT) == CAST_OK)
++				m_uiArcaneBoltTimer = 3000;
++		}
++		else
++			m_uiArcaneBoltTimer -= uiDiff;
+	}
+};
+
+@@ -762,7 +774,7 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
+		{
+			if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
+			{
+-				m_uiVanishTimer = urand(30000, 40000);
++				m_uiVanishTimer = 55000;
+				m_uiVanishEndtimer = 1000;
+			}
+		}

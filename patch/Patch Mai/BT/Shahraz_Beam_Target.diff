@@ -1,0 +1,24 @@
+src/game/Spell.cpp View
+@@ -1725,7 +1725,21 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
+  			}
+  			else
+  			{
+-				Unit* pUnitTarget = m_targets.getUnitTarget();
++				Unit* pUnitTarget = NULL;
++				switch(m_spellInfo->Id)
++				{
++				// Shahraz Beam
++				case 40827:
++				case 40859:
++				case 40860:
++				case 40861:
++					pUnitTarget = m_caster->SelectRandomUnfriendlyTarget((Unit*)0, radius);
++				break;
++				default:
++					pUnitTarget = m_targets.getUnitTarget();
++					break;
++				}
++				
+  				WorldObject* originalCaster = GetAffectiveCasterObject();
+  				if (!pUnitTarget || !originalCaster)
+  					break;

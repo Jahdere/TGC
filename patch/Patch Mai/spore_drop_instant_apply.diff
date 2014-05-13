@@ -1,0 +1,9 @@
+src/game/SpellAuras.cpp View
+@@ -4521,6 +4513,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
+			//case 8167:		// Poison totem
+		case 8145:		// Seisme totem
+		case 6474:		// Earthbind Totem
++		case 38571:		// Spore Drop (Toxic spore bat)
+			TriggerSpell();
+			break;
+		}

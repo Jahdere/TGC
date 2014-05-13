@@ -1,0 +1,12 @@
+TODO LIST ILLIDAN:
+
+- P1 : FLAME CRASH ( spell 40832) doit faire pop un trigger NPC_FLAME_CRASH(23336) qui fait une aoe constante autour de lui ( spell 40836)
+-> sur TGC l'aoe n'apparait pas, à croire que le npc ne pop pas.
+
+- Ambidextrie : Les dégats de la off hand d'Illidan sont fixes et bcp trop bas (70 sur 10k armo), ils devraient faire environ la moitié des dmg de la main hand avec des dégats étalés sur une plage de dégat.
+
+- En p2 (65% du boss) , les flammes d'azzinoth (22997) font un peu ce qu'elles veulent, incompréhension totale la dessus.
+-> elles devraient être tank et respecter leur script (npc_flame_of_azzinoth)
+
+- en p3 lorsqu'il switch de la forme démon à forme humaine il n'a plus ses armes et donc ne tappe plus de façon ambidex.
+(pour accéder à la p3 il suffit de kill les deux flammes d'azzinoth, il switch sur deux transformations qui sont basées sur des timers)
