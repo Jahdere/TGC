@@ -1,0 +1,16 @@
+src/game/Spell.cpp View
+@@ -1800,6 +1800,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
+
+		if (m_spellInfo->Id == 42005)                   // Bloodboil (spell hits only the 5 furthest away targets)
+		{
++			// Target only player
++			for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end();)
++			{
++				if((*itr)->GetTypeId() != TYPEID_PLAYER)
++					targetUnitMap.erase(itr++);
++				else
++					++itr;
++			}
+			if (targetUnitMap.size() > unMaxTargets)
+			{
+				targetUnitMap.sort(TargetDistanceOrderFarAway(m_caster));

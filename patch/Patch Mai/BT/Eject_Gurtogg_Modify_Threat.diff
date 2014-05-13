@@ -1,0 +1,10 @@
+src/game/SpellEffects.cpp View
+@@ -5472,7 +5472,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
+						return;
+
+					if (m_caster->getThreatManager().getThreat(unitTarget))
+-						m_caster->getThreatManager().modifyThreatPercent(unitTarget, -40);
++						m_caster->getThreatManager().modifyThreatPercent(unitTarget, -25);
+					return;
+				}
+			case 40892:	
