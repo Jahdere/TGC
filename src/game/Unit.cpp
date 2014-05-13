@@ -1399,7 +1399,8 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
 	if (damage > 0)
 	{
 		// physical damage => armor
-		if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
+		// Bloodboil don't care about armor
+		if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL && spellInfo->id != 42005)
 			damage = CalcArmorReducedDamage(pVictim, damage);
 	}
 	else
