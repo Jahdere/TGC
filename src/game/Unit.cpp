@@ -5085,8 +5085,14 @@ bool Unit::IsHostileTo(Unit const* unit) const
 		return true;
 
 	// test pet/charm masters instead pers/charmeds
-	Unit const* testerOwner = GetCharmerOrOwner();
-	Unit const* targetOwner = unit->GetCharmerOrOwner();
+	Unit* testerOwner = GetCharmerOrOwner();
+	Unit* targetOwner = unit->GetCharmerOrOwner();
+
+	// Go deeper if necessary (Fire Elemental is owned by Fire Elemental Totem which is owned by player) -- @Rikub
+	if (testerOwner)
+		testerOwner = testerOwner->GetCharmerOrOwnerOrSelf();
+	if (targetOwner)
+		targetOwner = targetOwner->GetCharmerOrOwnerOrSelf();
 
 	// always hostile to owner's enemy
 	if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -5197,8 +5203,14 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 		return false;
 
 	// test pet/charm masters instead pers/charmeds
-	Unit const* testerOwner = GetCharmerOrOwner();
-	Unit const* targetOwner = unit->GetCharmerOrOwner();
+	Unit* testerOwner = GetCharmerOrOwner();
+	Unit* targetOwner = unit->GetCharmerOrOwner();
+
+	// Go deeper if necessary (Fire Elemental is owned by Fire Elemental Totem which is owned by player) -- @Rikub
+	if (testerOwner)
+		testerOwner = testerOwner->GetCharmerOrOwnerOrSelf();
+	if (targetOwner)
+		targetOwner = targetOwner->GetCharmerOrOwnerOrSelf();
 
 	// always non-friendly to owner's enemy
 	if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
