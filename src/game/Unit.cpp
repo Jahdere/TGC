@@ -2967,6 +2967,15 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 	if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
 		return SPELL_MISS_IMMUNE;
 
+	// Pickpocket removes stealth on resist -- @Rikub
+	if (spell->Id == 921)
+	{
+		SpellMissInfo missInfo = MagicSpellHitResult(pVictim, spell);
+		if (missInfo == SPELL_MISS_RESIST)
+			this->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+		return missInfo;
+	}
+
 	// Try victim reflect spell
 	if (CanReflect)
 	{
