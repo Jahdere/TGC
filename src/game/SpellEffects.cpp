@@ -6637,7 +6637,7 @@ void Spell::DoSummonCritter(SpellEffectIndex eff_idx, uint32 forceFaction)
 
 	CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation());
 	if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
-		pos = CreatureCreatePos(m_caster, m_caster->GetOrientation());
+		pos = CreatureCreatePos(m_caster, m_caster->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
 	// summon new pet
 	Pet* critter = new Pet(MINI_PET);
