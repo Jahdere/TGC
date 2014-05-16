@@ -526,7 +526,20 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
 	uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
 	float chance = float(damage) / max_dmg * 100.0f;
 	if (roll_chance_f(chance))
-		RemoveSpellsCausingAura(auraType, GetSpellAuraHolder(47168));	//Can't break Improved Wing Clip (hunt) @Kordbc
+	{
+		for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+		{
+			// Damage breakable auras type spells shouldn't break when procFlags == 0 -- @Rikub
+			if ((*iter)->GetSpellProto()->procFlags == 0)
+			{
+				++iter;
+				continue;
+			}
+
+			RemoveAurasDueToSpell((*iter)->GetId());
+			iter = m_modAuras[auraType].begin();
+		}
+	}
 }
 
 void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
