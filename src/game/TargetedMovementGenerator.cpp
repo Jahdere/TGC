@@ -51,7 +51,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
             owner.GetPosition(x, y, z);
         }
-        else if (!i_offset)
+        else if (!i_offset && !i_angle)
         {
             // to nearest contact position
             i_target->GetContactPoint(&owner, x, y, z);
@@ -148,7 +148,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     if (owner.movespline->Finalized())
     {
-        if (i_angle == 0.f && !owner.HasInArc(0.01f, i_target.getTarget()))
+        if (!owner.HasInArc(0.01f, i_target.getTarget()))
             owner.SetInFront(i_target.getTarget());
 
         if (!i_targetReached)
