@@ -7331,7 +7331,13 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
 		//-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
 		// based on wowwiki every 5 mod we have 1 more level diff in calculation
-		visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
+		int32 detectionLevel = 0;
+		Unit::AuraList const& dAuras = u->GetAurasByType(SPELL_AURA_MOD_STEALTH_DETECT);
+		for (Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+			if ((*itr)->GetModifier()->m_miscvalue == 0) // Avoid trap detection aura (2836) -- @Rikub
+				detectionLevel += (*itr)->GetModifier()->m_amount;
+
+		visibleDistance += (detectionLevel - stealthMod) / 5.0f;
 		visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
 
 		// recheck new distance
