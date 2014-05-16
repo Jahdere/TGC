@@ -726,12 +726,11 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
 			return false;
 
 		// special invisibility cases
-		/* TODO: implement trap stealth, take look at spell 2836
 		if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
 		{
-		if(check stuff here)
-		return false;
-		}*/
+			if (!u->HasAura(2836) || !viewPoint->isInFrontInMap(this, MAX_PLAYER_STEALTH_DETECT_RANGE))
+				return false;
+		}
 
 		// Smuggled Mana Cell required 10 invisibility type detection/state
 		if (GetEntry() == 187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1 << 10)) == 0)
