@@ -9254,15 +9254,19 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
 		if (GetTypeId() != TYPEID_PLAYER && isAlive())
 		{
 			Creature* c = ((Creature*)this);
-			// restore appropriate movement generator
-			if (getVictim())
-				GetMotionMaster()->MoveChase(getVictim());
-			else
-				GetMotionMaster()->Initialize();
-
 			// attack caster if can
 			if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL)
 				c->AttackedBy(caster);
+
+			// restore appropriate movement generator
+			if (getVictim())
+			{
+				// Set target back
+				SetTargetGuid(getVictim()->GetObjectGuid());
+				GetMotionMaster()->MoveChase(getVictim());
+			}
+			else
+				GetMotionMaster()->Initialize();
 		}
 	}
 
@@ -9299,9 +9303,18 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 
 		if (GetTypeId() != TYPEID_PLAYER && isAlive())
 		{
+			Creature* c = ((Creature*)this);
+			// attack caster if can
+			if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL)
+				c->AttackedBy(caster);
+			
 			// restore appropriate movement generator
 			if (getVictim())
+			{
+				// Set target back
+				SetTargetGuid(getVictim()->GetObjectGuid());
 				GetMotionMaster()->MoveChase(getVictim());
+			}
 			else
 				GetMotionMaster()->Initialize();
 		}
