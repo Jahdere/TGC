@@ -4035,6 +4035,16 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
 				summon->CastSpell(summon, 40282, true);		// Can't be attackable
 			}
 
+			// Inferno enslave at spawn -- @Lorh
+			if (summon->GetEntry() == 89 && m_spellInfo->Id == 1122)
+			{
+				m_caster->CastSpell(summon, 20882, true); // Enslave
+
+				// Inferno effect
+				summon->CastSpell(summon, 23053, true);
+				summon->CastSpell(summon, 22703, true, 0);
+			}
+
 			// Notify original caster if not done already
 			if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
 				((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
