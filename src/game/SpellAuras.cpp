@@ -7135,9 +7135,10 @@ void SpellAuraHolder::_AddSpellAuraHolder()
 	// will be < MAX_AURAS slot (if find free) with !secondaura
 	if (IsNeedVisibleSlot(caster))
 	{
+		uint8 positiveLimit = m_target->GetTypeId() == TYPEID_PLAYER ? MAX_POSITIVE_AURAS : MAX_NPC_POSITIVE_AURAS;
 		if (IsPositive())                                   // empty positive slot
 		{
-			for (uint8 i = 0; i < MAX_POSITIVE_AURAS; i++)
+			for (uint8 i = 0; i < positiveLimit; i++)
 			{
 				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
 				{
@@ -7148,7 +7149,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
 		}
 		else                                                // empty negative slot
 		{
-			for (uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
+			for (uint8 i = positiveLimit; i < MAX_AURAS; i++)
 			{
 				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
 				{
