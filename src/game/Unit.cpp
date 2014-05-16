@@ -7338,7 +7338,8 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 				detectionLevel += (*itr)->GetModifier()->m_amount;
 
 		visibleDistance += (detectionLevel - stealthMod) / 5.0f;
-		visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
+		// Max detection range w/o Shadow sight is 10y -- @Rikub
+		visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE ? MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE : visibleDistance;
 
 		// recheck new distance
 		if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
