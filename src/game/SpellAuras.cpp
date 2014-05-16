@@ -3837,13 +3837,13 @@ void Aura::HandleModStealth(bool apply, bool Real)
 				target->SetVisibility(VISIBILITY_GROUP_STEALTH);
 			}
 
-			// for RACE_NIGHTELF stealth
-			if (target->GetTypeId() == TYPEID_PLAYER && GetId() == 20580)
-				target->CastSpell(target, 21009, true, NULL, this);
-
 			// apply full stealth period bonuses only at first stealth aura in stack
 			if (target->GetAurasByType(SPELL_AURA_MOD_STEALTH).size() <= 1)
 			{
+				// Apply passive RACE_NIGHTELF stealth bonus on first non Shadowmeld cast -- @Rikub
+				if (target->GetTypeId() == TYPEID_PLAYER && target->getRace() == RACE_NIGHTELF && GetId() != 20580)
+					target->CastSpell(target, 21009, true, NULL, this);
+
 				Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
 				for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
 				{
@@ -3861,13 +3861,13 @@ void Aura::HandleModStealth(bool apply, bool Real)
 	}
 	else
 	{
-		// for RACE_NIGHTELF stealth
-		if (Real && target->GetTypeId() == TYPEID_PLAYER && GetId() == 20580)
-			target->RemoveAurasDueToSpell(21009);
-
 		// only at real aura remove of _last_ SPELL_AURA_MOD_STEALTH
 		if (Real && !target->HasAuraType(SPELL_AURA_MOD_STEALTH))
 		{
+			// Also remove RACE_NIGHTELF stealth bonus on any stealth end -- @Rikub
+			if (target->GetTypeId() == TYPEID_PLAYER && target->getRace() == RACE_NIGHTELF)
+				target->RemoveAurasDueToSpell(21009);
+
 			// if no GM invisibility
 			if (target->GetVisibility() != VISIBILITY_OFF)
 			{
