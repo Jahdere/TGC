@@ -2065,12 +2065,16 @@ void GameObject::TickCapturePoint()
 	// alliance takes the tower from neutral, contested or horde (if there is no neutral area) to alliance
 	else if (m_captureState != CAPTURE_STATE_PROGRESS_ALLIANCE && m_captureSlider > CAPTURE_SLIDER_MIDDLE + neutralPercent * 0.5f && progressFaction == ALLIANCE)
 	{
-		eventId = info->capturePoint.progressEventID1;
+		// Going from CONTEST_ALLIANCE to PROGRESS_ALLIANCE doesn't involve any ownership changes, ignore these -- @Rikub
+		if (m_captureState != CAPTURE_STATE_CONTEST_ALLIANCE)
+		{
+			eventId = info->capturePoint.progressEventID1;
 
-		// handle objective complete
-		if (m_captureState == CAPTURE_STATE_NEUTRAL)
-			if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
-				outdoorPvP->HandleObjectiveComplete(eventId, capturingPlayers, progressFaction);
+			// handle objective complete
+			if (m_captureState == CAPTURE_STATE_NEUTRAL)
+				if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
+					outdoorPvP->HandleObjectiveComplete(eventId, capturingPlayers, progressFaction);
+		}
 
 		// set capture state to alliance
 		m_captureState = CAPTURE_STATE_PROGRESS_ALLIANCE;
@@ -2078,12 +2082,16 @@ void GameObject::TickCapturePoint()
 	// horde takes the tower from neutral, contested or alliance (if there is no neutral area) to horde
 	else if (m_captureState != CAPTURE_STATE_PROGRESS_HORDE && m_captureSlider < CAPTURE_SLIDER_MIDDLE - neutralPercent * 0.5f && progressFaction == HORDE)
 	{
-		eventId = info->capturePoint.progressEventID2;
+		// Going from CONTEST_HORDE to PROGRESS_HORDE doesn't involve any ownership changes, ignore these -- @Rikub
+		if (m_captureState != CAPTURE_STATE_CONTEST_HORDE)
+		{
+			eventId = info->capturePoint.progressEventID2;
 
-		// handle objective complete
-		if (m_captureState == CAPTURE_STATE_NEUTRAL)
-			if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
-				outdoorPvP->HandleObjectiveComplete(eventId, capturingPlayers, progressFaction);
+			// handle objective complete
+			if (m_captureState == CAPTURE_STATE_NEUTRAL)
+				if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
+					outdoorPvP->HandleObjectiveComplete(eventId, capturingPlayers, progressFaction);
+		}
 
 		// set capture state to horde
 		m_captureState = CAPTURE_STATE_PROGRESS_HORDE;
