@@ -9233,13 +9233,21 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
 		GetMotionMaster()->MovementExpired(false);
 		CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
-		Unit* caster = IsInWorld() ?  GetMap()->GetUnit(casterGuid) : NULL;
+		Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL;
 
 		GetMotionMaster()->MoveFleeing(caster, time);       // caster==NULL processed in MoveFleeing
 	}
 	else
 	{
 		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+
+		// Restore confused after fleeing end -- @Rikub
+		if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
+		{
+			GetMotionMaster()->MovementExpired(false);
+			GetMotionMaster()->MoveConfused();
+			return;
+		}
 
 		GetMotionMaster()->MovementExpired(false);
 
@@ -9275,6 +9283,17 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 	else
 	{
 		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+
+		Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL;
+
+		// Restore fleeing after confused end -- @Rikub
+		if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
+		{
+			GetMotionMaster()->MovementExpired(false);
+			// There is no proper way to keep the original flee caster and time is always 0
+			GetMotionMaster()->MoveFleeing(caster, 0);
+			return;
+		}
 
 		GetMotionMaster()->MovementExpired(false);
 

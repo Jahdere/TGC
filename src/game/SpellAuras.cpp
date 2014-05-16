@@ -3650,7 +3650,9 @@ void Aura::HandleModConfuse(bool apply, bool Real)
 	if (!Real)
 		return;
 
-	GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
+	// Do not remove confused effect if we still have MOD_CONFUSE auras -- @Rikub
+	if (apply || GetTarget()->GetAurasByType(SPELL_AURA_MOD_CONFUSE).empty())
+		GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleModFear(bool apply, bool Real)
@@ -3658,7 +3660,9 @@ void Aura::HandleModFear(bool apply, bool Real)
 	if (!Real)
 		return;
 
-	GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
+	// Do not remove fleeing effect if we still have MOD_FEAR auras -- @Rikub
+	if (apply || GetTarget()->GetAurasByType(SPELL_AURA_MOD_FEAR).empty())
+		GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
