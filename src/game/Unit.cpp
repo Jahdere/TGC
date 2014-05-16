@@ -6201,6 +6201,9 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
 		return false;
 	case SPELL_DAMAGE_CLASS_MAGIC:
 		{
+			for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+				if (spellProto->Effect[i] == SPELL_EFFECT_HEALTH_LEECH) // Health leech cannot crit -- @Rikub
+					return false;
 			if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
 				crit_chance = 0.0f;
 			// For other schools
