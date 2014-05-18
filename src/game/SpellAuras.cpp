@@ -3650,7 +3650,9 @@ void Aura::HandleModConfuse(bool apply, bool Real)
 	if (!Real)
 		return;
 
-	GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
+	// Do not remove confused effect if we still have MOD_CONFUSE auras -- @Rikub
+	if (apply || GetTarget()->GetAurasByType(SPELL_AURA_MOD_CONFUSE).empty())
+		GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleModFear(bool apply, bool Real)
@@ -3658,7 +3660,9 @@ void Aura::HandleModFear(bool apply, bool Real)
 	if (!Real)
 		return;
 
-	GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
+	// Do not remove fleeing effect if we still have MOD_FEAR auras -- @Rikub
+	if (apply || GetTarget()->GetAurasByType(SPELL_AURA_MOD_FEAR).empty())
+		GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
@@ -3837,13 +3841,13 @@ void Aura::HandleModStealth(bool apply, bool Real)
 				target->SetVisibility(VISIBILITY_GROUP_STEALTH);
 			}
 
-			// for RACE_NIGHTELF stealth
-			if (target->GetTypeId() == TYPEID_PLAYER && GetId() == 20580)
-				target->CastSpell(target, 21009, true, NULL, this);
-
 			// apply full stealth period bonuses only at first stealth aura in stack
 			if (target->GetAurasByType(SPELL_AURA_MOD_STEALTH).size() <= 1)
 			{
+				// Apply passive RACE_NIGHTELF stealth bonus on first non Shadowmeld cast -- @Rikub
+				if (target->GetTypeId() == TYPEID_PLAYER && target->getRace() == RACE_NIGHTELF && GetId() != 20580)
+					target->CastSpell(target, 21009, true, NULL, this);
+
 				Unit::AuraList const& mDummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
 				for (Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
 				{
@@ -3861,13 +3865,13 @@ void Aura::HandleModStealth(bool apply, bool Real)
 	}
 	else
 	{
-		// for RACE_NIGHTELF stealth
-		if (Real && target->GetTypeId() == TYPEID_PLAYER && GetId() == 20580)
-			target->RemoveAurasDueToSpell(21009);
-
 		// only at real aura remove of _last_ SPELL_AURA_MOD_STEALTH
 		if (Real && !target->HasAuraType(SPELL_AURA_MOD_STEALTH))
 		{
+			// Also remove RACE_NIGHTELF stealth bonus on any stealth end -- @Rikub
+			if (target->GetTypeId() == TYPEID_PLAYER && target->getRace() == RACE_NIGHTELF)
+				target->RemoveAurasDueToSpell(21009);
+
 			// if no GM invisibility
 			if (target->GetVisibility() != VISIBILITY_OFF)
 			{
@@ -7135,9 +7139,10 @@ void SpellAuraHolder::_AddSpellAuraHolder()
 	// will be < MAX_AURAS slot (if find free) with !secondaura
 	if (IsNeedVisibleSlot(caster))
 	{
+		uint8 positiveLimit = m_target->GetTypeId() == TYPEID_PLAYER ? MAX_POSITIVE_AURAS : MAX_NPC_POSITIVE_AURAS;
 		if (IsPositive())                                   // empty positive slot
 		{
-			for (uint8 i = 0; i < MAX_POSITIVE_AURAS; i++)
+			for (uint8 i = 0; i < positiveLimit; i++)
 			{
 				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
 				{
@@ -7148,7 +7153,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
 		}
 		else                                                // empty negative slot
 		{
-			for (uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
+			for (uint8 i = positiveLimit; i < MAX_AURAS; i++)
 			{
 				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
 				{

@@ -556,6 +556,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool HasCategoryCooldown(uint32 spell_id) const;
 
         bool HasSpell(uint32 spellID) const override;
+        void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
+        bool IsSpellSchoolProhibited(SpellSchoolMask idSchoolMask);
 
         bool UpdateEntry(uint32 entry, Team team = ALLIANCE, const CreatureData* data = NULL, GameEventCreatureData const* eventData = NULL, bool preserveHPAndPower = true);
 
@@ -750,6 +752,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_AI_locked;
         bool m_isDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
+
+        SpellSchoolMask m_prohibitedSpellSchool;
+        uint32 m_prohibitedNextCast;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;

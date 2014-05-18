@@ -131,7 +131,8 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && isAlive())
+            // Charmed creatures are considered in combat toward despawn timer -- @Lorh
+            if (!isInCombat() && isAlive() && !isCharmed())
             {
                 if (m_timer <= update_diff)
                 {

@@ -42,6 +42,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
             TargetedMovementGeneratorBase(target),
             i_recheckDistance(0),
             i_offset(offset), i_angle(angle),
+            i_targetAngle(0),
             m_speedChanged(false), i_targetReached(false),
             i_path(NULL)
         {
@@ -63,6 +64,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
         ShortTimeTracker i_recheckDistance;
         float i_offset;
         float i_angle;
+        float i_targetAngle;
         bool m_speedChanged : 1;
         bool i_targetReached : 1;
 
