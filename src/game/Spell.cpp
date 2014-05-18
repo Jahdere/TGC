@@ -6350,10 +6350,6 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if(!target->HasAura(41001))
 			return false;
 		break;
-	case 40832:											// Flame Crash (Illidan)
-		if(target->GetTypeId() == TYPEID_UNIT && target->GetEntry() == 22917)
-			return false;
-		break;
 	case 40251:											// Shadow of Death
 		if(target->HasAura(40251))
 			return false;
