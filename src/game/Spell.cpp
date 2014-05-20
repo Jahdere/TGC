@@ -1209,7 +1209,8 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 			// No threat spell shouldn't put friendly caster in combat -- @Rikub
 			if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 			{
-				(m_spellInfo->HasAttribute(SPELL_ATTR_UNK18) ? m_caster : realCaster)->SetInCombatState(unit->GetCombatTimer() > 0);
+				if (m_spellInfo->Id != 15290) // Vampiric embrace put in combat but generate threat -- @Rikub
+					(m_spellInfo->HasAttribute(SPELL_ATTR_UNK18) ? m_caster : realCaster)->SetInCombatState(unit->GetCombatTimer() > 0);
 				unit->getHostileRefManager().threatAssist((m_spellInfo->HasAttribute(SPELL_ATTR_UNK18) ? m_caster : realCaster), 0.0f, m_spellInfo);
 			}
 		}
