@@ -1206,7 +1206,8 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 			if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
 				realCaster->SetContestedPvP();
 
-			if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+			// No threat spell shouldn't put friendly caster in combat -- @Rikub
+			if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 			{
 				realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
 				unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
