@@ -1023,7 +1023,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 		int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, crit);
 
 		if (real_caster)
-			unitTarget->getHostileRefManager().threatAssist(real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo);
+			unitTarget->getHostileRefManager().threatAssist(m_spellInfo->HasAttribute(SPELL_ATTR_UNK18) ? unitTarget : real_caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo);
 	}
 	// Do damage and triggers
 	else if (m_damage)
@@ -1209,8 +1209,8 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 			// No threat spell shouldn't put friendly caster in combat -- @Rikub
 			if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
 			{
-				realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
-				unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
+				(m_spellInfo->HasAttribute(SPELL_ATTR_UNK18) ? realCaster : m_caster)->SetInCombatState(unit->GetCombatTimer() > 0);
+				unit->getHostileRefManager().threatAssist((m_spellInfo->HasAttribute(SPELL_ATTR_UNK18) ? realCaster : m_caster), 0.0f, m_spellInfo);
 			}
 		}
 	}
