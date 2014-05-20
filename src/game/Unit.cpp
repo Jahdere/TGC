@@ -643,7 +643,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 	// Get in CombatState
 	if (pVictim != this && damagetype != DOT)
 	{
-		SetInCombatWith(pVictim);
+		// No threat spells shouldn't put caster in combat -- @Rikub
+		if (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+			SetInCombatWith(pVictim);
 		pVictim->SetInCombatWith(this);
 
 		if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
