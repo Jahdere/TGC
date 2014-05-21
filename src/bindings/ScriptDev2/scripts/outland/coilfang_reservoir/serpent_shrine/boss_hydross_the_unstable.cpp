@@ -53,7 +53,6 @@ enum
     POINT_ID_ELEMENTAL_CLEAN    = 1,
     POINT_ID_ELEMENTAL_EXIT     = 2,
 
-    SWITCH_RADIUS               = 18,
     MAX_HYDROSS_ADDS            = 4,
     MAX_HYDROSS_MARKS           = 6,
 };
@@ -63,6 +62,8 @@ static const uint32 aMarkCorruption[MAX_HYDROSS_MARKS] = {38219, 38220, 38221, 3
 
 static const float aElementalCleanPoint[3] = { -231.48f, -343.05f, -1.58f};
 static const float aElementalExitPoint[3] = { -177.41f, -395.72f, -1.60f};
+
+static const float flagPosition[2][2] = { { -213.387375f, -352.244415f }, { -251.622940, -339.388275 } }; // North(x,y), South(x,y)
 
 struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
 {
@@ -220,6 +221,15 @@ struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
         }
     }
 
+    bool IsInCleanZone()
+    {
+        float fX, fY, fZ;
+        m_creature->GetPosition(fX, fY, fZ);
+        //float northFlagX = -213.387375, northFlagY = -352.244415, southFlagX = -251.622940, southFlagY = -339.388275;
+        //return ((flagPosition[0][0] - flagPosition[1][0])*(fY - flagPosition[1][1]) - (flagPosition[0][1] - flagPosition[1][1]) * (fX - flagPosition[1][0])) < 0;
+        return (38.235565f * (fY - flagPosition[1][1]) < -12.85614f * (fX - flagPosition[1][0]));
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -264,10 +274,7 @@ struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
             // Change to clean
             if (m_uiPosCheckTimer < uiDiff)
             {
-                float fPosX, fPosY, fPosZ;
-                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ);
-
-                if (m_creature->IsWithinDist2d(fPosX, fPosY, SWITCH_RADIUS))
+                if (IsInCleanZone())
                 {
                     DoScriptText(SAY_SWITCH_TO_CLEAN, m_creature);
                     m_creature->RemoveAurasDueToSpell(SPELL_CORRUPTION);
@@ -307,10 +314,7 @@ struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
             // Change to corrupt
             if (m_uiPosCheckTimer < uiDiff)
             {
-                float fPosX, fPosY, fPosZ;
-                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ);
-
-                if (!m_creature->IsWithinDist2d(fPosX, fPosY, SWITCH_RADIUS))
+                if (!IsInCleanZone())
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTION) == CAST_OK)
                     {

@@ -27,6 +27,7 @@
 
 #define MAX_AURAS 56
 #define MAX_POSITIVE_AURAS 40
+#define MAX_NPC_POSITIVE_AURAS 16
 
 enum AuraFlags
 {

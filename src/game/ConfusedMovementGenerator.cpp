@@ -37,6 +37,9 @@ void ConfusedMovementGenerator<T>::Initialize(T& unit)
 
     unit.StopMoving();
     unit.addUnitState(UNIT_STAT_CONFUSED_MOVE);
+
+    if (unit.GetTypeId() == TYPEID_UNIT)
+        unit.SetTargetGuid(ObjectGuid());
 }
 
 template<class T>

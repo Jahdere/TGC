@@ -793,11 +793,17 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
 					return false;
 				break;
 			case SPELL_AURA_MOD_PACIFY_SILENCE:
-				if (spellproto->Id == 24740)            // Wisp Costume
+				switch (spellproto->Id)
+				{
+				case 24740:                             // Wisp Costume
+				case 38318:                             // Transformation - Blackwhelp
 					return true;
+				}
 				return false;
-			case SPELL_AURA_MOD_ROOT:
 			case SPELL_AURA_MOD_SILENCE:
+				if (spellproto->Id == 24732)            // Bat Costume
+					return true;
+			case SPELL_AURA_MOD_ROOT:
 			case SPELL_AURA_GHOST:
 			case SPELL_AURA_PERIODIC_LEECH:
 			case SPELL_AURA_MOD_STALKED:

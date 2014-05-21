@@ -141,6 +141,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 	m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
 	m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 	m_temporaryFactionFlags(TEMPFACTION_NONE),
+	m_prohibitedSpellSchool(SPELL_SCHOOL_MASK_NONE),
 	m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
 	m_creatureInfo(NULL)
 {
@@ -2151,6 +2152,21 @@ time_t Creature::GetRespawnTimeEx() const
 		return now + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS;
 	else
 		return now;
+}
+
+void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
+{
+	if (unTimeMs == 0)
+		return;
+	m_prohibitedSpellSchool = idSchoolMask;
+	m_prohibitedNextCast = time(NULL) + unTimeMs / IN_MILLISECONDS;
+}
+
+bool Creature::IsSpellSchoolProhibited(SpellSchoolMask idSchoolMask)
+{
+	if (m_prohibitedSpellSchool && time(NULL) > m_prohibitedNextCast)
+		m_prohibitedSpellSchool = SPELL_SCHOOL_MASK_NONE;
+	return (m_prohibitedSpellSchool && (m_prohibitedSpellSchool & idSchoolMask));
 }
 
 void Creature::GetRespawnCoord(float& x, float& y, float& z, float* ori, float* dist) const

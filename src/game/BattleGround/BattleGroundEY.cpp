@@ -221,6 +221,8 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
 
+        // update capture point owner
+        m_towerOwner[towerId] = ALLIANCE;
         // spawn gameobjects
         SpawnEvent(towerId, BG_TEAM_ALLIANCE, true);
     }
@@ -232,6 +234,8 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
 
+        // update capture point owner
+        m_towerOwner[towerId] = HORDE;
         // spawn gameobjects
         SpawnEvent(towerId, BG_TEAM_HORDE, true);
     }
@@ -254,6 +258,8 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
             SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
         }
 
+        // update capture point owner
+        m_towerOwner[towerId] = TEAM_NONE;
         // despawn gameobjects
         SpawnEvent(towerId, EY_NEUTRAL_TEAM, true);
     }
@@ -262,9 +268,6 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
     UpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
     m_towerWorldState[towerId] = newWorldState;
     UpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
-
-    // update capture point owner
-    m_towerOwner[towerId] = team;
 }
 
 void BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)

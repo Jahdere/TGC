@@ -45,7 +45,7 @@
 #include "GossipDef.h"
 #include "Mail.h"
 #include "InstanceData.h"
-#include "BattleGround\BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 
 #include <limits>
 

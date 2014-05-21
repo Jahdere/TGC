@@ -695,7 +695,7 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
 
 	uint32 m_uiDeadlyPoisonTimer;
 	uint32 m_uiVanishTimer;
-	uint32 m_uiVanishEndtimer;
+	bool m_bVanishEnd;
 	uint32 m_uiEnvenomTimer;
 
 	void Reset() override
@@ -703,7 +703,7 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
 		m_uiDeadlyPoisonTimer   = 1000;
 		m_uiVanishTimer         = urand(30000, 40000);
 		m_uiEnvenomTimer        = 5000;
-		m_uiVanishEndtimer      = 0;
+		m_bVanishEnd			= false;
 	}
 
 	void KilledUnit(Unit* /*pVictim*/) override
@@ -720,7 +720,7 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
 
 	void EnterEvadeMode() override
 	{
-		if (m_uiVanishEndtimer)
+		if (m_bVanishEnd)
 			return;
 
 		ScriptedAI::EnterEvadeMode();
@@ -731,18 +731,13 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
 			return;
 
-		if (m_uiVanishEndtimer)
+		if (m_bVanishEnd)
 		{
-			if (m_uiVanishEndtimer <= uiDiff)
+			if (DoCastSpellIfCan(m_creature, SPELL_VANISH_TELEPORT) == CAST_OK)
 			{
-				if (DoCastSpellIfCan(m_creature, SPELL_VANISH_TELEPORT) == CAST_OK)
-				{
-					DoResetThreat();
-					m_uiVanishEndtimer = 0;
-				}
+				DoResetThreat();
+				m_bVanishEnd = false;
 			}
-			else
-				m_uiVanishEndtimer -= uiDiff;
 
 			// no more abilities during vanish
 			return;
@@ -775,7 +770,7 @@ struct MANGOS_DLL_DECL boss_veras_darkshadowAI : public boss_illidari_councilAI
 			if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
 			{
 				m_uiVanishTimer = 55000;
-				m_uiVanishEndtimer = 1000;
+				m_bVanishEnd = true;
 			}
 		}
 		else

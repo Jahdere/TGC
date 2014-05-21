@@ -40,6 +40,7 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
 {
     m_AllySet.clear();
     UpdateAllies();
+    m_attackAngle = M_PI_F;
 }
 
 void PetAI::MoveInLineOfSight(Unit* u)
@@ -70,7 +71,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
 void PetAI::AttackStart(Unit* u)
 {
-    if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET) || m_creature->isCharmedOwnedByPlayerOrPlayer())
+    if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
         return;
 
     if (m_creature->Attack(u, true))

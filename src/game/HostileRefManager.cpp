@@ -43,10 +43,6 @@ void HostileRefManager::threatAssist(Unit* pVictim, float pThreat, SpellEntry co
     float threat = pThreat / size;
     HostileReference* ref = getFirst();
 
-	// Prayer of Mending , don't generate threat on original caster
-	if(pThreatSpell->Id == 33110)
-		pVictim = getOwner();
-
     while (ref)
     {
         ref->getSource()->addThreat(pVictim, threat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);

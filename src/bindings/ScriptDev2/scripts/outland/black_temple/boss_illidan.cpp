@@ -150,6 +150,7 @@ enum
 	SPELL_CHARGE                    = 42003,                // Flames of Azzinoth charges whoever is too far from them. They enrage after this
 	SPELL_UNCAGED_WRATH             = 39869,
 	SPELL_BLAZE                     = 40637,                // summons 23259
+	SPELL_IMMUNE_FIRE				= 34305,
 
 	// Shadow Demon
 	SPELL_SHADOW_DEMON_PASSIVE      = 41079,                // Adds the "shadowform" uiAura to Shadow Demons.
@@ -390,9 +391,9 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		SetCombatMovement(true);
 
 		//m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-		//SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-		SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
+		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
+		SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+		//SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
 	}
 
 	void GetAIInformation(ChatHandler& reader) override
@@ -403,6 +404,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 	void Aggro(Unit* /*pWho*/) override
 	{
 		m_creature->RemoveAurasDueToSpell(SPELL_KNEEL_INTRO);
+		SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
 		if (m_pInstance)
 			m_pInstance->SetData(TYPE_ILLIDAN, IN_PROGRESS);
 	}
@@ -1530,7 +1532,7 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 		pClosestGlaive = NULL;
 		pFarthestGlaive = NULL;
 
-		m_creature->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
+		m_creature->CastSpell(m_creature, SPELL_IMMUNE_FIRE, true);
 	}
 
 	void JustSummoned(Creature* pSummoned) override
@@ -1769,6 +1771,7 @@ struct MANGOS_DLL_DECL npc_illidan_targetAI : public ScriptedAI
 	// Do-Nothing-Just-Run
 	void AttackStart(Unit* /*pWho*/) override { }
 	void MoveInLineOfSight(Unit* /*pWho*/) override { }
+	void EnterEvadeMode() override { }
 	void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 

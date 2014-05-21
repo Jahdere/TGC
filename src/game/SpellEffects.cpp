@@ -3905,22 +3905,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
 
 	// victim have to be alive and humanoid or undead
 	if (unitTarget->isAlive() && (unitTarget->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0)
-	{
-		int32 chance = 10 + int32(m_caster->getLevel()) - int32(unitTarget->getLevel());
-
-		if (chance > irand(0, 19))
-		{
-			// Stealing successful
-			// DEBUG_LOG("Sending loot from pickpocket");
-			((Player*)m_caster)->SendLoot(unitTarget->GetObjectGuid(), LOOT_PICKPOCKETING);
-		}
-		else
-		{
-			// Reveal action + get attack
-			m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-			unitTarget->AttackedBy(m_caster);
-		}
-	}
+		((Player*)m_caster)->SendLoot(unitTarget->GetObjectGuid(), LOOT_PICKPOCKETING);
 }
 
 void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
@@ -4048,6 +4033,16 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
 				m_caster->CastSpell(m_caster, 40282, true);	// Can't be attackable
 				m_caster->CastSpell(m_caster, 40268, true, NULL, NULL, m_caster->GetObjectGuid()); // Possess Spirit by Player
 				summon->CastSpell(summon, 40282, true);		// Can't be attackable
+			}
+
+			// Inferno enslave at spawn -- @Lorh
+			if (summon->GetEntry() == 89 && m_spellInfo->Id == 1122)
+			{
+				m_caster->CastSpell(summon, 20882, true); // Enslave
+
+				// Inferno effect
+				summon->CastSpell(summon, 23053, true);
+				summon->CastSpell(summon, 22703, true, 0);
 			}
 
 			// Notify original caster if not done already
@@ -6652,7 +6647,7 @@ void Spell::DoSummonCritter(SpellEffectIndex eff_idx, uint32 forceFaction)
 
 	CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation());
 	if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
-		pos = CreatureCreatePos(m_caster, m_caster->GetOrientation());
+		pos = CreatureCreatePos(m_caster, m_caster->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
 	// summon new pet
 	Pet* critter = new Pet(MINI_PET);
