@@ -6310,6 +6310,11 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if(m_spellInfo->Id == 36450 && target != m_caster)
 			return true;
 		break;
+	case SPELL_EFFECT_APPLY_AURA:
+		// Totem don't care about LOS when applying aura (need tests)
+		if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->IsTotem())
+			return true;
+		break;
 	default:                                            // normal case
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)
