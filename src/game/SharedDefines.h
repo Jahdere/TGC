@@ -262,7 +262,7 @@ enum SpellAttributes
     SPELL_ATTR_OUTDOORS_ONLY                   = 0x00008000,// 15 Only useable outdoors.
     SPELL_ATTR_NOT_SHAPESHIFT                  = 0x00010000,// 16 Not while shapeshifted
     SPELL_ATTR_ONLY_STEALTHED                  = 0x00020000,// 17 Must be in stealth
-    SPELL_ATTR_UNK18                           = 0x00040000,// 18
+    SPELL_ATTR_UNK18                           = 0x00040000,// 18 Triggered heals threat redirected to trigger unit (what about damage spells?) -- @Rikub
     SPELL_ATTR_LEVEL_DAMAGE_CALCULATION        = 0x00080000,// 19 spelldamage depends on caster level
     SPELL_ATTR_STOP_ATTACK_TARGET              = 0x00100000,// 20 Stop attack after use this spell (and not begin attack if use)
     SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK    = 0x00200000,// 21 Cannot be dodged/parried/blocked

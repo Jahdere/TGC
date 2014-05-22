@@ -54,6 +54,10 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         // Check for power (also done by Spell::CheckCast())
         if (m_creature->GetPower((Powers)pSpell->powerType) < Spell::CalculatePowerCost(pSpell, m_creature))
             return CAST_FAIL_POWER;
+
+        // School-lock like effect after interrupt -- @Rikub
+        if ((pSpell->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && m_creature->IsSpellSchoolProhibited(SpellSchoolMask(pSpell->SchoolMask)))
+            return CAST_FAIL_STATE;
     }
 
     if (const SpellRangeEntry* pSpellRange = sSpellRangeStore.LookupEntry(pSpell->rangeIndex))

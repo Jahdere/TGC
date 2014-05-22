@@ -73,7 +73,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Received opcode CMSG_WHO");
     // recv_data.hexlike();
 
-    uint32 clientcount = 0;
+    uint32 clientcount = 0, totalcount = 0;
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
@@ -239,6 +239,12 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         if (!s_show)
             continue;
 
+        // 50 is maximum player count sent to client
+        // Who is supposed to filter players and return the first 50 players along with total matching players count
+        // Lets scan through even if we're above 50 results to get proper total count -- @Rikub
+        if ((++totalcount) >= 50)
+            continue;
+
         data << pname;                                      // player name
         data << gname;                                      // guild name
         data << uint32(lvl);                                // player level
@@ -247,14 +253,12 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         data << uint8(gender);                              // player gender
         data << uint32(pzoneid);                            // player zone id
 
-        // 50 is maximum player count sent to client
-        if ((++clientcount) == 50)
-            break;
+        ++clientcount;
     }
 
-    uint32 count = m.size();
+
     data.put(0, clientcount);                               // insert right count, listed count
-    data.put(4, count > 50 ? count : clientcount);          // insert right count, online count
+    data.put(4, totalcount);                                // insert right count, online count
 
     SendPacket(&data);
     DEBUG_LOG("WORLD: Send SMSG_WHO Message");

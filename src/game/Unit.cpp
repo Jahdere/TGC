@@ -526,7 +526,20 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
 	uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
 	float chance = float(damage) / max_dmg * 100.0f;
 	if (roll_chance_f(chance))
-		RemoveSpellsCausingAura(auraType, GetSpellAuraHolder(47168));	//Can't break Improved Wing Clip (hunt) @Kordbc
+	{
+		for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+		{
+			// Damage breakable auras type spells shouldn't break when procFlags == 0 -- @Rikub
+			if ((*iter)->GetSpellProto()->procFlags == 0)
+			{
+				++iter;
+				continue;
+			}
+
+			RemoveAurasDueToSpell((*iter)->GetId());
+			iter = m_modAuras[auraType].begin();
+		}
+	}
 }
 
 void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
@@ -630,7 +643,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 	// Get in CombatState
 	if (pVictim != this && damagetype != DOT)
 	{
-		SetInCombatWith(pVictim);
+		// No threat spells shouldn't put caster in combat -- @Rikub
+		if (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+			SetInCombatWith(pVictim);
 		pVictim->SetInCombatWith(this);
 
 		if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -1400,7 +1415,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
 	{
 		// physical damage => armor
 		// Bloodboil don't care about armor
-		if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL && spellInfo->id != 42005)
+		if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL && spellInfo->Id != 42005)
 			damage = CalcArmorReducedDamage(pVictim, damage);
 	}
 	else
@@ -2835,7 +2850,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 			return SPELL_MISS_PARRY;
 	}
 
-	if (this->GetTypeId() == TYPEID_UNIT && !IsSpellHaveEffect(spell, SPELL_EFFECT_SCHOOL_DAMAGE) && !IsSpellHaveAura(SPELL_AURA_PERIODIC_DAMAGE))
+	if (this->GetTypeId() == TYPEID_UNIT && !IsSpellHaveEffect(spell, SPELL_EFFECT_SCHOOL_DAMAGE) && !IsSpellHaveAura(spell, SPELL_AURA_PERIODIC_DAMAGE))
 	{
 		if (pVictim->IsSpellBlocked(this, spell, attType))
 			return SPELL_MISS_BLOCK;
@@ -2966,6 +2981,15 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 	// Check for immune (use charges)
 	if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell)))
 		return SPELL_MISS_IMMUNE;
+
+	// Pickpocket removes stealth on resist -- @Rikub
+	if (spell->Id == 921)
+	{
+		SpellMissInfo missInfo = MagicSpellHitResult(pVictim, spell);
+		if (missInfo == SPELL_MISS_RESIST)
+			this->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+		return missInfo;
+	}
 
 	// Try victim reflect spell
 	if (CanReflect)
@@ -5076,8 +5100,14 @@ bool Unit::IsHostileTo(Unit const* unit) const
 		return true;
 
 	// test pet/charm masters instead pers/charmeds
-	Unit const* testerOwner = GetCharmerOrOwner();
-	Unit const* targetOwner = unit->GetCharmerOrOwner();
+	Unit* testerOwner = GetCharmerOrOwner();
+	Unit* targetOwner = unit->GetCharmerOrOwner();
+
+	// Go deeper if necessary (Fire Elemental is owned by Fire Elemental Totem which is owned by player) -- @Rikub
+	if (testerOwner)
+		testerOwner = testerOwner->GetCharmerOrOwnerOrSelf();
+	if (targetOwner)
+		targetOwner = targetOwner->GetCharmerOrOwnerOrSelf();
 
 	// always hostile to owner's enemy
 	if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -5188,8 +5218,14 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 		return false;
 
 	// test pet/charm masters instead pers/charmeds
-	Unit const* testerOwner = GetCharmerOrOwner();
-	Unit const* targetOwner = unit->GetCharmerOrOwner();
+	Unit* testerOwner = GetCharmerOrOwner();
+	Unit* targetOwner = unit->GetCharmerOrOwner();
+
+	// Go deeper if necessary (Fire Elemental is owned by Fire Elemental Totem which is owned by player) -- @Rikub
+	if (testerOwner)
+		testerOwner = testerOwner->GetCharmerOrOwnerOrSelf();
+	if (targetOwner)
+		targetOwner = targetOwner->GetCharmerOrOwnerOrSelf();
 
 	// always non-friendly to owner's enemy
 	if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -6167,6 +6203,9 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
 		return false;
 	case SPELL_DAMAGE_CLASS_MAGIC:
 		{
+			for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+				if (spellProto->Effect[i] == SPELL_EFFECT_HEALTH_LEECH) // Health leech cannot crit -- @Rikub
+					return false;
 			if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
 				crit_chance = 0.0f;
 			// For other schools
@@ -7317,8 +7356,8 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 	{
 		// Calculation if target is in front
 
-		// Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-		visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
+		// Visible distance based on stealth value (stealth rank 4 350MOD, 8.5 - 3.5 = 5), base detection is 5y -- @Rikub
+		visibleDistance = 8.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
 
 		// Visible distance is modified by
 		//-Level Diff (every level diff = 1.0f in visible distance)
@@ -7331,8 +7370,15 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
 		//-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
 		// based on wowwiki every 5 mod we have 1 more level diff in calculation
-		visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_DETECT)) - stealthMod) / 5.0f;
-		visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_RANGE ? MAX_PLAYER_STEALTH_DETECT_RANGE : visibleDistance;
+		int32 detectionLevel = 0;
+		Unit::AuraList const& dAuras = u->GetAurasByType(SPELL_AURA_MOD_STEALTH_DETECT);
+		for (Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+			if ((*itr)->GetModifier()->m_miscvalue == 0) // Avoid trap detection aura (2836) -- @Rikub
+				detectionLevel += (*itr)->GetModifier()->m_amount;
+
+		visibleDistance += (detectionLevel - stealthMod) / 5.0f;
+		// Max detection range w/o Shadow sight is 10y -- @Rikub
+		visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE ? MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE : visibleDistance;
 
 		// recheck new distance
 		if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
@@ -9205,7 +9251,7 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
 		GetMotionMaster()->MovementExpired(false);
 		CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
 
-		Unit* caster = IsInWorld() ?  GetMap()->GetUnit(casterGuid) : NULL;
+		Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL;
 
 		GetMotionMaster()->MoveFleeing(caster, time);       // caster==NULL processed in MoveFleeing
 	}
@@ -9213,20 +9259,32 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
 	{
 		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
+		// Restore confused after fleeing end -- @Rikub
+		if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
+		{
+			GetMotionMaster()->MovementExpired(false);
+			GetMotionMaster()->MoveConfused();
+			return;
+		}
+
 		GetMotionMaster()->MovementExpired(false);
 
 		if (GetTypeId() != TYPEID_PLAYER && isAlive())
 		{
 			Creature* c = ((Creature*)this);
-			// restore appropriate movement generator
-			if (getVictim())
-				GetMotionMaster()->MoveChase(getVictim());
-			else
-				GetMotionMaster()->Initialize();
-
 			// attack caster if can
 			if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL)
 				c->AttackedBy(caster);
+
+			// restore appropriate movement generator
+			if (getVictim())
+			{
+				// Set target back
+				SetTargetGuid(getVictim()->GetObjectGuid());
+				GetMotionMaster()->MoveChase(getVictim());
+			}
+			else
+				GetMotionMaster()->Initialize();
 		}
 	}
 
@@ -9248,13 +9306,33 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
 	{
 		RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
+		Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL;
+
+		// Restore fleeing after confused end -- @Rikub
+		if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
+		{
+			GetMotionMaster()->MovementExpired(false);
+			// There is no proper way to keep the original flee caster and time is always 0
+			GetMotionMaster()->MoveFleeing(caster, 0);
+			return;
+		}
+
 		GetMotionMaster()->MovementExpired(false);
 
 		if (GetTypeId() != TYPEID_PLAYER && isAlive())
 		{
+			Creature* c = ((Creature*)this);
+			// attack caster if can
+			if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL)
+				c->AttackedBy(caster);
+			
 			// restore appropriate movement generator
 			if (getVictim())
+			{
+				// Set target back
+				SetTargetGuid(getVictim()->GetObjectGuid());
 				GetMotionMaster()->MoveChase(getVictim());
+			}
 			else
 				GetMotionMaster()->Initialize();
 		}

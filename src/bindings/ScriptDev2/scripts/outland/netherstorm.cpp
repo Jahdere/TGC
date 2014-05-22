@@ -1136,6 +1136,147 @@ bool QuestAccept_npc_captured_vanguard(Player* pPlayer, Creature* pCreature, con
     return true;
 }
 
+/*######
+## npc_dr_boom
+######*/
+
+/*
+SQL implementation :
+DELETE FROM `creature` WHERE `id` = 19692;  -- Remove existing spawned bots
+UPDATE `creature_template` SET `unit_flags` = 4, `ScriptName` = 'npc_dr_boom', `mchanic_immune_mask` = 77660179 WHERE entry = 20284; -- DISABLE_MOVE & add script & CC immunity
+UPDATE `creature_template` SET `ScriptName` = 'npc_boom_bot' WHERE entry = 19692;  -- add script
+*/
+
+enum
+{
+    THROW_DYNAMITE = 35276,
+    BOOM_BOT = 19692
+};
+
+struct npc_dr_boomAI : public Scripted_NoMovementAI
+{
+    npc_dr_boomAI(Creature *pCeature) : Scripted_NoMovementAI(pCeature) { Reset(); }
+
+    uint32 m_uiDynamiteTimer;
+    uint32 m_uiSummonTimer;
+
+    void Reset()
+    {
+        m_uiDynamiteTimer = 3000;
+        m_uiSummonTimer = 500;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        // Spawn boom_bot
+        if (m_uiSummonTimer <= uiDiff)
+        {
+            m_creature->SummonCreature(BOOM_BOT, 3241.334f, 3531.906f, 121.328, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+            m_uiSummonTimer = 500;
+        }
+        else
+            m_uiSummonTimer -= uiDiff;
+
+        // Throw dynamite if close enough
+        if (m_uiDynamiteTimer <= uiDiff)
+        {
+            DoCast(m_creature->getVictim(), THROW_DYNAMITE);
+            m_uiDynamiteTimer = 3000;
+        }
+        else
+            m_uiDynamiteTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_dr_boom(Creature* pCreature)
+{
+    return new npc_dr_boomAI(pCreature);
+}
+
+/*######
+## npc_boom_bot
+######*/
+
+#define SPELL_BOOM 35132
+
+struct npc_boom_botAI : public ScriptedAI
+{
+    npc_boom_botAI(Creature *pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    bool m_reachedDestination;
+    uint32 m_uiBoomTimer;
+    uint32 m_uiEndTimer;
+
+    void Reset()
+    {
+        m_reachedDestination = false;
+        m_uiBoomTimer = 400;
+        m_uiEndTimer = 1400;
+
+        switch (urand(0, 4))
+        {
+        case 0: m_creature->GetMotionMaster()->MovePoint(0, 3233.412f, 3549.979f, 124.003f); break;
+        case 1: m_creature->GetMotionMaster()->MovePoint(0, 3228.104f, 3546.568f, 123.860f); break;
+        case 2: m_creature->GetMotionMaster()->MovePoint(0, 3223.539f, 3540.896f, 123.601f); break;
+        case 3: m_creature->GetMotionMaster()->MovePoint(0, 3221.414f, 3533.541f, 122.821f); break;
+        case 4: m_creature->GetMotionMaster()->MovePoint(0, 3222.225f, 3525.337f, 121.795f); break;
+        }
+    }
+
+    void AttackedBy(Unit* pWho) {}
+    void AttackStart(Unit* pWho) {}
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        // Set off the bomb as soon as we stopped (reached destination || close to player || got cc'ed)
+        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
+        {
+            m_creature->StopMoving();
+            m_reachedDestination = true;
+        }
+
+        if (!m_reachedDestination)
+            return;
+
+        // Fire style visual + aoe damage
+        if (m_uiBoomTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_BOOM) == CAST_OK)
+                m_uiBoomTimer = 10000; // Will be despawned by then
+        }
+        else
+            m_uiBoomTimer -= uiDiff;
+
+        // Death animation
+        if (m_uiEndTimer <= uiDiff)
+        {
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_uiEndTimer = 10000; // Will be despawned by then
+        }
+        else
+            m_uiEndTimer -= uiDiff;
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        // Boom if player gets too close
+        if (pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 2.0f))
+            m_creature->GetMotionMaster()->MoveIdle(); // Reset movement, UpdateAI will handle the rest
+
+        ScriptedAI::MoveInLineOfSight(pWho);
+    }
+};
+
+CreatureAI* GetAI_npc_boom_bot(Creature* pCreature)
+{
+    return new npc_boom_botAI(pCreature);
+}
+
 void AddSC_netherstorm()
 {
     Script* pNewScript;
@@ -1186,5 +1327,15 @@ void AddSC_netherstorm()
     pNewScript->Name = "npc_captured_vanguard";
     pNewScript->GetAI = &GetAI_npc_captured_vanguard;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_captured_vanguard;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dr_boom";
+    pNewScript->GetAI = &GetAI_npc_dr_boom;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_boom_bot";
+    pNewScript->GetAI = &GetAI_npc_boom_bot;
     pNewScript->RegisterSelf();
 }

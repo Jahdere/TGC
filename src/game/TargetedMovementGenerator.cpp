@@ -51,7 +51,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
             owner.GetPosition(x, y, z);
         }
-        else if (!i_offset)
+        else if (!i_offset && !i_angle)
         {
             // to nearest contact position
             i_target->GetContactPoint(&owner, x, y, z);
@@ -141,6 +141,14 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
             targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowed_dist);
         else
             targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowed_dist);
+
+        // If we have a following angle, the followed object isn't targeting us and its orientation changed a lot -- @Rikub
+        if (!targetMoved && i_angle && i_target->GetTargetGuid() != owner.GetObjectGuid()
+            && fabs(i_target->GetOrientation() - i_targetAngle) > M_PI_F / 3) // => 120° arc
+        {
+            i_targetAngle = i_target->GetOrientation();
+            targetMoved = true;
+        }
     }
 
     if (m_speedChanged || targetMoved)
@@ -148,7 +156,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     if (owner.movespline->Finalized())
     {
-        if (i_angle == 0.f && !owner.HasInArc(0.01f, i_target.getTarget()))
+        if (!owner.HasInArc(0.01f, i_target.getTarget()))
             owner.SetInFront(i_target.getTarget());
 
         if (!i_targetReached)

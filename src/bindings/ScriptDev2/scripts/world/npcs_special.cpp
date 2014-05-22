@@ -1175,6 +1175,80 @@ bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, 
     return false;
 }
 
+/*######
+## npc_training_dummy
+######*/
+
+struct pAttackMap
+{
+    pAttackMap() : guid(0), timer(0) { }
+    uint64 guid;
+    uint32 timer;
+};
+
+struct MANGOS_DLL_DECL npc_training_dummyAI : public Scripted_NoMovementAI
+{
+    npc_training_dummyAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature){}
+
+    std::map<uint64, pAttackMap*> AttackMap;
+    uint32 m_secondTimer;
+
+    void Reset(){}
+
+    void DamageTaken(Unit* pDealer, uint32& uiDamage)
+    {
+        uint64 guid = pDealer->GetObjectGuid();
+        pAttackMap *data = AttackMap[guid];
+
+        if (!data)
+        {
+            data = new pAttackMap();
+            AttackMap[guid] = data;
+            data->guid = guid;
+        }
+        data->timer = 6000;
+    }
+
+    void UpdateAI(const uint32 uiDiff)
+    {
+        if (m_secondTimer <= uiDiff)
+        {
+            m_secondTimer = 1000;
+            for (std::map<uint64, pAttackMap*>::iterator itr = AttackMap.begin(); itr != AttackMap.end(); ++itr)
+            {
+                if (itr->second->timer <= m_secondTimer)
+                {
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(ObjectGuid(itr->second->guid)))
+                        pPlayer->CombatStopWithPets(true);
+                    AttackMap.erase(itr->second->guid);
+                    delete itr->second;
+                }
+                else
+                    itr->second->timer -= m_secondTimer;
+
+                if (AttackMap.empty())
+                {
+                    EnterEvadeMode();
+                    m_creature->SetHealth(m_creature->GetMaxHealth());
+                    break;
+                }
+            }
+        }
+        else
+            m_secondTimer -= uiDiff;
+
+       if (m_creature->GetHealthPercent() < 10.0f && m_creature->isInCombat()) // allow players using finishers
+           m_creature->SetHealth(m_creature->GetMaxHealth() / 5);
+
+       m_creature->SetTargetGuid(ObjectGuid()); // prevent from rotating
+    }
+};
+
+CreatureAI* GetAI_npc_training_dummy(Creature* pCreature)
+{
+    return new npc_training_dummyAI(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* pNewScript;
@@ -1227,5 +1301,10 @@ void AddSC_npcs_special()
     pNewScript->Name = "npc_redemption_target";
     pNewScript->GetAI = &GetAI_npc_redemption_target;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_redemption_target;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_training_dummy";
+    pNewScript->GetAI = &GetAI_npc_training_dummy;
     pNewScript->RegisterSelf();
 }

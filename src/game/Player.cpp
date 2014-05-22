@@ -6759,9 +6759,6 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
     }
 
     uint32 armor = proto->Armor;
-    // Add armor bonus from ArmorDamageModifier if > 0
-    if (proto->ArmorDamageModifier > 0)
-        armor += uint32(proto->ArmorDamageModifier);
 
     if (armor)
     {
