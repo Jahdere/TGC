@@ -98,7 +98,7 @@ enum
     SPELL_EXPLODE_2                     = 36373,
     //SPELL_EXPLODE_3                   = 36375,
     //SPELL_EXPLODE_4                   = 36376,
-    //SPELL_KAEL_STUN                   = 36185,            // purpose unk
+    SPELL_KAEL_STUN                     = 36185,            // purpose unk
     SPELL_FULLPOWER                     = 36187,
     SPELL_GRAVITY_LAPSE                 = 35941,
     SPELL_GRAVITY_LAPSE_KNOCKBACK       = 34480,            // cast by players - damage effect
@@ -208,6 +208,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     uint8 m_uiGravityIndex;
 
     uint32 m_uiPhaseTimer;
+    uint32 m_uiFullPowerTimer
     uint8 m_uiPhase;
     uint8 m_uiPhaseSubphase;
     uint8 m_uiCountBeamer;
@@ -218,6 +219,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         m_uiPhase                   = PHASE_0_NOT_BEGUN;
         m_uiPhaseTimer              = 23000;
         m_uiPhaseSubphase           = 0;
+        m_uiFullPowerTimer          = 0;
 
         // Spells
         m_uiFireballTimer           = urand(1000, 3000);
@@ -368,6 +370,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             }
             else if (m_uiPhase == PHASE_6_FLYING)
             {
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
                 m_creature->InterruptNonMeleeSpells(false);
@@ -603,6 +606,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                         DoScriptText(SAY_PHASE5_NUTS, m_creature);
 
                         SetCombatMovement(false);
+                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         m_creature->GetMotionMaster()->Clear();
                         m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aCenterPos[0], aCenterPos[1], aCenterPos[2]);
 
@@ -704,12 +708,30 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                                 m_pInstance->DoUseDoorOrButton(GO_BRIDGE_WINDOW);
                             }
                             // Note: also Kael casts some other unk spells here
-                            m_uiPhaseTimer = 5000;
+                            m_creature->RemoveAurasDueToSpell(SPELL_GAIN_POWER);
+                            DoCastSpellIfCan(m_creature, SPELL_KAEL_STUN, CAST_TRIGGERED)
+                            m_uiFullPowerTimer = 3000;
                             m_uiExplodeTimer = 0;
                         }
                     }
                     else
                         m_uiExplodeTimer -= uiDiff;
+                }
+
+                if (m_uiFullPowerTimer)
+                {
+                    if (m_uiFullPowerTimer <= uiDiff)
+                    {
+                        m_creature->RemoveAurasDueToSpell(SPELL_KAEL_STUN);
+                        m_creature->InterruptNonMeleeSpells(false);
+                        if(DoCastSpellIfCan(m_creature, SPELL_FULLPOWER) == CAST_OK)
+                        {
+                            m_uiPhaseTimer = 2000
+                            m_uiFullPowerTimer = 0;
+                        }
+                    }
+                    else
+                        m_uiFullPowerTimer -= uiDiff;
                 }
 
                 if (m_uiPhaseTimer)
