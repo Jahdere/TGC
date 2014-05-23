@@ -371,6 +371,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             else if (m_uiPhase == PHASE_6_FLYING)
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_creature->RemoveAurasDueToSpell(SPELL_FULLPOWER);
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
                 m_creature->InterruptNonMeleeSpells(false);
