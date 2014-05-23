@@ -216,12 +216,12 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
         // Spells
         m_uiFireballTimer           = urand(1000, 3000);
-        m_uiArcaneDisruptionTimer   = 45000;
+        m_uiArcaneDisruptionTimer   = 20000;
         m_uiPhoenixTimer            = 50000;
         m_uiFlameStrikeTimer        = 30000;
 
         m_uiShockBarrierTimer       = 60000;
-        m_uiMindControlTimer        = 40000;
+        m_uiMindControlTimer        = 25000;
         m_uiPyroblastTimer          = 0;
         m_uiExplodeTimer            = 0;
 
@@ -234,6 +234,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         SetCombatMovement(true);
+        m_creature->SetObjectScale(1.0f);
     }
 
     void GetAIInformation(ChatHandler& reader)
