@@ -1110,7 +1110,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
         if (m_uiBombTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BOMB) == CAST_OK)
-                m_uiBombTimer = 25000;
+                m_uiBombTimer = urand(5000, 8000);
         }
         else
             m_uiBombTimer -= uiDiff;
@@ -1120,13 +1120,16 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_REMOTE_TOY) == CAST_OK)
-                    m_uiRemoteToyTimer = urand(10000, 15000);
+                    m_uiRemoteToyTimer = urand(10000, 20000);
             }
         }
         else
             m_uiRemoteToyTimer -= uiDiff;
 
-        DoMeleeAttackIfReady();
+        if (m_creature->IsWithinDistInMap(m_creature->getVictim(), 7.0f))
+            DoMeleeAttackIfReady();
+        else
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_BOMB);
     }
 };
 
