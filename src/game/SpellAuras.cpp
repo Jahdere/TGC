@@ -1376,8 +1376,18 @@ void Aura::TriggerSpell()
 							triggerTarget->CastSpell(triggerTarget, spell_id, true, NULL, this, casterGUID);
 						return;
 					}
-					//                    // Gravity Lapse
-					//                    case 34480: break;
+				case 34480:                             // Gravity Lapse
+					{
+						Unit* caster = GetCaster();
+
+						if(triggerTarget->GetTypeId() != TYPEID_PLAYER || !caster || !triggerTarget->isAlive())
+							return;
+
+						if (triggerTarget->GetPositionZ() - m_creature->GetMap()->GetHeight(triggerTarget->GetPositionX(), triggerTarget->GetPositionY(), triggerTarget->GetPositionZ()) < 0.1f )
+							((Player*)unitTarget)->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[EFFECT_INDEX_0]) / 10, float(damage) / 10);
+
+						return;
+					}
 					//                    // Tornado
 					//                    case 34683: break;
 					//                    // Frostbite Rotate
