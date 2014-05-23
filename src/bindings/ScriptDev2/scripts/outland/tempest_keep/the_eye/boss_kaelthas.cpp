@@ -106,6 +106,9 @@ enum
     SPELL_NETHER_BEAM                   = 35869,            // triggers 35873 on target
     SPELL_NETHER_VAPOR_SUMMON           = 35865,            // script effect - probably related to 35879
 
+    //Reset spell
+    SPELL_REMOVE_ENCHANTS_WEAPON        = 39497,            // trigger 39498, 39499, 39500, 39501, 39502, 39503, 39504
+
     // ***** Advisors spells ********
     //Thaladred the Darkener spells
     SPELL_PSYCHIC_BLOW                  = 36966,
