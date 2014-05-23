@@ -554,11 +554,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 {
                     if (m_uiFireballTimer < uiDiff)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_FIREBALL, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_FIREBALL) == CAST_OK)
-                                m_uiFireballTimer = 5000;
-                        }
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+                            m_uiFireballTimer = 5000;
                     }
                     else
                         m_uiFireballTimer -= uiDiff;
