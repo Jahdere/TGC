@@ -269,7 +269,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             m_creature->AddThreat(pWho);
             m_creature->SetInCombatWith(pWho);
             pWho->SetInCombatWith(m_creature);
-            DoStartMovement(pWho, 25.0f);
+            DoStartMovement(pWho);
         }
     }
 
