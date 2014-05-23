@@ -134,12 +134,16 @@ enum
     SPELL_BURN                          = 36720,
     SPELL_EMBER_BLAST                   = 34341,
     SPELL_REBIRTH                       = 35369,
+    // Beam
+    SPELL_BEAM_EFFECT_1                 = 36089,
+    SPELL_BEAM_EFFECT_2                 = 36090,
 
     // ***** Creature Entries ********
     NPC_FLAME_STRIKE_TRIGGER            = 21369,
     NPC_PHOENIX                         = 21362,
     NPC_PHOENIX_EGG                     = 21364,
     NPC_NETHER_VAPOR                    = 21002,
+    NPC_HELPER_BEAM                     = 20602,
 
     // ***** Other ********
     PHASE_0_NOT_BEGUN                   = 0,
@@ -206,6 +210,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     uint32 m_uiPhaseTimer;
     uint8 m_uiPhase;
     uint8 m_uiPhaseSubphase;
+    uint8 m_uiCountBeamer;
 
     void Reset()
     {
@@ -230,6 +235,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         m_uiNetherBeamTimer         = 8000;
         m_uiNetherVaporTimer        = 10000;
         m_uiGravityIndex            = 0;
+
+        m_uiCountBeamer             = 0;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -305,6 +312,14 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
         else if (pSummoned->GetEntry() == NPC_NETHER_VAPOR)
             pSummoned->CastSpell(pSummoned, SPELL_NETHER_VAPOR, false, NULL, NULL, m_creature->GetObjectGuid());
+        else if(pSummoned->GetEntry() == NPC_HELPER_BEAM)
+        {
+            if(m_uiCountBeamer % 2 == 0)
+                pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_1, true);
+            else
+                pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_2, true);
+            m_uiCountBeamer++;
+        }
         // Start combat for Weapons of Phoenix
         else
             pSummoned->SetInCombatWithZone();
@@ -344,7 +359,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         {
             if (m_uiPhase == PHASE_5_WAITING)
             {
-                // ToDo: also start channeling to the giant crystals nearby
+                // ToDo: also start channeling to the giant crystals nearby (core)
+                DoCastSpellIfCan(m_creature, SPELL_GAIN_POWER);
                 m_creature->SetLevitate(true);
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_AIR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 30.0f, false);
                 m_uiPhaseTimer = 0;
@@ -356,7 +372,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 m_creature->SetLevitate(false);
                 m_creature->InterruptNonMeleeSpells(false);
                 m_creature->GetMotionMaster()->Clear();
-                DoStartMovement(m_creature->getVictim(), 25.0f);
+                DoStartMovement(m_creature->getVictim());
                 m_uiShockBarrierTimer = 10000;
                 m_uiPhase = PHASE_7_GRAVITY;
             }
@@ -365,9 +381,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE_2) == CAST_OK)
             {
-                // ToDo: start channeling some additional crystals
+                // ToDo: start channeling some additional crystals (core)
                 // Also it's not very clear which other spells should be used here (which modifies his scale)
-                m_uiExplodeTimer = 8000;
+                m_creature->SetObjectScale(1.5f);
+                m_uiExplodeTimer = 4000;
             }
         }
     }

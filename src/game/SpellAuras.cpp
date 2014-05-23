@@ -1409,9 +1409,13 @@ void Aura::TriggerSpell()
 					{
 						case 1:
 							trigger_spell_id = 36364;
+							triggerTarget->SummonCreature(20602, 799.773254f, 38.516415f, 99.583954f, TEMPSUMMON_TIMED_DESPAWN, 16000);
+							triggerTarget->SummonCreature(20602, 800.079895f, -39.885204f, 99.583969f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 16000);
 							break;
 						case 2:
 							trigger_spell_id = 36370;
+							triggerTarget->SummonCreature(20602, 844.280334f, 6.207827f, 66.850929f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000);
+							triggerTarget->SummonCreature(20602, 843.770447f, -7.713974f, 67.301178f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000);
 							break;
 						case 3:
 							trigger_spell_id = 36371;
