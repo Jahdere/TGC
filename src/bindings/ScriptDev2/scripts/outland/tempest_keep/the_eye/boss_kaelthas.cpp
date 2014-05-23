@@ -1186,11 +1186,11 @@ struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
     {
         m_bFakeDeath = true;
 
+        m_creature->RemoveAllAurasOnDeath();
         m_creature->InterruptNonMeleeSpells(false);
         m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
-        m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -1227,7 +1227,7 @@ struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
     {
         // Self kill if the egg is killed
         if (m_bFakeDeath)
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->ForcedDespawn();
     }
 
     void UpdateAI(const uint32 uiDiff)
@@ -1242,7 +1242,7 @@ struct MANGOS_DLL_DECL mob_phoenix_tkAI : public ScriptedAI
         if (m_uiCycleTimer < uiDiff)
         {
             //spell Burn should possible do this, but it doesn't, so do this for now.
-            uint32 uiDmg = urand(4500, 5500);
+            uint32 uiDmg = m_creature->GetMaxHealth()*.05f;
             if (uiDmg > m_creature->GetHealth())
                 DoSetFakeDeath();
             else
