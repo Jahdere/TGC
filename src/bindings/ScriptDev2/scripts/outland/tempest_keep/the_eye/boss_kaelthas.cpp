@@ -993,36 +993,44 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
         DoScriptText(SAY_CAPERNIAN_DEATH, m_creature);
     }
 
+    bool SelectHostileTarget()
+    {
+        Unit* pTarget = NULL;
+
+        if (!m_creature->getThreatManager().isThreatListEmpty())
+            pTarget = m_creature->getThreatManager().getHostileTarget();
+
+        if (pTarget)
+        {
+            if (pTarget->HasAura(SPELL_CONFLAGRATION) && !pTarget->HasAura(36480)) //37019 -> Aura triggered by SPELL_CONFLAGRATION @Kordbc 36480 -> Baton Immune
+            {
+                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+                for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                {
+                    if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    {
+                        if (pNewTarget->GetTypeId() == TYPEID_PLAYER && pNewTarget != pTarget)
+                        {
+                            AttackStart(pNewTarget);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Will call EnterEvadeMode if fit
+        return m_creature->SelectHostileTarget();
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         // Don't use abilities during fake death
         if (m_bFakeDeath)
             return;
-
-        if (m_uiFireballTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAPERNIAN_FIREBALL) == CAST_OK)
-                m_uiFireballTimer = 4000;
-        }
-        else
-            m_uiFireballTimer -= uiDiff;
-
-        if (m_uiConflagrationTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
-
-            if (pTarget && m_creature->IsWithinDistInMap(pTarget, 30.0f))
-                DoCastSpellIfCan(pTarget, SPELL_CONFLAGRATION);
-            else
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CONFLAGRATION);
-
-            m_uiConflagrationTimer = urand(10000, 15000);
-        }
-        else
-            m_uiConflagrationTimer -= uiDiff;
 
         if (m_uiArcaneExplosionTimer < uiDiff)
         {
@@ -1034,6 +1042,28 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
         }
         else
             m_uiArcaneExplosionTimer -= uiDiff;
+
+        if (m_uiConflagrationTimer < uiDiff)
+        {
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CONFLAGRATION, SELECT_FLAG_PLAYER);
+
+            if (pTarget && m_creature->IsWithinDistInMap(pTarget, 30.0f))
+                DoCastSpellIfCan(pTarget, SPELL_CONFLAGRATION);
+            else
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CONFLAGRATION);
+
+            m_uiConflagrationTimer = urand(10000, 15000);
+        }
+        else
+            m_uiConflagrationTimer -= uiDiff;
+
+        if (m_uiFireballTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAPERNIAN_FIREBALL) == CAST_OK)
+                m_uiFireballTimer = 4000;
+        }
+        else
+            m_uiFireballTimer -= uiDiff;
 
         //Do NOT deal any melee damage.
     }
