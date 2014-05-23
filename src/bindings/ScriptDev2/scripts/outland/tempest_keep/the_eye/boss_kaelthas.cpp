@@ -537,17 +537,42 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
                 if (m_uiGravityExpireTimer)
                 {
+                    if (m_uiNetherVaporTimer)
+                    {
+                        if (m_uiNetherVaporTimer <= uiDiff)
+                        {
+                            if (DoCastSpellIfCan(m_creature, SPELL_NETHER_VAPOR_SUMMON) == CAST_OK)
+                                m_uiNetherVaporTimer = 0;
+                        }
+                        else
+                            m_uiNetherVaporTimer -= uiDiff;
+                    }
+
                     if (m_uiNetherBeamTimer < uiDiff)
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_NETHER_BEAM) == CAST_OK)
-                            m_uiNetherBeamTimer = urand(2000, 4000);
+                            m_uiNetherBeamTimer = 3000;
                     }
                     else
                         m_uiNetherBeamTimer -= uiDiff;
 
+                    if (m_uiShockBarrierTimer < uiDiff)
+                    {
+                        if(!m_creature->hasAura(SPELL_SHOCK_BARRIER))
+                        {
+                            if(DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED) == CAST_OK)
+                                m_uiShockBarrierTimer = 2000;
+                        }
+                    }
+                    else
+                        m_uiShockBarrierTimer -= uiDiff;
+
                     // Switch to the other spells after gravity lapse expired
                     if (m_uiGravityExpireTimer <= uiDiff)
+                    {
                         m_uiGravityExpireTimer = 0;
+                        m_uiFireballTimer = 5000;
+                    }
                     else
                         m_uiGravityExpireTimer -= uiDiff;
                 }
@@ -658,33 +683,16 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                         {
                             DoScriptText(urand(0, 1) ? SAY_GRAVITYLAPSE1 : SAY_GRAVITYLAPSE2, m_creature);;
                             m_uiGravityIndex       = 0;
-                            m_uiNetherBeamTimer    = 8000;
-                            m_uiNetherVaporTimer   = 4000;
+                            m_uiNetherBeamTimer    = 2000;
+                            m_uiNetherVaporTimer   = 1000;
                             m_uiGravityExpireTimer = 30000;
-                            m_uiGravityLapseTimer  = 90000;
+                            m_uiGravityLapseTimer  = 60000;
+                            m_uiShockBarrierTimer  = 2000;
+                            DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED);
                         }
                     }
                     else
                         m_uiGravityLapseTimer -= uiDiff;
-
-                    if (m_uiShockBarrierTimer < uiDiff)
-                    {
-                        if (DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER) == CAST_OK)
-                            m_uiShockBarrierTimer = 20000;
-                    }
-                    else
-                        m_uiShockBarrierTimer -= uiDiff;
-
-                    if (m_uiNetherVaporTimer)
-                    {
-                        if (m_uiNetherVaporTimer <= uiDiff)
-                        {
-                            if (DoCastSpellIfCan(m_creature, SPELL_NETHER_VAPOR_SUMMON) == CAST_OK)
-                                m_uiNetherVaporTimer = 0;
-                        }
-                        else
-                            m_uiNetherVaporTimer -= uiDiff;
-                    }
                 }
             }
             // ***** Phase 5 - transition ********
