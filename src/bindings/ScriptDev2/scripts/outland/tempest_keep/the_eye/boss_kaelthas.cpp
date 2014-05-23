@@ -1117,7 +1117,7 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
 
         if (m_uiRemoteToyTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_REMOTE_TOY, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_REMOTE_TOY) == CAST_OK)
                     m_uiRemoteToyTimer = urand(10000, 20000);
