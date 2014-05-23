@@ -1404,8 +1404,21 @@ void Aura::TriggerSpell()
 					//                    case 36061: break;
 					//                    // Professor Dabiri Talks
 					//                    case 36064: break;
-					//                    // Kael Gaining Power
-					//                    case 36091: break;
+				case 36091:               // Kael Gaining Power
+					switch(GetAuraTicks())
+					{
+						case 1:
+							trigger_spell_id = 36364;
+							break;
+						case 2:
+							trigger_spell_id = 36370;
+							break;
+						case 3:
+							trigger_spell_id = 36371;
+							break;
+						default:break;    // TODO : check if need to remove aura 36371
+					}
+					break;
 					//                    // They Must Burn Bomb Aura
 					//                    case 36344: break;
 					//                    // They Must Burn Bomb Aura (self)
