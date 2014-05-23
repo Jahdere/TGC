@@ -352,6 +352,21 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 						damage = damage * unitTarget->GetMaxHealth() / 100;
 						break;
 					}
+				case 35873:
+					{
+						uint32 count = 0;
+						for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+						{
+							if(ihit->targetGUID != unitTarget->GetObjectGuid())
+								++count;
+							else
+								break;									
+						}
+
+						if(count)
+							damage = damage * ( count * 2);
+						break;
+					}
 					// Shadow Inferno @Kordbc
 				case 39646:
 					{
@@ -1299,7 +1314,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
 						return;
 
-					((Player*)unitTarget)->DestroyItemCount(m_spellInfo->EffectMiscValue[eff_idx], 1, true);
+					((Player*)unitTarget)->DestroyItemCount(uint32(m_spellInfo->Reagent), 1, true);
 					return;
 				}
 			case 39635:                                 // Throw Glaive (first)
@@ -5449,6 +5464,32 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 						m_caster->GetNearPoint(m_caster, x, y, z, 0, 5.0f, M_PI_F * .5f * i + M_PI_F * .25f);
 						m_caster->SummonCreature(21002, x, y, z, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
 					}
+					return;
+				}
+			case 35869:                                 // Nether beam
+				{
+					if(!unitTarget)
+						return;
+
+					uint8 countNetherBeam = 0;
+					Map::PlayerList const& lPlayers = m_caster->GetMap()->GetPlayers();
+					if (!lPlayers.isEmpty())
+					{
+						for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+						{
+							if(Unit* pTarget = m_caster->GetMap()->GetUnit((itr->getSource())->GetObjectGuid()))
+							{
+								if(pTarget->isAlive())
+								{
+									m_caster->CastSpell(pTarget, 35873, true);
+									countNetherBeam++;
+								}
+							}
+							if(countNetherBeam == 5)           // Max 5 Target
+								break;
+						}
+					}
+
 					return;
 				}
 			case 37431:                                 // Spout
