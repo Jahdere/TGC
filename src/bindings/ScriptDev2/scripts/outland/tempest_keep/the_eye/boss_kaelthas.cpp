@@ -256,6 +256,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
+
+            DoCastSpellIfCan(m_creature, SPELL_REMOVE_ENCHANTS_WEAPON, CAST_TRIGGERED);
         }
     }
 
@@ -292,6 +294,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
+
+        DoCastSpellIfCan(m_creature, SPELL_REMOVE_ENCHANTS_WEAPON, CAST_TRIGGERED);
     }
 
     void JustSummoned(Creature* pSummoned)
