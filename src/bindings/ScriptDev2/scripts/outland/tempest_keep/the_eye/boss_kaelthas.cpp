@@ -1098,6 +1098,28 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
         DoScriptText(SAY_TELONICUS_DEATH, m_creature);
     }
 
+    void JustReachedHome()
+    {
+        CleanRemoteToy();
+
+        advisor_base_ai::JustReachedHome();
+    }
+
+    // This function remove all remote toy to prevent fail aggro during reset
+    void CleanRemoteToy()
+    {
+        Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
+        if (!lPlayers.isEmpty())
+        {
+            for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            {
+                if(Player* pPlayer = itr->getSource())
+                    if(pPlayer->hasAura(SPELL_REMOTE_TOY))
+                        pPlayer->RemoveAurasDueToSpell(SPELL_REMOTE_TOY);
+            }
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff)
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
