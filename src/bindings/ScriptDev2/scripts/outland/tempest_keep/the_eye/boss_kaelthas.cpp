@@ -784,11 +784,11 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
         uiDamage = 0;
         m_bFakeDeath = true;
 
+        m_creature->RemoveAllAurasOnDeath();
         m_creature->InterruptNonMeleeSpells(true);
         m_creature->SetHealth(0);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
-        m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -844,7 +844,8 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_THALADRED_AGGRO, m_creature);
-        m_creature->TauntApply(pWho);
+        m_creature->SetWalk(true);
+        m_creature->FixateTarget(pWho);
     }
 
     void JustDied(Unit* pKiller)
@@ -863,13 +864,12 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
 
         if (m_uiGazeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, (const SpellEntry*)0, SELECT_FLAG_PLAYER))
             {
-                DoResetThreat();
-                m_creature->TauntApply(pTarget);
+                m_creature->FixateTarget(pTarget);
                 DoScriptText(EMOTE_THALADRED_GAZE, m_creature, pTarget);
+                m_uiGazeTimer = 10000;
             }
-            m_uiGazeTimer = 10000;
         }
         else
             m_uiGazeTimer -= uiDiff;
