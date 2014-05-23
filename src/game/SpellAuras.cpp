@@ -1376,8 +1376,19 @@ void Aura::TriggerSpell()
 							triggerTarget->CastSpell(triggerTarget, spell_id, true, NULL, this, casterGUID);
 						return;
 					}
-					//                    // Gravity Lapse
-					//                    case 34480: break;
+				case 34480:                             // Gravity Lapse
+					{
+						if(triggerTarget->GetTypeId() != TYPEID_PLAYER || !triggerTarget->isAlive())
+							return;
+
+						if (triggerTarget->GetPositionZ() - triggerTarget->GetMap()->GetHeight(triggerTarget->GetPositionX(), triggerTarget->GetPositionY(), triggerTarget->GetPositionZ()) < 0.1f )
+						{
+							((Player*)triggerTarget)->KnockBackFrom(triggerTarget, 0.0f, float(urand(250,500) / 10));
+							triggerTarget->CastSpell(triggerTarget, 39432, true);
+						}
+
+						return;
+					}
 					//                    // Tornado
 					//                    case 34683: break;
 					//                    // Frostbite Rotate
@@ -1407,20 +1418,20 @@ void Aura::TriggerSpell()
 				case 36091:               // Kael Gaining Power
 					switch(GetAuraTicks())
 					{
-						case 1:
-							trigger_spell_id = 36364;
-							triggerTarget->SummonCreature(20602, 799.773254f, 38.516415f, 99.583954f, TEMPSUMMON_TIMED_DESPAWN, 16000);
-							triggerTarget->SummonCreature(20602, 800.079895f, -39.885204f, 99.583969f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 16000);
-							break;
-						case 2:
-							trigger_spell_id = 36370;
-							triggerTarget->SummonCreature(20602, 844.280334f, 6.207827f, 66.850929f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000);
-							triggerTarget->SummonCreature(20602, 843.770447f, -7.713974f, 67.301178f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000);
-							break;
-						case 3:
-							trigger_spell_id = 36371;
-							break;
-						default:break;    // TODO : check if need to remove aura 36371
+					case 1:
+						trigger_spell_id = 36364;
+						triggerTarget->SummonCreature(20602, 799.773254f, 38.516415f, 99.583954f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 16000);
+						triggerTarget->SummonCreature(20602, 800.079895f, -39.885204f, 99.583969f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 16000);
+						break;
+					case 2:
+						trigger_spell_id = 36370;
+						triggerTarget->SummonCreature(20602, 844.280334f, 6.207827f, 66.850929f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000);
+						triggerTarget->SummonCreature(20602, 843.770447f, -7.713974f, 67.301178f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 12000);
+						break;
+					case 3:
+						trigger_spell_id = 36371;
+						break;
+					default:break;    // TODO : check if need to remove aura 36371
 					}
 					break;
 					//                    // They Must Burn Bomb Aura
@@ -4545,6 +4556,9 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
 			if (m_removeMode != AURA_REMOVE_BY_DISPEL)
 				// Cast Wrath of the Plaguebringer if not dispelled
 					target->CastSpell(target, 29214, true, 0, this);
+			return;							
+		case 34480:                                     // remove gravity lapse fly aura
+			target->RemoveAurasDueToSpell(39432);
 			return;
 		case 42783:                                     // Wrath of the Astrom...
 			if (m_removeMode == AURA_REMOVE_BY_EXPIRE && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
