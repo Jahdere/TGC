@@ -208,7 +208,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     uint8 m_uiGravityIndex;
 
     uint32 m_uiPhaseTimer;
-    uint32 m_uiFullPowerTimer
+    uint32 m_uiFullPowerTimer;
     uint8 m_uiPhase;
     uint8 m_uiPhaseSubphase;
     uint8 m_uiCountBeamer;
@@ -306,6 +306,22 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_REMOVE_ENCHANTS_WEAPON, CAST_TRIGGERED);
+        CleanRemoteToy();
+    }
+
+	 // This function remove all remote toy to prevent fail aggro during reset
+    void CleanRemoteToy()
+    {
+        Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
+        if (!lPlayers.isEmpty())
+        {
+            for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            {
+                if(Player* pPlayer = itr->getSource())
+                    if(pPlayer->HasAura(SPELL_REMOTE_TOY))
+                        pPlayer->RemoveAurasDueToSpell(SPELL_REMOTE_TOY);
+            }
+        }
     }
 
     void JustSummoned(Creature* pSummoned)
@@ -317,9 +333,9 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         else if(pSummoned->GetEntry() == NPC_HELPER_BEAM)
         {
             if(m_uiCountBeamer % 2 == 0)
-                pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_1, true);
-            else
                 pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_2, true);
+            else
+                pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_1, true);
             m_uiCountBeamer++;
         }
         // Start combat for Weapons of Phoenix
@@ -336,7 +352,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 DoCastSpellIfCan(m_creature, m_auiSpellSummonWeapon[i], CAST_TRIGGERED);
 
             m_uiPhase      = PHASE_2_WEAPON;
-            m_uiPhaseTimer = 120000;
+            m_uiPhaseTimer = 30000; //120000
         }
     }
 
@@ -362,6 +378,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             if (m_uiPhase == PHASE_5_WAITING)
             {
                 // ToDo: also start channeling to the giant crystals nearby (core)
+                m_creature->SetWalk(true); 
                 DoCastSpellIfCan(m_creature, SPELL_GAIN_POWER);
                 m_creature->SetLevitate(true);
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_AIR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 30.0f, false);
@@ -372,6 +389,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_creature->RemoveAurasDueToSpell(SPELL_FULLPOWER);
+                m_creature->SetWalk(false);
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
                 m_creature->InterruptNonMeleeSpells(false);
@@ -383,12 +401,12 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         }
         if (uiPointId == POINT_ID_AIR)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE_2) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE_2, CAST_TRIGGERED) == CAST_OK)
             {
                 // ToDo: start channeling some additional crystals (core)
                 // Also it's not very clear which other spells should be used here (which modifies his scale)
                 m_creature->SetObjectScale(1.5f);
-                m_uiExplodeTimer = 4000;
+                m_uiExplodeTimer = 5000;
             }
         }
     }
@@ -500,7 +518,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     {
                         DoScriptText(SAY_PHASE3_ADVANCE, m_creature);
                         m_uiPhaseSubphase = 0;
-                        m_uiPhaseTimer    = 180000;
+                        m_uiPhaseTimer    = 30000; // 180000
                         m_uiPhase         = PHASE_3_ADVISOR_ALL;
                     }
                 }
@@ -558,7 +576,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
                     if (m_uiShockBarrierTimer < uiDiff)
                     {
-                        if(!m_creature->hasAura(SPELL_SHOCK_BARRIER))
+                        if(!m_creature->HasAura(SPELL_SHOCK_BARRIER))
                         {
                             if(DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED) == CAST_OK)
                                 m_uiShockBarrierTimer = 2000;
@@ -571,6 +589,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     if (m_uiGravityExpireTimer <= uiDiff)
                     {
                         m_uiGravityExpireTimer = 0;
+                        SetCombatMovement(true);
                         m_uiFireballTimer = 5000;
                     }
                     else
@@ -688,6 +707,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                             m_uiGravityExpireTimer = 30000;
                             m_uiGravityLapseTimer  = 60000;
                             m_uiShockBarrierTimer  = 2000;
+                            SetCombatMovement(false);
                             DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED);
                         }
                     }
@@ -705,7 +725,9 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 {
                     if (m_uiExplodeTimer <= uiDiff)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE) == CAST_OK)
+                        m_creature->RemoveAurasDueToSpell(36371);
+                        m_creature->InterruptNonMeleeSpells(false);
+                        if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED) == CAST_OK)
                         {
                             if (m_pInstance)
                             {
@@ -714,9 +736,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                                 m_pInstance->DoUseDoorOrButton(GO_BRIDGE_WINDOW);
                             }
                             // Note: also Kael casts some other unk spells here
-                            m_creature->RemoveAurasDueToSpell(SPELL_GAIN_POWER);
-                            DoCastSpellIfCan(m_creature, SPELL_KAEL_STUN, CAST_TRIGGERED)
-                            m_uiFullPowerTimer = 3000;
+                            m_uiFullPowerTimer = 5000;
                             m_uiExplodeTimer = 0;
                         }
                     }
@@ -732,7 +752,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                         m_creature->InterruptNonMeleeSpells(false);
                         if(DoCastSpellIfCan(m_creature, SPELL_FULLPOWER) == CAST_OK)
                         {
-                            m_uiPhaseTimer = 2000
+                            m_uiPhaseTimer = 2000;
                             m_uiFullPowerTimer = 0;
                         }
                     }
@@ -756,15 +776,15 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_kael_phase_2(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget)
+bool EffectDummyCreature_kael_phase_2(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    //always check spellid and effectindex
+    // always check spellid and effectindex
     if (uiSpellId == SPELL_KAEL_PHASE_2 && uiEffIndex == EFFECT_INDEX_0)
     {
         if (boss_kaelthasAI* pKaelAI = dynamic_cast<boss_kaelthasAI*>(pCreatureTarget->AI()))
             pKaelAI->AdvisorDefeated(pCaster->GetEntry());
 
-        //always return true when we are handling this spell and effect
+        // always return true when we are handling this spell and effect
         return true;
     }
 
@@ -796,6 +816,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        SetCombatMovement(true);
     }
 
     void JustReachedHome()
@@ -841,6 +862,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        SetCombatMovement(false);
 
         DoCastSpellIfCan(m_creature, SPELL_KAEL_PHASE_2, CAST_TRIGGERED);
     }
@@ -853,6 +875,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             m_creature->GetMotionMaster()->Clear();
+            SetCombatMovement(true);
             if (m_creature->GetEntry() == NPC_CAPERNIAN)
                 DoStartMovement(m_creature->getVictim(), 20.0f);
             else
@@ -889,7 +912,6 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
     void Aggro(Unit* pWho)
     {
         DoScriptText(SAY_THALADRED_AGGRO, m_creature);
-        m_creature->SetWalk(true);
         m_creature->FixateTarget(pWho);
     }
 
@@ -1006,12 +1028,15 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
     uint32 m_uiFireballTimer;
     uint32 m_uiConflagrationTimer;
     uint32 m_uiArcaneExplosionTimer;
+    bool   m_bCanExplosion;
 
     void Reset()
     {
         m_uiFireballTimer        = 2000;
         m_uiConflagrationTimer   = 20000;
         m_uiArcaneExplosionTimer = 5000;
+
+        m_bCanExplosion = false;
 
         advisor_base_ai::Reset();
     }
@@ -1084,6 +1109,34 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
                 if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_BURST) == CAST_OK)
                     m_uiArcaneExplosionTimer = urand(4000, 6000);
             }
+
+            if (m_uiArcaneExplosionTimer < uiDiff)
+            {
+                m_bCanExplosion = false;
+                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+                ThreatList::const_iterator itr = threatList.begin();
+
+                for (itr; itr != threatList.end(); ++itr)
+                {
+                    if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    {
+                        if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDist(m_creature, 10.0f))
+                            m_bCanExplosion = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(m_bCanExplosion)
+                {
+                     if(DoCastSpellIfCan(m_creature, SPELL_ARCANE_BURST) == CAST_OK)
+                         m_uiArcaneExplosionTimer = urand(4000, 6000);
+                }
+                else
+                    m_uiArcaneExplosionTimer = 1000;
+            }
+            else
+                m_uiArcaneExplosionTimer -= uiDiff;
         }
         else
             m_uiArcaneExplosionTimer -= uiDiff;
@@ -1141,28 +1194,6 @@ struct MANGOS_DLL_DECL boss_master_engineer_telonicusAI : public advisor_base_ai
     void JustDied(Unit* pKiller)
     {
         DoScriptText(SAY_TELONICUS_DEATH, m_creature);
-    }
-
-    void JustReachedHome()
-    {
-        CleanRemoteToy();
-
-        advisor_base_ai::JustReachedHome();
-    }
-
-    // This function remove all remote toy to prevent fail aggro during reset
-    void CleanRemoteToy()
-    {
-        Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
-        if (!lPlayers.isEmpty())
-        {
-            for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-            {
-                if(Player* pPlayer = itr->getSource())
-                    if(pPlayer->hasAura(SPELL_REMOTE_TOY))
-                        pPlayer->RemoveAurasDueToSpell(SPELL_REMOTE_TOY);
-            }
-        }
     }
 
     void UpdateAI(const uint32 uiDiff)
