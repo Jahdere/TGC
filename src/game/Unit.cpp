@@ -5936,11 +5936,14 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
 	if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
 		DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
 
-
+	Item* const pWeapon = GetTypeId() == TYPEID_PLAYER ? ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND) : NULL;
 	AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
 	for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
 	{
-		if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
+		// SPELL_ATTR_EX5_MOD_ALL_DAMAGE forces SPELL_AURA_MOD_DAMAGE_PERCENT_DONE on all damage -- @Rikub
+		if ((*i)->GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_MOD_ALL_DAMAGE) && pWeapon && pWeapon->IsFitToSpellRequirements((*i)->GetSpellProto()))
+			DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+		else if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
 			(*i)->GetSpellProto()->EquippedItemClass == -1 &&
 			// -1 == any item class (not wand then)
 			(*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
