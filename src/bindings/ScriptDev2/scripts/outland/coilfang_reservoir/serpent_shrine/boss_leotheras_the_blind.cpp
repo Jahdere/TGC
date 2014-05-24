@@ -47,8 +47,6 @@ enum
     SPELL_CONS_MADNESS      = 37749,                    // charm spell for the players which didn't kill the inner demons during the demon phase
     SPELL_METAMORPHOSIS     = 37673,                    // demon transform spell
 
-	SPELL_NETHER_PROTECTION = 30300,
-
     // Inner demons already scripted in eventAI
     // SPELL_DEMON_ALIGNMENT = 37713,
     // SPELL_SHADOW_BOLT     = 39309,
@@ -177,14 +175,14 @@ struct MANGOS_DLL_DECL boss_leotheras_the_blindAI : public ScriptedAI
 		{
 			if (m_bDemonForm)
 			{
-				if(pTarget->HasAura(SPELL_NETHER_PROTECTION) || !m_creature->IsWithinLOSInMap(pTarget) || !m_creature->IsWithinDistInMap(pTarget, 40.0f))
+				if(pTarget->IsImmunedToDamage(SPELL_SCHOOL_MASK_FIRE) || !m_creature->IsWithinLOSInMap(pTarget) || !m_creature->IsWithinDistInMap(pTarget, 40.0f))
 				{
 					ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
 					for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
 					{
 						if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
 						{
-							if (pNewTarget != pTarget && pNewTarget->GetTypeId() == TYPEID_PLAYER && !pNewTarget->HasAura(SPELL_NETHER_PROTECTION) 
+							if (pNewTarget != pTarget && pNewTarget->GetTypeId() == TYPEID_PLAYER && !pNewTarget->IsImmunedToDamage(SPELL_SCHOOL_MASK_FIRE) 
 								&& m_creature->IsWithinLOSInMap(pNewTarget) && m_creature->IsWithinDistInMap(pNewTarget, 40.0f))
 							{
 									AttackStart(pNewTarget);
