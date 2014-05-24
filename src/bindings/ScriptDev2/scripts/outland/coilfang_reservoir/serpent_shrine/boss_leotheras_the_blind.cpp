@@ -47,6 +47,8 @@ enum
     SPELL_CONS_MADNESS      = 37749,                    // charm spell for the players which didn't kill the inner demons during the demon phase
     SPELL_METAMORPHOSIS     = 37673,                    // demon transform spell
 
+	SPELL_NETHER_PROTECTION = 30300,
+
     // Inner demons already scripted in eventAI
     // SPELL_DEMON_ALIGNMENT = 37713,
     // SPELL_SHADOW_BOLT     = 39309,
@@ -162,6 +164,42 @@ struct MANGOS_DLL_DECL boss_leotheras_the_blindAI : public ScriptedAI
             m_pInstance->SetData(TYPE_LEOTHERAS_EVENT, FAIL);
     }
 
+	// Custom threat management
+	bool SelectHostileTarget()
+	{
+		Unit* pTarget = NULL;
+
+		// No valid fixate target, taunt aura or taunt aura caster is dead, standard target selection
+		if (!m_creature->getThreatManager().isThreatListEmpty())
+			pTarget = m_creature->getThreatManager().getHostileTarget();
+
+		if (pTarget)
+		{
+			if (m_bDemonForm)
+			{
+				if(pTarget->HasAura(SPELL_NETHER_PROTECTION) || !m_creature->IsWithinLOSInMap(pTarget) || !m_creature->IsWithinDistInMap(pTarget, 40.0f))
+				{
+					ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+					for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+					{
+						if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+						{
+							if (pNewTarget != pTarget && pNewTarget->GetTypeId() == TYPEID_PLAYER && !pNewTarget->HasAura(SPELL_NETHER_PROTECTION) 
+								&& m_creature->IsWithinLOSInMap(pNewTarget) && m_creature->IsWithinDistInMap(pNewTarget, 40.0f))
+							{
+									AttackStart(pNewTarget);
+									return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Will call EnterEvadeMode if fit
+		return m_creature->SelectHostileTarget();
+	}
+
     void UpdateAI(const uint32 uiDiff) override
     {
         // Banish the boss before combat
@@ -177,7 +215,7 @@ struct MANGOS_DLL_DECL boss_leotheras_the_blindAI : public ScriptedAI
         }
 
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         if (m_uiFinalFormTimer)
@@ -220,7 +258,6 @@ struct MANGOS_DLL_DECL boss_leotheras_the_blindAI : public ScriptedAI
                         SetCombatMovement(false);
                         m_creature->GetMotionMaster()->Clear();
                         m_creature->GetMotionMaster()->MoveIdle();
-
                         DoResetThreat();
                         m_bDemonForm = true;
 
