@@ -109,7 +109,7 @@ struct MANGOS_DLL_DECL boss_magtheridonAI : public ScriptedAI
     void Reset() override
     {
         m_uiBerserkTimer    = 20 * MINUTE * IN_MILLISECONDS;
-        m_uiQuakeTimer      = 30000;
+        m_uiQuakeTimer      = 43000;
         m_uiBlazeTimer      = urand(10000, 15000);
         m_uiBlastNovaTimer  = 60000;
         m_uiCleaveTimer     = 15000;
@@ -210,37 +210,40 @@ struct MANGOS_DLL_DECL boss_magtheridonAI : public ScriptedAI
                 return;
         }
 
-        if (m_uiQuakeTimer < uiDiff)
+        if(m_uiQuakeTimer)
         {
-            // Workaround for missing spell
-            // Note: this won't really stun the boss, but it won't allow him to use other spells
-            if (!m_uiQuakeCount)
+            if (m_uiQuakeTimer <= uiDiff)
             {
-                SetCombatMovement(false);
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveIdle();
-            }
-
-            if (m_uiQuakeCount < MAX_QUAKE_COUNT)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_QUAKE_KNOCKBACK) == CAST_OK)
+                // Workaround for missing spell
+                // Note: this won't really stun the boss, but it won't allow him to use other spells
+                if (!m_uiQuakeCount)
                 {
-                    m_uiQuakeTimer = 1000;
-                    ++m_uiQuakeCount;
+                    SetCombatMovement(false);
+                    m_creature->GetMotionMaster()->Clear();
+                    m_creature->GetMotionMaster()->MoveIdle();
+                }
+
+                if (m_uiQuakeCount < MAX_QUAKE_COUNT)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_QUAKE_KNOCKBACK) == CAST_OK)
+                    {
+                        m_uiQuakeTimer = 1000;
+                        ++m_uiQuakeCount;
+                    }
+                }
+                else
+                {
+                    SetCombatMovement(true);
+                    m_creature->GetMotionMaster()->Clear();
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+
+                    m_uiQuakeTimer = 0;
+                    m_uiQuakeCount = 0;
                 }
             }
             else
-            {
-                SetCombatMovement(true);
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-
-                m_uiQuakeTimer = 43000;
-                m_uiQuakeCount = 0;
-            }
+                m_uiQuakeTimer -= uiDiff;
         }
-        else
-            m_uiQuakeTimer -= uiDiff;
 
         // don't use other spells during quake
         if (m_uiQuakeCount)
@@ -260,6 +263,7 @@ struct MANGOS_DLL_DECL boss_magtheridonAI : public ScriptedAI
             {
                 DoScriptText(EMOTE_BLASTNOVA, m_creature);
                 m_uiBlastNovaTimer = 60000;
+                m_uiQuakeTimer = 43000;
             }
         }
         else
