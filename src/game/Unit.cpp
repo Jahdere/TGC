@@ -593,6 +593,16 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 			pVictim->SetStandState(UNIT_STAND_STATE_STAND);
 	}
 
+	// remove damage breakable affects on non-environmental damage (including 0 dmg) -- @Rikub
+	if (damagetype <= DOT)
+	{
+		SpellAuraHolder* exceptSelfHolder = spellProto ? pVictim->GetSpellAuraHolder(spellProto->Id) : NULL;
+		if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
+			pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE | AURA_INTERRUPT_FLAG_DAMAGE, exceptSelfHolder);
+		else
+			pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DAMAGE, exceptSelfHolder);
+	}
+
 	if (!damage)
 	{
 		// Rage from physical damage received .
@@ -899,11 +909,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 			}
 		}
 
-		if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
-		{
-			if (!spellProto || !(spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
-				pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
-		}
 		if (pVictim->GetTypeId() != TYPEID_PLAYER)
 		{
 			float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
@@ -933,30 +938,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 			{
 				EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
 				((Player*)this)->DurabilityPointLossForEquipSlot(slot);
-			}
-		}
-
-		// TODO: Store auras by interrupt flag to speed this up.
-		SpellAuraHolderMap& vAuras = pVictim->GetSpellAuraHolderMap();
-		for (SpellAuraHolderMap::const_iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
-		{
-			const SpellEntry* se = i->second->GetSpellProto();
-			next = i; ++next;
-			if (spellProto && spellProto->Id == se->Id) // Not drop auras added by self
-				continue;
-			if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
-			{
-				bool remove = true;
-				if (se->procFlags & (1 << 3))
-				{
-					if (!roll_chance_i(se->procChance))
-						remove = false;
-				}
-				if (remove)
-				{
-					pVictim->RemoveAurasDueToSpell(i->second->GetId());
-					next = vAuras.begin();
-				}
 			}
 		}
 
@@ -4349,11 +4330,11 @@ void Unit::RemoveAurasDueToItemSpell(Item* castItem, uint32 spellId)
 	}
 }
 
-void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
+void Unit::RemoveAurasWithInterruptFlags(uint32 flags, SpellAuraHolder* except)
 {
 	for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
 	{
-		if (iter->second->GetSpellProto()->AuraInterruptFlags & flags)
+		if (iter->second->GetSpellProto()->AuraInterruptFlags & flags && iter->second != except)
 		{
 			RemoveSpellAuraHolder(iter->second);
 			iter = m_spellAuraHolders.begin();
@@ -5955,11 +5936,14 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
 	if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
 		DoneTotalMod *= ((Creature*)this)->GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->rank);
 
-
+	Item* const pWeapon = GetTypeId() == TYPEID_PLAYER ? ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND) : NULL;
 	AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
 	for (AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
 	{
-		if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
+		// SPELL_ATTR_EX5_MOD_ALL_DAMAGE forces SPELL_AURA_MOD_DAMAGE_PERCENT_DONE on all damage -- @Rikub
+		if ((*i)->GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_MOD_ALL_DAMAGE) && pWeapon && pWeapon->IsFitToSpellRequirements((*i)->GetSpellProto()))
+			DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+		else if (((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
 			(*i)->GetSpellProto()->EquippedItemClass == -1 &&
 			// -1 == any item class (not wand then)
 			(*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)

@@ -146,7 +146,7 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 			for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
 			{
 				if(Player* pPlayer = itr->getSource())
-					if(pPlayer->hasAura(SPELL_SHADOW_OF_DEATH))
+					if(pPlayer->HasAura(SPELL_SHADOW_OF_DEATH))
 						pPlayer->RemoveAurasDueToSpell(SPELL_SHADOW_OF_DEATH);
 			}
 		}

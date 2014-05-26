@@ -440,7 +440,7 @@ enum SpellAttributesEx5
     SPELL_ATTR_EX5_UNK13                       = 0x00002000,// 13 haste affects duration (e.g. 8050 since 3.3.3)
     SPELL_ATTR_EX5_UNK14                       = 0x00004000,// 14
     SPELL_ATTR_EX5_UNK15                       = 0x00008000,// 15
-    SPELL_ATTR_EX5_UNK16                       = 0x00010000,// 16
+    SPELL_ATTR_EX5_MOD_ALL_DAMAGE              = 0x00010000,// 16 (only affects protpally One-Handed Weapon Spec)
     SPELL_ATTR_EX5_USABLE_WHILE_FEARED         = 0x00020000,// 17 usable while feared
     SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED       = 0x00040000,// 18 usable while confused
     SPELL_ATTR_EX5_UNK19                       = 0x00080000,// 19
