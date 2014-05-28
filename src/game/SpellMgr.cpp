@@ -845,6 +845,8 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
 				case 36901:                         // Soul Split: Good
 				case 36893:                         // Transporter Malfunction (decrease size case)
 				case 36895:                         // Transporter Malfunction (increase size case)
+				case 41406:                         // Dementia
+				case 41409:                         // Dementia
 					return false;
 				}
 				break;
