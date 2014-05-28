@@ -2335,6 +2335,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 						continue;
 					}
 
+					// Chain heal casted by player can't jump on friendly npc 
+					if (m_caster->GetTypeId() == TYPEID_PLAYER && (*next)->GetTypeId() == TYPEID_UNIT 
+						&& !((*next)->IsPet() && (*next)->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER))
+					{
+						next = tempTargetUnitMap.erase(next);
+						continue;
+					}
+
 					prev = *next;
 					targetUnitMap.push_back(prev);
 					tempTargetUnitMap.erase(next);
