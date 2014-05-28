@@ -309,19 +309,13 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         CleanRemoteToy();
     }
 
-	 // This function remove all remote toy to prevent fail aggro during reset
+    // This function remove all remote toy to prevent fail aggro during reset
     void CleanRemoteToy()
     {
         Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
-        if (!lPlayers.isEmpty())
-        {
-            for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-            {
-                if(Player* pPlayer = itr->getSource())
-                    if(pPlayer->HasAura(SPELL_REMOTE_TOY))
-                        pPlayer->RemoveAurasDueToSpell(SPELL_REMOTE_TOY);
-            }
-        }
+        for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+            if(Player* pPlayer = itr->getSource())
+                pPlayer->RemoveAurasDueToSpell(SPELL_REMOTE_TOY);
     }
 
     void JustSummoned(Creature* pSummoned)
@@ -1121,6 +1115,7 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
                     if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                     {
                         if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDist(m_creature, 10.0f))
+                        {
                             m_bCanExplosion = true;
                             break;
                         }
