@@ -1303,20 +1303,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					((Creature*)unitTarget)->ForcedDespawn(10000);
 					return;
 				}
-			case 39498:                                 //Remove Cosmic Infuser
-			case 39499:                                 //Remove Devastation
-			case 39500:                                 //Remove Infinity Blase
-			case 39501:                                 //Remove Netherstrand Longbow
-			case 39502:                                 //Remove Phaseshift Bulwark
-			case 39503:                                 //Remove Staff of Disintegration
-			case 39504:                                 //Remove Warp Slicer
-				{
-					if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-						return;
-
-					((Player*)unitTarget)->DestroyItemCount(uint32(m_spellInfo->Reagent), 1, true);
-					return;
-				}
 			case 39635:                                 // Throw Glaive (first)
 			case 39849:                                 // Throw Glaive (second)
 				{
@@ -5513,13 +5499,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					if(!unitTarget)
 						return;
 
-					unitTarget->CastSpell(unitTarget, 39498, true);
-					unitTarget->CastSpell(unitTarget, 39499, true);
-					unitTarget->CastSpell(unitTarget, 39500, true);
-					unitTarget->CastSpell(unitTarget, 39501, true);
-					unitTarget->CastSpell(unitTarget, 39502, true);
-					unitTarget->CastSpell(unitTarget, 39503, true);
-					unitTarget->CastSpell(unitTarget, 39504, true);
+					error_log("***** TRY REMOVE WEAPON ****");
+					unitTarget->CastSpell(unitTarget, 39498, false);
+					unitTarget->CastSpell(unitTarget, 39499, false);
+					unitTarget->CastSpell(unitTarget, 39500, false);
+					unitTarget->CastSpell(unitTarget, 39501, false);
+					unitTarget->CastSpell(unitTarget, 39502, false);
+					unitTarget->CastSpell(unitTarget, 39503, false);
+					unitTarget->CastSpell(unitTarget, 39504, false);
+					error_log("***** WEAPON REMOVED ****");
 					return;
 				}
 			case 39835:									// Nidle Spine aoe (Naj'entus) @Kordbc

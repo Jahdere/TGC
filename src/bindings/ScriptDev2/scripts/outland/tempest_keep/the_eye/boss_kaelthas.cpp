@@ -144,6 +144,7 @@ enum
     NPC_PHOENIX_EGG                     = 21364,
     NPC_NETHER_VAPOR                    = 21002,
     NPC_HELPER_BEAM                     = 20602,
+	NPC_LONGBOW                         = 21268,
 
     // ***** Other ********
     PHASE_0_NOT_BEGUN                   = 0,
@@ -212,6 +213,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     uint8 m_uiPhase;
     uint8 m_uiPhaseSubphase;
     uint8 m_uiCountBeamer;
+	uint8 m_uiCountPyro;
 
     void Reset()
     {
@@ -239,11 +241,15 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         m_uiGravityIndex            = 0;
 
         m_uiCountBeamer             = 0;
+		m_uiCountPyro               = 0;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         SetCombatMovement(true);
         m_creature->SetObjectScale(1.0f);
+
+		DoCastSpellIfCan(m_creature, SPELL_REMOVE_ENCHANTS_WEAPON, CAST_TRIGGERED);
+        CleanRemoteToy();
     }
 
     void GetAIInformation(ChatHandler& reader)
@@ -304,9 +310,6 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KAELTHAS, FAIL);
-
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_ENCHANTS_WEAPON, CAST_TRIGGERED);
-        CleanRemoteToy();
     }
 
 	 // This function remove all remote toy to prevent fail aggro during reset
@@ -337,7 +340,11 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
             else
                 pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_1, true);
             m_uiCountBeamer++;
-        }
+		}else if(pSummoned->GetEntry() == NPC_LONGBOW){
+			pSummoned->SetInCombatWithZone();
+			if(pSummoned->getVictim())
+				pSummoned->GetMotionMaster()->MoveChase(pSummoned->getVictim(), 40.0f);
+		}
         // Start combat for Weapons of Phoenix
         else
             pSummoned->SetInCombatWithZone();
@@ -588,9 +595,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     // Switch to the other spells after gravity lapse expired
                     if (m_uiGravityExpireTimer <= uiDiff)
                     {
-                        m_uiGravityExpireTimer = 0;
-                        SetCombatMovement(true);
+                        m_uiGravityExpireTimer = 0;                        
                         m_uiFireballTimer = 5000;
+						SetCombatMovement(true);
+						DoStartMovement(m_creature->getVictim());
                     }
                     else
                         m_uiGravityExpireTimer -= uiDiff;
@@ -670,11 +678,23 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     {
                         if (m_uiPyroblastTimer <= uiDiff)
                         {
-                            if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
-                            {
-                                DoScriptText(EMOTE_PYROBLAST, m_creature);
-                                m_uiPyroblastTimer = 0;
-                            }
+							if(m_uiCountPyro < 3)
+							{
+								if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
+								{									
+									DoScriptText(EMOTE_PYROBLAST, m_creature);
+									m_uiPyroblastTimer = 1000;
+									m_uiFireballTimer = 5000;
+									m_uiArcaneDisruptionTimer  = 5000;
+									m_uiCountPyro++;
+								}
+							}
+							else
+							{
+								m_uiArcaneDisruptionTimer = 2000;
+								m_uiPyroblastTimer = 0;
+								m_uiCountPyro = 0;
+							}
                         }
                         else
                             m_uiPyroblastTimer -= uiDiff;
@@ -708,6 +728,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                             m_uiGravityLapseTimer  = 60000;
                             m_uiShockBarrierTimer  = 2000;
                             SetCombatMovement(false);
+							m_creature->GetMotionMaster()->Clear();
+							m_creature->GetMotionMaster()->MoveIdle();
                             DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED);
                         }
                     }
@@ -725,8 +747,6 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 {
                     if (m_uiExplodeTimer <= uiDiff)
                     {
-                        m_creature->RemoveAurasDueToSpell(36371);
-                        m_creature->InterruptNonMeleeSpells(false);
                         if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED) == CAST_OK)
                         {
                             if (m_pInstance)
@@ -748,7 +768,6 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 {
                     if (m_uiFullPowerTimer <= uiDiff)
                     {
-                        m_creature->RemoveAurasDueToSpell(SPELL_KAEL_STUN);
                         m_creature->InterruptNonMeleeSpells(false);
                         if(DoCastSpellIfCan(m_creature, SPELL_FULLPOWER) == CAST_OK)
                         {
@@ -1104,39 +1123,29 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 
         if (m_uiArcaneExplosionTimer < uiDiff)
         {
-            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_ARCANE_BURST, SELECT_FLAG_IN_MELEE_RANGE))
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_BURST) == CAST_OK)
-                    m_uiArcaneExplosionTimer = urand(4000, 6000);
-            }
+            m_bCanExplosion = false;
+            ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+            ThreatList::const_iterator itr = threatList.begin();
 
-            if (m_uiArcaneExplosionTimer < uiDiff)
+            for (itr; itr != threatList.end(); ++itr)
             {
-                m_bCanExplosion = false;
-                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-                ThreatList::const_iterator itr = threatList.begin();
-
-                for (itr; itr != threatList.end(); ++itr)
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
-                    {
-                        if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDist(m_creature, 10.0f))
-                            m_bCanExplosion = true;
-                            break;
-                        }
+                    if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDist(m_creature, 10.0f))
+					{
+                        m_bCanExplosion = true;
+                        break;
                     }
                 }
+            }
 
-                if(m_bCanExplosion)
-                {
-                     if(DoCastSpellIfCan(m_creature, SPELL_ARCANE_BURST) == CAST_OK)
-                         m_uiArcaneExplosionTimer = urand(4000, 6000);
-                }
-                else
-                    m_uiArcaneExplosionTimer = 1000;
+            if(m_bCanExplosion)
+            {
+                    if(DoCastSpellIfCan(m_creature, SPELL_ARCANE_BURST) == CAST_OK)
+                        m_uiArcaneExplosionTimer = urand(4000, 6000);
             }
             else
-                m_uiArcaneExplosionTimer -= uiDiff;
+                m_uiArcaneExplosionTimer = 1000;
         }
         else
             m_uiArcaneExplosionTimer -= uiDiff;
