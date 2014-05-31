@@ -63,7 +63,7 @@ static const uint32 aMarkCorruption[MAX_HYDROSS_MARKS] = {38219, 38220, 38221, 3
 static const float aElementalCleanPoint[3] = { -231.48f, -343.05f, -1.58f};
 static const float aElementalExitPoint[3] = { -177.41f, -395.72f, -1.60f};
 
-static const float flagPosition[2][2] = { { -213.387375f, -352.244415f }, { -251.622940, -339.388275 } }; // North(x,y), South(x,y)
+static const float flagPosition[2][2] = { { -213.387375f, -352.244415f }, { -251.622940f, -339.388275f } }; // North(x,y), South(x,y)
 
 struct MANGOS_DLL_DECL boss_hydross_the_unstableAI : public ScriptedAI
 {

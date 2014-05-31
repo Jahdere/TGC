@@ -1730,18 +1730,18 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 				Unit* pUnitTarget = NULL;
 				switch(m_spellInfo->Id)
 				{
-				// Shahraz Beam
+					// Shahraz Beam
 				case 40827:
 				case 40859:
 				case 40860:
 				case 40861:
 					pUnitTarget = m_caster->SelectRandomUnfriendlyTarget((Unit*)0, radius);
-				break;
+					break;
 				default:
 					pUnitTarget = m_targets.getUnitTarget();
 					break;
 				}
-				
+
 				WorldObject* originalCaster = GetAffectiveCasterObject();
 				if (!pUnitTarget || !originalCaster)
 					break;
@@ -2815,6 +2815,7 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 	// execute triggered without cast time explicitly in call point
 	else if (m_timer == 0)
 		cast(true);
+
 	// else triggered with cast time will execute execute at next tick or later
 	// without adding to cast type slot
 	// will not show cast bar but will show effects at casting time etc
@@ -2905,10 +2906,10 @@ void Spell::cast(bool skipCheck)
 	{
 		m_caster->SetInFront(m_targets.getUnitTarget());
 		// target current victim by this spell @Kordbc
-		if(m_targets.getUnitTarget() != m_caster->getVictim())
-			m_caster->FixateTarget(m_targets.getUnitTarget());
+		/*if(m_targets.getUnitTarget() != m_caster->getVictim())
+			m_caster->FixateTarget(m_targets.getUnitTarget());*/
 	}
-
+	
 	SpellCastResult castResult = CheckPower();
 	if (castResult != SPELL_CAST_OK)
 	{
@@ -6312,6 +6313,18 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if(m_spellInfo->Id == 36450 && target != m_caster)
 			return true;
 		break;
+	case SPELL_EFFECT_APPLY_AURA:
+		// Howl of Azgalor
+		if(m_spellInfo->Id == 31344)
+			break;
+		// Mark of Kaz'rogal	-> Fixe only player target?
+		if(m_spellInfo->Id == 31447)
+		{
+			if(target->GetTypeId() != TYPEID_PLAYER)
+				return false;
+			else
+				break;
+		}
 	default:                                            // normal case
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)

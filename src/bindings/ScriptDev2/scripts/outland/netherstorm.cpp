@@ -1174,7 +1174,7 @@ struct npc_dr_boomAI : public Scripted_NoMovementAI
         // Spawn boom_bot
         if (m_uiSummonTimer <= uiDiff)
         {
-            m_creature->SummonCreature(BOOM_BOT, 3241.334f, 3531.906f, 121.328, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
+            m_creature->SummonCreature(BOOM_BOT, 3241.334f, 3531.906f, 121.328f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000);
             m_uiSummonTimer = 500;
         }
         else

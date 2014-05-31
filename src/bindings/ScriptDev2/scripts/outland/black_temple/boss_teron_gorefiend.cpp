@@ -133,6 +133,23 @@ struct MANGOS_DLL_DECL boss_teron_gorefiendAI : public ScriptedAI
 			m_pInstance->SetData(TYPE_GOREFIEND, DONE);
 
 		DoScriptText(SAY_DEATH, m_creature);
+
+		cleanShadowOfDeath();
+	}
+
+	// Remove all shadow of death aura when Teron die
+	void cleanShadowOfDeath()
+	{
+		Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
+		if (!lPlayers.isEmpty())
+		{
+			for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+			{
+				if(Player* pPlayer = itr->getSource())
+					if(pPlayer->HasAura(SPELL_SHADOW_OF_DEATH))
+						pPlayer->RemoveAurasDueToSpell(SPELL_SHADOW_OF_DEATH);
+			}
+		}
 	}
 
 	void JustSummoned(Creature* pSummoned) override
