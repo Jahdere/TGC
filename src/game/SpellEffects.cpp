@@ -5499,13 +5499,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					if(!unitTarget)
 						return;
 
-					unitTarget->CastSpell(unitTarget, 39498, true);
-					unitTarget->CastSpell(unitTarget, 39499, true);
-					unitTarget->CastSpell(unitTarget, 39500, true);
-					unitTarget->CastSpell(unitTarget, 39501, true);
-					unitTarget->CastSpell(unitTarget, 39502, true);
-					unitTarget->CastSpell(unitTarget, 39503, true);
-					unitTarget->CastSpell(unitTarget, 39504, true);
+					unitTarget->CastSpell(unitTarget, 39498, false);
+					unitTarget->CastSpell(unitTarget, 39499, false);
+					unitTarget->CastSpell(unitTarget, 39500, false);
+					unitTarget->CastSpell(unitTarget, 39501, false);
+					unitTarget->CastSpell(unitTarget, 39502, false);
+					unitTarget->CastSpell(unitTarget, 39503, false);
+					unitTarget->CastSpell(unitTarget, 39504, false);
 					return;
 				}
 			case 39835:									// Nidle Spine aoe (Naj'entus) @Kordbc
