@@ -6312,6 +6312,22 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		if(m_spellInfo->Id == 36450 && target != m_caster)
 			return true;
 		break;
+	case SPELL_EFFECT_APPLY_AURA:
+		// Howl of Azgalor
+		if(m_spellInfo->Id == 31344)
+			break;
+		//Mark of Kaz'rogal
+		else if(m_spellInfo->Id == 31447)
+		{
+			if(target->GetTypeId() != TYPEID_PLAYER)
+				return false;
+			else
+				break;
+		}
+	case SPELL_EFFECT_SCHOOL_DAMAGE:
+		// Nether beam and Carrion Swarm
+		if(m_spellInfo->Id == 35873 || m_spellInfo->Id == 31306)
+			break;
 	default:                                            // normal case
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)
