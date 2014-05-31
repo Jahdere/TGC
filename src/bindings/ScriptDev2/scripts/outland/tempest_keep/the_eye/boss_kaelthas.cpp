@@ -130,6 +130,7 @@ enum
     // ***** Other summons spells ********
     //Nether Vapor spell
     SPELL_NETHER_VAPOR                  = 35858,
+    SPELL_NETHER_VAPOR_LIGHTING         = 45960,
     //Phoenix spell
     SPELL_BURN                          = 36720,
     SPELL_EMBER_BLAST                   = 34341,
@@ -137,6 +138,10 @@ enum
     // Beam
     SPELL_BEAM_EFFECT_1                 = 36089,
     SPELL_BEAM_EFFECT_2                 = 36090,
+    // Netherstrand Longbow
+    SPELL_SHOOT                         = 36980,
+    SPELL_MULTI_SHOOT                   = 36979,
+    SPELL_BLINK                         = 36994,
 
     // ***** Creature Entries ********
     NPC_FLAME_STRIKE_TRIGGER            = 21369,
@@ -212,6 +217,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     uint8 m_uiPhase;
     uint8 m_uiPhaseSubphase;
     uint8 m_uiCountBeamer;
+    uint8 m_uiCountPyro;
 
     void Reset()
     {
@@ -239,6 +245,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         m_uiGravityIndex            = 0;
 
         m_uiCountBeamer             = 0;
+        m_uiCountPyro               = 0;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -323,7 +330,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
             pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, false, NULL, NULL, m_creature->GetObjectGuid());
         else if (pSummoned->GetEntry() == NPC_NETHER_VAPOR)
+        {
             pSummoned->CastSpell(pSummoned, SPELL_NETHER_VAPOR, false, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_NETHER_VAPOR_LIGHTING, true);
+        }
         else if(pSummoned->GetEntry() == NPC_HELPER_BEAM)
         {
             if(m_uiCountBeamer % 2 == 0)
@@ -334,7 +344,12 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
         }
         // Start combat for Weapons of Phoenix
         else
+        {
             pSummoned->SetInCombatWithZone();
+            // Weapons corpse despawn after 1min
+            if(pSummoned->GetEntry() != NPC_PHOENIX)
+                pSummoned->SetCorpseDelay(MINUTE);
+        }
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell)
@@ -346,7 +361,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 DoCastSpellIfCan(m_creature, m_auiSpellSummonWeapon[i], CAST_TRIGGERED);
 
             m_uiPhase      = PHASE_2_WEAPON;
-            m_uiPhaseTimer = 30000; //120000
+            m_uiPhaseTimer = 120000;
         }
     }
 
@@ -512,7 +527,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     {
                         DoScriptText(SAY_PHASE3_ADVANCE, m_creature);
                         m_uiPhaseSubphase = 0;
-                        m_uiPhaseTimer    = 30000; // 180000
+                        m_uiPhaseTimer    = 180000;
                         m_uiPhase         = PHASE_3_ADVISOR_ALL;
                     }
                 }
@@ -584,6 +599,7 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     {
                         m_uiGravityExpireTimer = 0;
                         SetCombatMovement(true);
+                        DoStartMovement(m_creature->getVictim());
                         m_uiFireballTimer = 5000;
                     }
                     else
@@ -664,10 +680,23 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                     {
                         if (m_uiPyroblastTimer <= uiDiff)
                         {
-                            if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
+                           if(m_uiCountPyro < 3)
+                           {
+                                if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
+                                {
+                                    DoScriptText(EMOTE_PYROBLAST, m_creature);
+                                    m_uiPyroblastTimer = 1000;
+                                    m_uiFireballTimer = 20000;
+                                    m_uiArcaneDisruptionTimer  = 20000;
+                                    m_uiCountPyro++;
+                                }
+                            }
+                            else
                             {
-                                DoScriptText(EMOTE_PYROBLAST, m_creature);
+                                m_uiFireballTimer = 3000;
+                                m_uiArcaneDisruptionTimer = 2000;
                                 m_uiPyroblastTimer = 0;
+                                m_uiCountPyro = 0;
                             }
                         }
                         else
@@ -702,6 +731,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                             m_uiGravityLapseTimer  = 60000;
                             m_uiShockBarrierTimer  = 2000;
                             SetCombatMovement(false);
+                            m_creature->GetMotionMaster()->Clear();
+                            m_creature->GetMotionMaster()->MoveIdle();
                             DoCastSpellIfCan(m_creature, SPELL_SHOCK_BARRIER, CAST_TRIGGERED);
                         }
                     }
@@ -719,12 +750,11 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 {
                     if (m_uiExplodeTimer <= uiDiff)
                     {
-                        m_creature->RemoveAurasDueToSpell(36371);
-                        m_creature->InterruptNonMeleeSpells(false);
                         if (DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED) == CAST_OK)
                         {
                             if (m_pInstance)
                             {
+                                DoCastSpellIfCan(m_creature, SPELL_KAEL_STUN, CAST_TRIGGERED);
                                 m_pInstance->DoUseDoorOrButton(GO_KAEL_STATUE_LEFT);
                                 m_pInstance->DoUseDoorOrButton(GO_KAEL_STATUE_RIGHT);
                                 m_pInstance->DoUseDoorOrButton(GO_BRIDGE_WINDOW);
@@ -899,6 +929,7 @@ struct MANGOS_DLL_DECL boss_thaladred_the_darkenerAI : public advisor_base_ai
         m_uiRendTimer        = urand(4000, 8000);
         m_uiSilenceTimer     = 5000;
         m_uiPsychicBlowTimer = 25000;
+        m_creature->FixateTarget(NULL);
 
         advisor_base_ai::Reset();
     }
@@ -1365,6 +1396,82 @@ struct MANGOS_DLL_DECL mob_phoenix_egg_tkAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 uiDiff) { }
 };
 
+
+/*######
+## mob_netherstrand_longbow
+######*/
+
+// TODO Remove this 'script' when combat movement can be proper prevented from core-side
+struct MANGOS_DLL_DECL mob_netherstrand_longbowAI : public ScriptedAI{
+
+    mob_netherstrand_longbowAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
+
+    uint32 m_uiShootTimer;
+    uint32 m_uiMultiShootTimer;
+    uint32 m_uiCheckRangeTimer;
+
+    void Reset() 
+    {
+        m_uiShootTimer = 2000;
+        m_uiMultiShootTimer = urand(12000, 16000);
+        m_uiCheckRangeTimer = 1000;
+    }
+
+    void AttackStart(Unit* pWho)
+    {
+        if (m_creature->Attack(pWho, true))
+        {
+            m_creature->AddThreat(pWho);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+
+            DoStartMovement(pWho, 20.0f);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) 
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if(m_uiCheckRangeTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, (const SpellEntry*)0, SELECT_FLAG_IN_MELEE_RANGE))
+            {
+                m_creature->SetFacingTo(m_creature->GetOrientation() + M_PI);
+                DoCastSpellIfCan(m_creature, SPELL_BLINK);
+            }
+            m_uiCheckRangeTimer = 3000;
+        }
+        else
+            m_uiCheckRangeTimer -= uiDiff;
+
+        if(m_uiMultiShootTimer < uiDiff)
+        {
+            if(Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MULTI_SHOOT, SELECT_FLAG_PLAYER))
+            {
+                if(DoCastSpellIfCan(pTarget, SPELL_MULTI_SHOOT) == CAST_OK)
+                {
+                    m_uiMultiShootTimer = urand(12000 , 16000);
+                    m_uiShootTimer = 2000;
+                }
+            }
+        }
+        else
+            m_uiMultiShootTimer -= uiDiff;
+
+        if(m_uiShootTimer < uiDiff)
+        {
+            if(DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+            {
+                m_uiShootTimer = urand(2000, 3000);
+            }
+        }
+        else
+            m_uiShootTimer -= uiDiff;
+    }
+};
+
 CreatureAI* GetAI_boss_kaelthas(Creature* pCreature)
 {
     return new boss_kaelthasAI(pCreature);
@@ -1398,6 +1505,11 @@ CreatureAI* GetAI_mob_phoenix_tk(Creature* pCreature)
 CreatureAI* GetAI_mob_phoenix_egg_tk(Creature* pCreature)
 {
     return new mob_phoenix_egg_tkAI(pCreature);
+}
+
+CreatureAI* GetAI_mob_netherstrand_longbow(Creature* pCreature)
+{
+    return new mob_netherstrand_longbowAI(pCreature);
 }
 
 void AddSC_boss_kaelthas()
@@ -1438,5 +1550,10 @@ void AddSC_boss_kaelthas()
     pNewScript = new Script;
     pNewScript->Name = "mob_phoenix_egg_tk";
     pNewScript->GetAI = &GetAI_mob_phoenix_egg_tk;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_netherstrand_longbow";
+    pNewScript->GetAI = &GetAI_mob_netherstrand_longbow;
     pNewScript->RegisterSelf();
 }
