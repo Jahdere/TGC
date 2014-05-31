@@ -3428,8 +3428,11 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed)
 				((Player*)this)->SendAutoRepeatCancel();
 		}
 
-		if (m_currentSpells[spellType]->getState() != SPELL_STATE_FINISHED)
-			m_currentSpells[spellType]->cancel();
+		if(m_currentSpells[spellType]->m_spellInfo->StartRecoveryTime && m_currentSpells[spellType]->GetCastTime())
+		{
+			if (m_currentSpells[spellType]->getState() != SPELL_STATE_FINISHED)
+				m_currentSpells[spellType]->cancel();
+		}
 
 		// cancel can interrupt spell already (caster cancel ->target aura remove -> caster iterrupt)
 		if (m_currentSpells[spellType])
