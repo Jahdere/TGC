@@ -1401,7 +1401,7 @@ struct MANGOS_DLL_DECL mob_phoenix_egg_tkAI : public Scripted_NoMovementAI
 ## mob_netherstrand_longbow
 ######*/
 
-// TODO Remove this 'script' when combat movement can be proper prevented from core-side
+// UPDATE creature_template SET AIName = '' , ScriptName = 'mob_netherstrand_longbow' WHERE entry = 21268;
 struct MANGOS_DLL_DECL mob_netherstrand_longbowAI : public ScriptedAI{
 
     mob_netherstrand_longbowAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
