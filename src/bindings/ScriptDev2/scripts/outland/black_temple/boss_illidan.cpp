@@ -382,7 +382,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		m_uiShadowDemonTimer    = 30000;
 
 		m_uiEnrageTimer         = 40000;
-		m_uiTrapTimer           = urand(30000, 40000);
+		m_uiTrapTimer           = 0;
 
 		m_lBladesGuidList.clear();
 
@@ -746,18 +746,22 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 				{
 					DoScriptText(SAY_FRENZY, m_creature);
 					m_uiEnrageTimer = 40000;
+					m_uiTrapTimer = urand(1000 , 5000);
 				}
 			}
 			else
 				m_uiEnrageTimer -= uiDiff;
 
-			if (m_uiTrapTimer < uiDiff)
+			if(m_uiTrapTimer)
 			{
-				if (DoCastSpellIfCan(m_creature, SPELL_CAGE_TRAP) == CAST_OK)
-					m_uiTrapTimer = urand(40000, 50000);
+				if (m_uiTrapTimer <= uiDiff)
+				{
+					if (DoCastSpellIfCan(m_creature, SPELL_CAGE_TRAP) == CAST_OK)
+						m_uiTrapTimer = 0
+				}
+				else
+					m_uiTrapTimer -= uiDiff;
 			}
-			else
-				m_uiTrapTimer -= uiDiff;
 
 			// no break;
 		case PHASE_DUAL_NORMAL:
@@ -797,7 +801,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			if (m_uiShearTimer < uiDiff)
 			{
 				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHEAR) == CAST_OK)
-					m_uiShearTimer = urand(10000, 15000);
+					m_uiShearTimer = 15000;
 			}
 			else
 				m_uiShearTimer -= uiDiff;
@@ -1034,7 +1038,6 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 						m_uiPhase = m_uiPrevPhase;
 						m_uiEnrageTimer = 40000;
 						m_uiTransformTimer = 60000;
-						m_uiTrapTimer = urand(30000, 40000);
 					}
 				}
 				else
