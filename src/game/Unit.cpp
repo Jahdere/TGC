@@ -3428,11 +3428,8 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed)
 				((Player*)this)->SendAutoRepeatCancel();
 		}
 
-		if(m_currentSpells[spellType]->m_spellInfo->StartRecoveryTime && m_currentSpells[spellType]->GetCastTime())
-		{
-			if (m_currentSpells[spellType]->getState() != SPELL_STATE_FINISHED)
-				m_currentSpells[spellType]->cancel();
-		}
+		if (m_currentSpells[spellType]->getState() != SPELL_STATE_FINISHED)
+			m_currentSpells[spellType]->cancel();
 
 		// cancel can interrupt spell already (caster cancel ->target aura remove -> caster iterrupt)
 		if (m_currentSpells[spellType])
@@ -7331,7 +7328,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 		return false;
 
 	// set max ditance
-	float visibleDistance = MAX_PLAYER_STEALTH_DETECT_RANGE;
+	float visibleDistance = (u->GetTypeId() == TYPEID_PLAYER) ? MAX_PLAYER_STEALTH_DETECT_RANGE : ((Creature const*)u)->GetAttackDistance(this);
 
 	// Always invisible from back (when stealth detection is on), also filter max distance cases
 	bool isInFront = viewPoint->isInFrontInMap(this, visibleDistance);
@@ -7342,35 +7339,33 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 	if (!u->HasAuraType(SPELL_AURA_DETECT_STEALTH))
 	{
 		// Calculation if target is in front
-		// Visible distance based on stealth value (Detection score is 5 per level, Stealth score is aura value)
-		int32 unitStealthDetectionScore = int32(u->GetLevelForTarget(this)) * 5;
-		int32 stealthScore = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH);
-		int32 baseDetect = unitStealthDetectionScore, baseStealth = stealthScore;
 
-		// stealthDetectionScore bonus modifiers (Master of Deception for example)
-		stealthScore += GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
-		int32 modStealth = stealthScore;
+		// Visible distance based on stealth value (stealth rank 4 350MOD, 8.5 - 3.5 = 5), base detection is 5y -- @Rikub
+		visibleDistance = 8.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH) / 100.0f);
 
-		// Stealth Detection bonus (like paranoia)
+		// Visible distance is modified by
+		//-Level Diff (every level diff = 1.0f in visible distance)
+		visibleDistance += int32(u->GetLevelForTarget(this)) - int32(GetLevelForTarget(u));
+
+		// This allows to check talent tree and will add addition stealth dependent on used points)
+		int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
+		if (stealthMod < 0)
+			stealthMod = 0;
+
+		//-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
+		// based on wowwiki every 5 mod we have 1 more level diff in calculation
+		int32 detectionLevel = 0;
 		Unit::AuraList const& dAuras = u->GetAurasByType(SPELL_AURA_MOD_STEALTH_DETECT);
 		for (Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
-			if ((*itr)->GetModifier()->m_miscvalue == 0) // Avoid trap detection aura (2836)
-				unitStealthDetectionScore += (*itr)->GetModifier()->m_amount;
-		int32 modDetect = unitStealthDetectionScore;
-		// Base detect range is 5.0 according to comment sources
-		// Now, each 5 stealth points differences between stealth/detection score add/remove 1 yard to visible range
-		visibleDistance = 5.0f + ((unitStealthDetectionScore - stealthScore) / 5.0f);
-		float baseDist = visibleDistance;
+			if ((*itr)->GetModifier()->m_miscvalue == 0) // Avoid trap detection aura (2836) -- @Rikub
+				detectionLevel += (*itr)->GetModifier()->m_amount;
 
-		// Check limits
-		if (visibleDistance > MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE)
-			visibleDistance = MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE;
-		else if (visibleDistance < 1.0f)
-			visibleDistance = 1.0f;
+		visibleDistance += (detectionLevel - stealthMod) / 5.0f;
+		// Max detection range w/o Shadow sight is 10y -- @Rikub
+		visibleDistance = visibleDistance > MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE ? MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE : visibleDistance;
 
-		DEBUG_LOG("** StealthTick %i %i | %i %i | %f %f", baseStealth, baseDetect, modStealth, modDetect, baseDist, visibleDistance);
 		// recheck new distance
-		if (!IsWithinDist(viewPoint, visibleDistance))
+		if (visibleDistance <= 0 || !IsWithinDist(viewPoint, visibleDistance))
 			return false;
 	}
 
