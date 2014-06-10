@@ -815,7 +815,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_PARASITIC_SHADOWFIEND, SELECT_FLAG_PLAYER))
 				{
 					if (DoCastSpellIfCan(pTarget, SPELL_PARASITIC_SHADOWFIEND) == CAST_OK)
-						m_uiShadowFiendTimer = 40000;
+						m_uiShadowFiendTimer = 30000;
 				}
 			}
 			else
