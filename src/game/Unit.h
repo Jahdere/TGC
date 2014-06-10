@@ -1118,7 +1118,7 @@ enum ReactiveType
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 #define MAX_PLAYER_STEALTH_DETECT_RANGE 45.0f               // max distance for detection targets by player
-#define MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE 10.0f         // max distance for stealth detection by player after level/auras comparison
+#define MAX_PLAYER_STEALTH_DETECT_LEVEL_RANGE 10.5f         // max distance for stealth detection by player after level/auras comparison
 #define MAX_CREATURE_ATTACK_RADIUS 45.0f                    // max distance for creature aggro (use with CONFIG_FLOAT_RATE_CREATURE_AGGRO)
 
 // Regeneration defines
