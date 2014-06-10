@@ -619,10 +619,10 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		uint8 uiTargetLoc = 0;
 		switch (uiSpawnLoc)
 		{
-		case 0: uiTargetLoc = urand(4, 5); break;
-		case 1: uiTargetLoc = urand(6, 7); break;
-		case 2: uiTargetLoc = urand(0, 1) ? 5 : 8; break;
-		case 3: uiTargetLoc = urand(7, 8); break;
+		case 0: uiTargetLoc = 4; break;
+		case 1: uiTargetLoc = 6; break;
+		case 2: uiTargetLoc = 8; break;
+		case 3: uiTargetLoc = 8; break;
 		}
 
 		m_fTargetMoveX = aEyeBlastPos[uiTargetLoc].fX;
