@@ -2850,6 +2850,13 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 			return SPELL_MISS_PARRY;
 	}
 
+	// Shear Illidan
+	if (spell->Id == 41032)
+	{
+		if (pVictim->IsSpellBlocked(this, spell, attType))
+			return SPELL_MISS_BLOCK;
+	}
+
 	return SPELL_MISS_NONE;
 }
 
