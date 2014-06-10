@@ -2910,7 +2910,10 @@ void Spell::cast(bool skipCheck)
 	}
 
 	if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+	{
 		m_caster->SetInFront(m_targets.getUnitTarget());
+		m_caster->SetTargetGuid(m_targets.getUnitTargetGuid());
+	}
 
 	SpellCastResult castResult = CheckPower();
 	if (castResult != SPELL_CAST_OK)
@@ -3221,6 +3224,7 @@ void Spell::update(uint32 difftime)
 	{
 	case SPELL_STATE_PREPARING:
 		{
+
 			if (m_timer)
 			{
 				if (difftime >= m_timer)
@@ -3328,6 +3332,12 @@ void Spell::finish(bool ok)
 	}
 
 	m_spellState = SPELL_STATE_FINISHED;
+
+	if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+	{
+		if(m_caster->getVictim());
+			m_caster->SetTargetGuid(m_caster->getVictim()->GetObjectGuid());
+	}
 
 	// other code related only to successfully finished spells
 	if (!ok)
