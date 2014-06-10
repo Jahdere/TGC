@@ -501,7 +501,6 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			}
 			break;
 		case SAY_AKAMA_LEAVE:
-			DoResetThreat();
 			if (m_pInstance)
 			{
 				// Remove Akama from threat list and allow him to fight the Illidari elites
