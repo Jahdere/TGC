@@ -2902,12 +2902,7 @@ void Spell::cast(bool skipCheck)
 	}
 
 	if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
-	{
 		m_caster->SetInFront(m_targets.getUnitTarget());
-		// target current victim by this spell @Kordbc
-		if(m_targets.getUnitTarget() != m_caster->getVictim())
-			m_caster->FixateTarget(m_targets.getUnitTarget());
-	}
 
 	SpellCastResult castResult = CheckPower();
 	if (castResult != SPELL_CAST_OK)
@@ -3402,10 +3397,6 @@ void Spell::finish(bool ok)
 	// Stop Attack for some spells
 	if (m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
 		m_caster->AttackStop();
-
-	// stop fixate target @Kordbc
-	if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster && m_caster->GetFixateTargetGuid())
-		m_caster->FixateTarget(NULL);
 }
 
 void Spell::SendCastResult(SpellCastResult result)
