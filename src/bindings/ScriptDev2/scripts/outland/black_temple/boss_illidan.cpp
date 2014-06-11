@@ -613,6 +613,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		DoScriptText(SAY_EYE_BLAST, m_creature);
 
 		// Set spawn and target loc
+		uint8 uiSpawnLoc = urand(0, 3);
 		uint8 uiTargetLoc = 0;
 		switch (uiSpawnLoc)
 		{
