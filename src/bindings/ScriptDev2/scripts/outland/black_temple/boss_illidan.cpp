@@ -390,10 +390,9 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		m_creature->SetLevitate(false);
 		SetCombatMovement(true);
 
-		//m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+		m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
 		m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE);
 		SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
-		//SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
 	}
 
 	void GetAIInformation(ChatHandler& reader) override
@@ -501,7 +500,6 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			}
 			break;
 		case SAY_AKAMA_LEAVE:
-			DoResetThreat();
 			if (m_pInstance)
 			{
 				// Remove Akama from threat list and allow him to fight the Illidari elites
@@ -615,7 +613,6 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		DoScriptText(SAY_EYE_BLAST, m_creature);
 
 		// Set spawn and target loc
-		uint8 uiSpawnLoc = urand(0, 3);
 		uint8 uiTargetLoc = 0;
 		switch (uiSpawnLoc)
 		{
@@ -629,7 +626,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		m_fTargetMoveY = aEyeBlastPos[uiTargetLoc].fY;
 		m_fTargetMoveZ = aEyeBlastPos[uiTargetLoc].fZ;
 		m_creature->SummonCreature(NPC_ILLIDAN_TARGET, aEyeBlastPos[uiSpawnLoc].fX, aEyeBlastPos[uiSpawnLoc].fY, aEyeBlastPos[uiSpawnLoc].fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
-
+		countBlast++;
 		return true;
 	}
 
@@ -806,7 +803,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			if (m_uiFlameCrashTimer < uiDiff)
 			{
 				if (DoCastSpellIfCan(m_creature, SPELL_FLAME_CRASH) == CAST_OK)
-					m_uiFlameCrashTimer = urand(25000, 35000);
+					m_uiFlameCrashTimer = urand(20000, 30000);
 			}
 			else
 				m_uiFlameCrashTimer -= uiDiff;
@@ -816,7 +813,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_PARASITIC_SHADOWFIEND, SELECT_FLAG_PLAYER))
 				{
 					if (DoCastSpellIfCan(pTarget, SPELL_PARASITIC_SHADOWFIEND) == CAST_OK)
-						m_uiShadowFiendTimer = 40000;
+						m_uiShadowFiendTimer = 30000;
 				}
 			}
 			else
@@ -1550,7 +1547,7 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 		{
 			if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BLAST) == CAST_OK)
 			{
-				m_uiFlameBlastTimer = 10000;
+				m_uiFlameBlastTimer = urand(15000, 20000);
 				m_uiSummonBlazeTimer = 2000;
 			}
 		}
@@ -1594,7 +1591,7 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 			}
 			else
 				m_uiLoadGlaiveTimer -= uiDiff;
-		}		
+		}
 
 		// Workaround for broken aura 41997; the creature should enrage if not within dist of 30 from summoner
 		// This should be done by checking if aura 41997 is removed from self, when getting out of range
@@ -1808,11 +1805,7 @@ struct MANGOS_DLL_DECL npc_shadowfiendAI : public ScriptedAI
 			if(m_uiStartFightTimer <= uiDiff)
 			{
 				m_creature->SetInCombatWithZone();
-				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARASITIC, SELECT_FLAG_PLAYER))
-				{
-					AttackStart(pTarget);
-					m_uiStartFightTimer = 0;
-				}
+				m_uiStartFightTimer = 0;
 			}
 			else
 				m_uiStartFightTimer -= uiDiff;
