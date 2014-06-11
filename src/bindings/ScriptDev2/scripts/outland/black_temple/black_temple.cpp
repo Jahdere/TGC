@@ -32,15 +32,22 @@ EndContentData */
 # npc_spirit_of_olum
 ####*/
 
-#define SPELL_TELEPORT      41566                           // s41566 - Teleport to Ashtongue NPC's
-#define GOSSIP_OLUM1        "Teleport me to the other Ashtongue Deathsworn"
+#define SPELL_TELEPORT_ASHTONGUE   41566                           // s41566 - Teleport to Ashtongue NPC's
+#define GOSSIP_OLUM1               "Teleport me to the other Ashtongue Deathsworn"
+#define SPELL_TELEPORT_COUNCIL     41570                           // s41570 - Teleport to Council
+#define GOSSIP_OLUM2               "Teleport me to the Council"
 
 bool GossipHello_npc_spirit_of_olum(Player* pPlayer, Creature* pCreature)
 {
 	ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
-	if (pInstance && (pInstance->GetData(TYPE_SUPREMUS) >= DONE) && (pInstance->GetData(TYPE_NAJENTUS) >= DONE))
-		pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OLUM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+	if (pInstance)
+	{
+		if((pInstance->GetData(TYPE_SUPREMUS) >= DONE) && (pInstance->GetData(TYPE_NAJENTUS) >= DONE))
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OLUM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+		if(pInstance->GetData(TYPE_COUNCIL) >= DONE)
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OLUM2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);		
+	}
 
 	pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
 	return true;
@@ -48,11 +55,15 @@ bool GossipHello_npc_spirit_of_olum(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_spirit_of_olum(Player* pPlayer, Creature* /*pCreature*/, uint32 /*uiSender*/, uint32 uiAction)
 {
-	if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+	if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 || uiAction == GOSSIP_ACTION_INFO_DEF + 2)
 		pPlayer->CLOSE_GOSSIP_MENU();
 
 	pPlayer->InterruptNonMeleeSpells(false);
-	pPlayer->CastSpell(pPlayer, SPELL_TELEPORT, false);
+	if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+		pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_ASHTONGUE, false);
+	else if(uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+		pPlayer->CastSpell(pPlayer, SPELL_TELEPORT_COUNCIL, false);
+
 	return true;
 }
 
