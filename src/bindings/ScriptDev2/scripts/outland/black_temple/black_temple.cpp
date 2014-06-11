@@ -35,7 +35,7 @@ EndContentData */
 #define SPELL_TELEPORT_ASHTONGUE   41566                           // s41566 - Teleport to Ashtongue NPC's
 #define GOSSIP_OLUM1               "Teleport me to the other Ashtongue Deathsworn"
 #define SPELL_TELEPORT_COUNCIL     41570                           // s41570 - Teleport to Council
-#define GOSSIP_OLUM2               "Teleport me to the Council"
+#define GOSSIP_OLUM2               "Teleport me to the Chamber of Command"
 
 bool GossipHello_npc_spirit_of_olum(Player* pPlayer, Creature* pCreature)
 {
