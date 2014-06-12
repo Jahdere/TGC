@@ -89,7 +89,7 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
 		std::list<Creature*> m_lAdds;
 		
 		m_lAdds.clear();
-		GetCreatureListWithEntryInGrid(m_lAdds,m_creature,ENTRY_VOID_TRAVELER,150.0f);
+		GetCreatureListWithEntryInGrid(m_lAdds, m_creature, ENTRY_VOID_TRAVELER, 150.0f);
 	
 		if(!m_lAdds.empty())
 		{
@@ -99,7 +99,7 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
 		}
 		
 		m_lAdds.clear();
-		GetCreatureListWithEntryInGrid(m_lAdds,m_creature,ENTRY_VOID_PORTAL,150.0f);
+		GetCreatureListWithEntryInGrid(m_lAdds, m_creature, ENTRY_VOID_PORTAL, 150.0f);
 	
 		if(!m_lAdds.empty())
 		{
@@ -130,7 +130,7 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
 
-        DoCastSpellIfCan(m_creature, SPELL_VOID_PORTAL_A,true);
+        DoCastSpellIfCan(m_creature, SPELL_VOID_PORTAL_A, true);
         m_creature->SummonCreature(ENTRY_VOID_PORTAL, -262.40f, -229.57f, 17.08f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN,0);
         m_creature->SummonCreature(ENTRY_VOID_PORTAL, -260.35f, -297.56f, 17.08f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN,0);
         m_creature->SummonCreature(ENTRY_VOID_PORTAL, -292.05f, -270.37f, 12.68f, 0.0f, TEMPSUMMON_CORPSE_DESPAWN,0);
@@ -154,7 +154,7 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
 
         if (summoned->GetEntry() == ENTRY_VOID_PORTAL)
 		{
-            summoned->CastSpell(summoned,SPELL_VOID_PORTAL_VISUAL,true);
+            summoned->CastSpell(summoned, SPELL_VOID_PORTAL_VISUAL, true);
 			summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 			summoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 		}
@@ -200,8 +200,8 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
 
                     if (target && target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        target->GetRandomPoint(LOCX,LOCY,LOCZ,3.0f,ranX,ranY,ranZ);
-                        DoTeleportPlayer(target,ranX,ranY,ranZ,m_creature->GetAngle(m_creature->GetPositionX(),m_creature->GetPositionY()));
+                        target->GetRandomPoint(LOCX, LOCY, LOCZ, 3.0f, ranX, ranY, ranZ);
+                        DoTeleportPlayer(target, ranX, ranY, ranZ, m_creature->GetAngle(m_creature->GetPositionX(), m_creature->GetPositionY()));
                     }
                 }
                 Teleport = false;
@@ -221,12 +221,12 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
 
         if (DrawShadows_Timer < diff)
         {
-            DoCastSpellIfCan(m_creature,SPELL_DRAW_SHADOWS);
+            DoCastSpellIfCan(m_creature, SPELL_DRAW_SHADOWS);
             DrawShadows_Timer = 30000;
             Teleport = true;
         }else DrawShadows_Timer -= diff;
 
- /*       if (VoidTraveler_Timer < diff)
+        if (VoidTraveler_Timer < diff)
         {
             if (!b_yelledForHelp)
             {
@@ -243,9 +243,9 @@ struct MANGOS_DLL_DECL boss_grandmaster_vorpilAI : public ScriptedAI
                 case 4: DoCastSpellIfCan(m_creature, SPELL_SUMMON_VOIDWALKER_E, CAST_TRIGGERED); break;
             }
             //faster rate when below (X) health?
-			float timer = (float)(m_creature->GetHealth()/m_creature->GetMaxHealth()) * 22000.0f;
-            VoidTraveler_Timer = 5000 + timer;
-        }else VoidTraveler_Timer -= diff;*/
+			float timer = (float)(m_creature->GetHealth() / m_creature->GetMaxHealth()) * 22000.0f;
+			VoidTraveler_Timer = 5000 + timer;
+        }else VoidTraveler_Timer -= diff;
 
         if (!m_bIsRegularMode)
         {
@@ -302,7 +302,7 @@ struct MANGOS_DLL_DECL mob_void_travelerAI : public ScriptedAI
 			if (Creature* pVorpil = m_pInstance->GetSingleCreatureFromStorage(NPC_VORPIL))
 				if(m_creature->IsWithinDistInMap(pVorpil, 10.0f))
 				{
-					DoCastSpellIfCan(m_creature,SPELL_SHADOW_NOVA);
+					DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA);
                     if (pVorpil->isAlive())
                     {
 					 //   pVorpil->ApplyAura(m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H);
@@ -330,7 +330,7 @@ void AddSC_boss_grandmaster_vorpil()
     newscript->RegisterSelf();
 	
     newscript = new Script;
-    newscript->Name = "mob_void_traveler";
+    newscript->Name = "npc_void_traveler";
     newscript->GetAI = &GetAI_mob_void_traveler;
     newscript->RegisterSelf();
 }
