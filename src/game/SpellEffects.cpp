@@ -3988,7 +3988,7 @@ void Spell::DoSummonWild(SpellEffectIndex eff_idx, uint32 forceFaction)
 			if (count == 0)
 			{
 				// prevent hack with LOS and summon on caster coordinate if needed
-				if (m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ))			
+				if (m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ) || m_caster->GetTypeId() != TYPEID_PLAYER)
 				{
 					px = m_targets.m_destX;
 					py = m_targets.m_destY;
