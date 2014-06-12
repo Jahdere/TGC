@@ -304,10 +304,7 @@ struct MANGOS_DLL_DECL mob_void_travelerAI : public ScriptedAI
 				{
 					DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA);
                     if (pVorpil->isAlive())
-                    {
-					 //   pVorpil->ApplyAura(m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H);
-					    pVorpil->SetHealth(pVorpil->GetHealth() + (m_bIsRegularMode ? urand(3750, 6250) : urand(6375, 10625)));
-                    }
+						pVorpil->AI()->DoCastSpellIfCan(pVorpil, m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H, true);
                     m_creature->ForcedDespawn();
 				}
 			Check_Timer = 2000;
