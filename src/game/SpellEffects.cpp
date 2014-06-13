@@ -3022,8 +3022,8 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 			}
 		}
 
-
-		addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+		if (m_spellInfo->Id != 379) // Earthshield heal bonus is calc on cast, not on heal -- @Rikub
+			addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
 		addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
 		m_healing += addhealth;

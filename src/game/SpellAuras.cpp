@@ -2161,10 +2161,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 					if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->GetSession()->PlayerLoading())
 					{
 						if (Unit* caster = GetCaster())
-						{
-							m_modifier.m_amount = caster->SpellHealingBonusDone(target, GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE);
-							m_modifier.m_amount = target->SpellHealingBonusTaken(caster, GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE);
-						}
+							m_modifier.m_amount = caster->SpellHealingBonusDone(target, GetSpellProto(), m_modifier.m_amount, HEAL);
 					}
 					return;
 				}
