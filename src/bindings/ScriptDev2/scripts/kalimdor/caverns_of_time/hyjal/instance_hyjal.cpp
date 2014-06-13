@@ -339,6 +339,8 @@ void instance_mount_hyjal::SetData(uint32 uiType, uint32 uiData)
 		break;
 	case TYPE_ARCHIMONDE:
 		m_auiEncounter[uiType] = uiData;
+		if (uiData == IN_PROGRESS)
+			m_bCanSpawnHordeGem = false;
 		break;
 
 	case TYPE_TRASH_COUNT:
