@@ -627,7 +627,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		m_fTargetMoveY = aEyeBlastPos[uiTargetLoc].fY;
 		m_fTargetMoveZ = aEyeBlastPos[uiTargetLoc].fZ;
 		m_creature->SummonCreature(NPC_ILLIDAN_TARGET, aEyeBlastPos[uiSpawnLoc].fX, aEyeBlastPos[uiSpawnLoc].fY, aEyeBlastPos[uiSpawnLoc].fZ, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
-		countBlast++;
+
 		return true;
 	}
 
