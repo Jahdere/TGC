@@ -327,7 +327,7 @@ void AddSC_boss_grandmaster_vorpil()
     newscript->RegisterSelf();
 	
     newscript = new Script;
-    newscript->Name = "npc_void_traveler";
+    newscript->Name = "mob_void_traveler";
     newscript->GetAI = &GetAI_mob_void_traveler;
     newscript->RegisterSelf();
 }
