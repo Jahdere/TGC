@@ -906,6 +906,7 @@ struct MANGOS_DLL_DECL advisor_base_ai : public ScriptedAI
                 DoStartMovement(m_creature->getVictim());
             m_bCanFakeDeath = false;
             m_bFakeDeath = false;
+            DoResetThreat();
         }
     }
 };
