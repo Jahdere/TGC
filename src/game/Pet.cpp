@@ -293,6 +293,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     // load spells/cooldowns/auras
     _LoadAuras(timediff);
+    if (BattleGround* bg = owner->GetBattleGround())
+    {
+        if (bg->isArena() && bg->GetStatus() == STATUS_WAIT_JOIN)
+            owner->CastSpell(this, SPELL_ARENA_PREPARATION, true);
+    }
 
     // init AB
     if (is_temporary_summoned)
