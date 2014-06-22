@@ -962,7 +962,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			if (m_uiFlameBurstTimer < uiDiff)
 			{
 				if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BURST) == CAST_OK)
-					m_uiFlameBurstTimer = 20000;
+					m_uiFlameBurstTimer = 15000;
 			}
 			else
 				m_uiFlameBurstTimer -= uiDiff;
