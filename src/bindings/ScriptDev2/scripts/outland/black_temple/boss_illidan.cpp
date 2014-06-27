@@ -290,18 +290,13 @@ static const Locations aIllidariElitesPos[MAX_ILLIDARI_ELITES] =
 static const Locations aEyeBlastPos[] =
 {
 	// spawn
-	{650.600f, 258.124f, 352.996f},             // back left
-	{651.867f, 353.212f, 352.996f},             // back right
-	{710.010f, 266.950f, 352.996f},             // front left
-	{711.003f, 343.562f, 352.996f},             // front right
-	// target - left
-	{742.212f, 338.333f, 352.996f},             // front right
-	{674.559f, 375.761f, 352.996f},             // back right
-	// target - right
-	{741.545f, 270.640f, 352.996f},             // front left
-	{671.943f, 235.718f, 352.996f},             // back left
-	// center back
-	{639.511f, 305.852f, 353.264f}
+	{637.806f, 307.600f, 353.186f},	// back
+	{727.801f, 305.120f, 352.996f},	// front
+	//target
+	{710.242f, 267.065f, 352.996f},	// front right
+	{738.744f, 345.131f, 352.996f}, // front left
+	{648.739f, 266.539f, 352.996f},	// back right
+	{646.646f, 338.843f, 352.996f}	// back left
 };
 
 /*######
@@ -402,8 +397,6 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 
 	void Aggro(Unit* /*pWho*/) override
 	{
-		m_creature->RemoveAurasDueToSpell(SPELL_KNEEL_INTRO);
-		SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
 		if (m_pInstance)
 			m_pInstance->SetData(TYPE_ILLIDAN, IN_PROGRESS);
 	}
@@ -486,6 +479,8 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			break;
 		case EQUIP_ID_MAIN_HAND:
 			SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
+			m_creature->UpdateDamagePhysical(BASE_ATTACK);
+			m_creature->UpdateDamagePhysical(OFF_ATTACK);
 			break;
 		case NPC_ILLIDAN_STORMRAGE:
 			m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
@@ -564,7 +559,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 			DoCastSpellIfCan(pSummoned, SPELL_EYE_BLAST_DUMMY, CAST_TRIGGERED);
 			break;
 		case NPC_DEMON_FIRE:
-			pSummoned->CastSpell(pSummoned, SPELL_DEMON_FIRE, true, NULL, NULL, m_creature->GetObjectGuid());
+			pSummoned->CastSpell(pSummoned, SPELL_DEMON_FIRE, false, NULL, NULL, m_creature->GetObjectGuid());
 			break;
 		case NPC_SHADOW_DEMON:
 			pSummoned->CastSpell(pSummoned, SPELL_SHADOW_DEMON_PASSIVE, true);
@@ -613,14 +608,12 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 		DoScriptText(SAY_EYE_BLAST, m_creature);
 
 		// Set spawn and target loc
-		uint8 uiSpawnLoc = urand(0, 3);
+		uint8 uiSpawnLoc = urand(0, 1);
 		uint8 uiTargetLoc = 0;
 		switch (uiSpawnLoc)
 		{
-		case 0: uiTargetLoc = 4; break;
-		case 1: uiTargetLoc = 6; break;
-		case 2: uiTargetLoc = 8; break;
-		case 3: uiTargetLoc = 8; break;
+		case 0: uiTargetLoc = urand(2, 3); break;
+		case 1: uiTargetLoc = urand(4, 5); break;
 		}
 
 		m_fTargetMoveX = aEyeBlastPos[uiTargetLoc].fX;
@@ -866,6 +859,8 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 						{
 							DoCastSpellIfCan(pGlaive2, SPELL_THROW_GLAIVE, CAST_TRIGGERED);
 							SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
+							m_creature->UpdateDamagePhysical(BASE_ATTACK);
+							m_creature->UpdateDamagePhysical(OFF_ATTACK);
 							m_uiSummonBladesTimer = 0;
 						}
 					}
@@ -882,7 +877,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 				if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
 				{
 					if (DoCastSpellIfCan(pTarget, SPELL_FIREBALL) == CAST_OK)
-						m_uiFireballTimer = urand(2000, 3000);
+						m_uiFireballTimer = urand(2000, 5000);
 				}
 			}
 			else
@@ -991,6 +986,9 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 					case 1:
 						// Set the equipment and land
 						SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
+
+						m_creature->UpdateDamagePhysical(BASE_ATTACK);
+						m_creature->UpdateDamagePhysical(OFF_ATTACK);
 
 						m_creature->SetLevitate(false);
 						m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
@@ -1548,7 +1546,7 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 		{
 			if (DoCastSpellIfCan(m_creature, SPELL_FLAME_BLAST) == CAST_OK)
 			{
-				m_uiFlameBlastTimer = urand(15000, 20000);
+				m_uiFlameBlastTimer = urand(10000, 15000);
 				m_uiSummonBlazeTimer = 2000;
 			}
 		}
