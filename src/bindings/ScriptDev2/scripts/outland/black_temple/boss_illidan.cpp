@@ -1625,8 +1625,8 @@ struct MANGOS_DLL_DECL npc_flame_of_azzinothAI : public ScriptedAI
 				{
 					if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
 					{
-						// Check If any raid member is farther away than 25 yards from *both* Blades
-						if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(pClosestGlaive, 25.0f) && !pTarget->IsWithinDist(pFarthestGlaive, 25.0f))
+						// Check If any raid member is farther away than 30 yards from *both* Blades
+						if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(pClosestGlaive, 30.0f) && !pTarget->IsWithinDist(pFarthestGlaive, 30.0f))
 							suitableTargets.push_back(pTarget);
 					}
 				}
