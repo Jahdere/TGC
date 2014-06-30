@@ -1808,7 +1808,6 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 		// victim's damage shield
 		std::set<Aura*> alreadyDone;
 		AuraList const& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
-		AuraList const& vDamageShieldMods = pVictim->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
 		for (AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
 		{
 			if (alreadyDone.find(*i) == alreadyDone.end())
@@ -1817,11 +1816,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 				uint32 damage = (*i)->GetModifier()->m_amount;
 				SpellEntry const* i_spellProto = (*i)->GetSpellProto();
 				
-                for (AuraList::const_iterator j = vDamageShieldMods.begin(); j != vDamageShieldMods.end(); j++)
-                {
-                    if ((*j)->isAffectedOnSpell(i_spellProto))
-                        damage += (*j)->GetModifier()->m_amount;
-                }
+				if (pVictim->GetTypeId() == TYPEID_PLAYER)
+					((Player*)pVictim)->ApplySpellMod(i_spellProto->Id, SPELLMOD_DAMAGE, damage);
 
 				// Calculate absorb resist ??? no data in opcode for this possibly unable to absorb or resist?
 				// uint32 absorb;
