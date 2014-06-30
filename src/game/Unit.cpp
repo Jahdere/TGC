@@ -7270,11 +7270,11 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 		if (!u->IsHostileTo(this))
 		{
 			// player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
-			if (GetTypeId() == TYPEID_PLAYER && u->GetTypeId() == TYPEID_PLAYER)
+			if (u->GetTypeId() == TYPEID_PLAYER)
 			{
-				if (((Player*)this)->IsGroupVisibleFor(((Player*)u)))
+				Player const* selfOrOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
+				if (selfOrOwner && selfOrOwner->IsGroupVisibleFor(((Player*)u)))
 					return true;
-
 				// else apply same rules as for hostile case (detecting check for stealth)
 			}
 		}
