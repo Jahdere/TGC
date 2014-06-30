@@ -437,11 +437,7 @@ void BattleGround::Update(uint32 diff)
                 for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
                 {
                     if (Player* player = sObjectMgr.GetPlayer(itr->first))
-                    {
                         player->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
-                        if (player->GetPet())
-                            player->GetPet()->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
-                    }
                 }
 
                 CheckArenaWinConditions();
@@ -1180,11 +1176,7 @@ void BattleGround::AddPlayer(Player* plr)
         plr->UnsummonPetTemporaryIfAny();
 
         if (GetStatus() == STATUS_WAIT_JOIN)                // not started yet
-        {
             plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
-            if (plr->GetPet())
-                plr->CastSpell(plr->GetPet(), SPELL_ARENA_PREPARATION, true);
-        }
     }
     else
     {
