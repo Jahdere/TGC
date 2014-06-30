@@ -398,7 +398,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         uint32 curmana = GetPower(POWER_MANA);
 
         // stable and not in slot saves
-        if (mode != PET_SAVE_AS_CURRENT)
+        if (mode != PET_SAVE_AS_CURRENT && mode != PET_SAVE_NOT_IN_SLOT)
             RemoveAllAuras();
 
         // save pet's data as one single transaction
