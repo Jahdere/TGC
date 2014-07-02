@@ -1019,6 +1019,7 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 					// Drop the transform time from the spell timers
 					if (m_creature->HasAura(SPELL_DEMON_FORM))
 					{
+						SetEquipmentSlots(false, EQUIP_UNEQUIP, EQUIP_UNEQUIP, EQUIP_NO_CHANGE);
 						DoResetThreat();
 						m_uiPhase = PHASE_DUAL_DEMON;
 						m_uiShadowDemonTimer = 17000;
@@ -1027,6 +1028,10 @@ struct MANGOS_DLL_DECL boss_illidan_stormrageAI : public ScriptedAI, private Dia
 					}
 					else
 					{
+						SetEquipmentSlots(false, EQUIP_ID_MAIN_HAND, EQUIP_ID_OFF_HAND, EQUIP_NO_CHANGE);
+						m_creature->UpdateDamagePhysical(BASE_ATTACK);
+						m_creature->UpdateDamagePhysical(OFF_ATTACK);
+
 						DoResetThreat();
 						m_uiPhase = m_uiPrevPhase;
 						m_uiEnrageTimer = 40000;
