@@ -1030,28 +1030,30 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
 				return;
 			}
 
-			(*(itr_team[BG_TEAM_ALLIANCE]))->OpponentsTeamRating = (*(itr_team[BG_TEAM_HORDE]))->ArenaTeamRating;
-			DEBUG_LOG("setting oposite teamrating for team %u to %u", (*(itr_team[BG_TEAM_ALLIANCE]))->ArenaTeamId, (*(itr_team[BG_TEAM_ALLIANCE]))->OpponentsTeamRating);
-			(*(itr_team[BG_TEAM_HORDE]))->OpponentsTeamRating = (*(itr_team[BG_TEAM_ALLIANCE]))->ArenaTeamRating;
-			DEBUG_LOG("setting oposite teamrating for team %u to %u", (*(itr_team[BG_TEAM_HORDE]))->ArenaTeamId, (*(itr_team[BG_TEAM_HORDE]))->OpponentsTeamRating);
+			group1->OpponentsTeamRating = group2->ArenaTeamRating;
+			DEBUG_LOG("Setting oposite teamrating for team %u to %u", group1->ArenaTeamId, group1->OpponentsTeamRating);
+			group2->OpponentsTeamRating = group1->ArenaTeamRating;
+			DEBUG_LOG("Setting oposite teamrating for team %u to %u", group2->ArenaTeamId, group2->OpponentsTeamRating);
 			// now we must move team if we changed its faction to another faction queue, because then we will spam log by errors in Queue::RemovePlayer
-			if ((*(itr_team[BG_TEAM_ALLIANCE]))->GroupTeam != ALLIANCE)
+			if (group1->GroupTeam != ALLIANCE)
 			{
 				// add to alliance queue
-				m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(*(itr_team[BG_TEAM_ALLIANCE]));
+				m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].push_front(group1);
 				// erase from horde queue
+				itr_team[BG_TEAM_ALLIANCE] = std::find(m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin(), m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].end(), group1);
 				m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].erase(itr_team[BG_TEAM_ALLIANCE]);
-				itr_team[BG_TEAM_ALLIANCE] = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin();
+				group1 = *m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin();
 			}
-			if ((*(itr_team[BG_TEAM_HORDE]))->GroupTeam != HORDE)
+			if (group2->GroupTeam != HORDE)
 			{
-				m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].push_front(*(itr_team[BG_TEAM_HORDE]));
+				m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].push_front(group2);
+				itr_team[BG_TEAM_HORDE] = std::find(m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].begin(), m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].end(), group2);
 				m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].erase(itr_team[BG_TEAM_HORDE]);
-				itr_team[BG_TEAM_HORDE] = m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin();
+				group2 = *m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].begin();
 			}
 
-			InviteGroupToBG(*(itr_team[BG_TEAM_ALLIANCE]), arena, ALLIANCE);
-			InviteGroupToBG(*(itr_team[BG_TEAM_HORDE]), arena, HORDE);
+			InviteGroupToBG(group1, arena, ALLIANCE);
+			InviteGroupToBG(group2, arena, HORDE);
 
 			DEBUG_LOG("Starting rated arena match!");
 
