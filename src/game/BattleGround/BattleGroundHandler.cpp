@@ -428,7 +428,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
                 _player->m_taxi.ClearTaxiDestinations();
             }
 
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime(), bg->GetArenaType());
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime(), bg->GetArenaType(), _player->GetBGTeam());
             _player->GetSession()->SendPacket(&data);
             // remove battleground queue status from BGmgr
             bgQueue.RemovePlayer(_player->GetObjectGuid(), false);
@@ -520,7 +520,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recv_data*/)
             {
                 // this line is checked, i only don't know if GetStartTime is changing itself after bg end!
                 // send status in BattleGround
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, i, STATUS_IN_PROGRESS, bg->GetEndTime(), bg->GetStartTime(), arenaType);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, i, STATUS_IN_PROGRESS, bg->GetEndTime(), bg->GetStartTime(), arenaType, _player->GetBGTeam());
                 SendPacket(&data);
                 continue;
             }
