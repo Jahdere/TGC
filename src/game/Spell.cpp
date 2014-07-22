@@ -4915,7 +4915,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 				// Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
 				if (m_caster->GetTypeId() == TYPEID_PLAYER)
 					if (Unit* target = m_targets.getUnitTarget())
-						if (target != m_caster && int32(target->getPowerType()) != m_spellInfo->EffectMiscValue[i])
+						if (target != m_caster && (int32(target->getPowerType()) != m_spellInfo->EffectMiscValue[i]) || target->GetMaxPower(target->getPowerType()) == 0)
 							return SPELL_FAILED_BAD_TARGETS;
 				break;
 			}
