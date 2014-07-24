@@ -2909,6 +2909,10 @@ void Spell::cast(bool skipCheck)
 	if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
 		m_caster->SetInFront(m_targets.getUnitTarget());
 
+	// Recalc power if necessary
+	if (m_casttime && !m_IsTriggeredSpell)
+		m_powerCost = CalculatePowerCost(m_spellInfo, m_caster, this, m_CastItem);
+
 	SpellCastResult castResult = CheckPower();
 	if (castResult != SPELL_CAST_OK)
 	{
