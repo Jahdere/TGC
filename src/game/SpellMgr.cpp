@@ -2125,6 +2125,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 				((spellInfo_2->SpellFamilyFlags & UI64LIT(0x1)) && (spellInfo_1->SpellFamilyFlags & UI64LIT(0x400000))))
 				return false;
 		}
+		// Arcane missiles and any arcane missile like icon
+		if (spellInfo_1->SpellIconID == 225 && spellInfo_2->SpellIconID == 225)
+			return false;
+
 		// Detect Invisibility and Mana Shield (multi-family check)
 		if (spellInfo_2->Id == 132 && spellInfo_1->SpellIconID == 209 && spellInfo_1->SpellVisual == 968)
 			return false;
@@ -2269,6 +2273,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 				(spellInfo_2->Id == 16864 && spellInfo_1->Id == 37311))
 				return false;
 		}
+		// Moonfire and any arcane missiles icons
+		if (spellInfo_1->SpellFamilyFlags & UI64LIT(0x2) && spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo_2->SpellIconID == 225)
+			return false;
 
 		// Leader of the Pack and Scroll of Stamina (multi-family check)
 		if (spellInfo_1->Id == 24932 && spellInfo_2->SpellIconID == 312 && spellInfo_2->SpellVisual == 216)
