@@ -687,6 +687,11 @@ void Spell::prepareDataForTriggerSystem()
 			if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0001000000200000)))
 				m_canTrigger = true;
 			break;
+		case SPELLFAMILY_SHAMAN:
+			// Lightning overload procs can trigger
+			if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000000000003)))
+				m_canTrigger = true;
+			break;
 		default:
 			break;
 		}
