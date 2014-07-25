@@ -44,7 +44,8 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     if (updateDestination || !i_path)
     {
         // prevent redundant micro-movement for pets, other followers.
-        if (i_offset && i_target->IsWithinDistInMap(&owner, 2 * i_offset))
+		if (i_offset && i_target->IsWithinDistInMap(&owner, 2 * i_offset) && 
+			(i_offset <= 3.0f || i_target->IsWithinLOSInMap(&owner)))
         {
             if (!owner.movespline->Finalized())
                 return;
