@@ -442,9 +442,18 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 			else
 			{
 				// Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
-				// SpellIcon 2560 is Spell 46687, does not have this flag
-				if (spellInfo->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF) || spellInfo->SpellIconID == 2560)
+				// SpellIcon 2560 is Spell 46687, does not have this flag. So does Spell 6114
+				if (spellInfo->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF) || spellInfo->SpellIconID == 2560 || spellInfo->Id == 6114)
 					return SPELL_WELL_FED;
+				// Also include beer related buffs as well fed
+				else if (spellInfo->SpellVisual == 101)
+				{
+					for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+					{
+						if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STAT)
+							return SPELL_WELL_FED;
+					}
+				}
 			}
 			break;
 		}
