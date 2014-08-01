@@ -192,6 +192,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
+		for (uint8 i = 0; i < MAX_WEAPONS; i++)
+			m_agSummonedWeapons[i].Clear();
     }
 
     ScriptedInstance* m_pInstance;
@@ -218,6 +220,9 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
     uint8 m_uiPhaseSubphase;
     uint8 m_uiCountBeamer;
     uint8 m_uiCountPyro;
+
+	uint8 m_uiSummonedWeaponsCount;
+	ObjectGuid m_agSummonedWeapons[MAX_WEAPONS];
 
     void Reset()
     {
@@ -246,6 +251,8 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
         m_uiCountBeamer             = 0;
         m_uiCountPyro               = 0;
+		
+		m_uiSummonedWeaponsCount    = 0;
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -314,6 +321,14 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
 
         DoCastSpellIfCan(m_creature, SPELL_REMOVE_ENCHANTS_WEAPON, CAST_TRIGGERED);
         CleanRemoteToy();
+
+		// Despawn weapons creatures
+		for (uint8 i = 0; i < MAX_WEAPONS; ++i)
+		{
+			if (Creature* weapon = m_creature->GetMap()->GetCreature(m_agSummonedWeapons[i]))
+				weapon->ForcedDespawn();
+			m_agSummonedWeapons[i].Clear();
+		}
     }
 
     // This function remove all remote toy to prevent fail aggro during reset
@@ -342,13 +357,15 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                 pSummoned->CastSpell(pSummoned, SPELL_BEAM_EFFECT_1, true);
             m_uiCountBeamer++;
         }
-        // Start combat for Weapons of Phoenix
+        // Start combat for Weapons and Phoenix
         else
         {
             pSummoned->SetInCombatWithZone();
             // Weapons corpse despawn after 1min
-            if(pSummoned->GetEntry() != NPC_PHOENIX)
-                pSummoned->SetCorpseDelay(MINUTE);
+			if (pSummoned->GetEntry() != NPC_PHOENIX) {
+				pSummoned->SetCorpseDelay(MINUTE);
+				m_agSummonedWeapons[m_uiSummonedWeaponsCount++] = pSummoned->GetObjectGuid();
+			}
         }
     }
 
