@@ -1115,14 +1115,14 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 
         if (pTarget)
         {
-            if (pTarget->HasAura(SPELL_CONFLAGRATION) && !pTarget->HasAura(36480)) //37019 -> Aura triggered by SPELL_CONFLAGRATION @Kordbc 36480 -> Baton Immune
+			if ((pTarget->HasAura(SPELL_CONFLAGRATION) && !pTarget->HasAura(36480)) || pTarget->IsImmunedToDamage(SPELL_SCHOOL_MASK_FIRE)) //37019 -> Aura triggered by SPELL_CONFLAGRATION @Kordbc 36480 -> Baton Immune
             {
                 ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
                 for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                 {
                     if (Unit* pNewTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
                     {
-                        if (pNewTarget->GetTypeId() == TYPEID_PLAYER && pNewTarget != pTarget)
+						if (pNewTarget->GetTypeId() == TYPEID_PLAYER && pNewTarget != pTarget && !pNewTarget->IsImmunedToDamage(SPELL_SCHOOL_MASK_FIRE))
                         {
                             AttackStart(pNewTarget);
                             return true;
