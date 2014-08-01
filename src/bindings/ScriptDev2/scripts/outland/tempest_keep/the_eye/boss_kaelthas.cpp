@@ -1138,11 +1138,11 @@ struct MANGOS_DLL_DECL boss_grand_astromancer_capernianAI : public advisor_base_
 
     void UpdateAI(const uint32 uiDiff)
     {
-        if (!SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Don't use abilities during fake death
-        if (m_bFakeDeath)
+		// Don't use abilities during fake death
+		if (m_bFakeDeath)
+			return;
+		
+		if (!SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         if (m_uiArcaneExplosionTimer < uiDiff)
