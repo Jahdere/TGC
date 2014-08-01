@@ -4324,7 +4324,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 				}
 			}
 
-			if (!m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
+			if (!m_IsTriggeredSpell && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
 				return SPELL_FAILED_LINE_OF_SIGHT;
 
 			// auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
@@ -4380,7 +4380,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 				}
 				else if (!pet->isAlive())
 					return SPELL_FAILED_TARGETS_DEAD;
-				else if(!m_caster->IsWithinLOSInMap(pet))
+				else if (!m_caster->IsWithinLOSInMap(pet) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED))
 					return SPELL_FAILED_LINE_OF_SIGHT;
 				break;
 			}
