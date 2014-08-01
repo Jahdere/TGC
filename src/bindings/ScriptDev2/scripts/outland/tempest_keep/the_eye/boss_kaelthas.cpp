@@ -699,10 +699,10 @@ struct MANGOS_DLL_DECL boss_kaelthasAI : public ScriptedAI
                         {
                            if(m_uiCountPyro < 3)
                            {
-                                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
+                                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST, CAST_FORCE_CAST) == CAST_OK)
                                 {
                                     DoScriptText(EMOTE_PYROBLAST, m_creature);
-                                    m_uiPyroblastTimer = 1000;
+                                    m_uiPyroblastTimer = 4000;
                                     m_uiFireballTimer = 20000;
                                     m_uiArcaneDisruptionTimer  = 20000;
                                     m_uiCountPyro++;
