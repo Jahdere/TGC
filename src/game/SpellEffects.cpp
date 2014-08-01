@@ -4190,7 +4190,7 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx)
 	if (!unitTarget)
 		return;
 
-	if (unitTarget->IsTaxiFlying())
+	if (unitTarget->IsTaxiFlying() || unitTarget == m_caster)
 		return;
 
 	float fx, fy, fz;
