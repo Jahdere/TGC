@@ -4865,6 +4865,9 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 	case 31408:			// Lesser Doomguard War Stomp
 		weaponPercent = false;
 		break;
+	case 44949:			// Ignore 50% malus on offhand whirlwind
+		weaponDamagePercentMod = 1.0f;
+		break;
 	}
 
 	// + weapon damage with applied weapon% dmg to base weapon damage in call
