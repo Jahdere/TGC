@@ -6807,6 +6807,14 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 		return;
 	Player* _player = (Player*)m_caster;
 	Pet* pet = _player->GetPet();
+	if (!pet && _player->HasDeadPet())
+	{
+		pet = new Pet;
+		// Dead pet in DB, load corpse before rez
+		if (!pet->LoadPetFromDB((Player*)m_caster))
+			delete pet;
+	}
+
 	if (!pet)
 		return;
 	if (pet->isAlive())

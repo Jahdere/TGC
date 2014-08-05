@@ -92,6 +92,29 @@ void Pet::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
+bool Pet::IsDeadInDB(Player* owner)
+{
+    uint32 ownerid = owner->GetGUIDLow();
+    QueryResult* result;
+    result = CharacterDatabase.PQuery("SELECT id, entry, owner, modelid, level, exp, Reactstate, loyaltypoints, loyalty, trainpoint, slot, name, renamed, curhealth, curmana, curhappiness, abdata, TeachSpelldata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType "
+        "FROM character_pet WHERE owner = '%u' AND (slot = '%u' OR slot > '%u') ",
+        ownerid, PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT);
+
+    if (!result)
+        return false;
+
+    Field* fields = result->Fetch();
+    // Check petType and savedHealth
+    if (PetType(fields[22].GetUInt8()) == HUNTER_PET && fields[13].GetUInt32() < 1)
+    {
+        delete result;
+        return true;
+    }
+
+    delete result;
+    return false;
+}
+
 bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current)
 {
     m_loading = true;
@@ -158,9 +181,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     PetType pet_type = PetType(fields[22].GetUInt8());
+    uint32 savedhealth = fields[13].GetUInt32();
+    uint32 savedmana = fields[14].GetUInt32();
     if (pet_type == HUNTER_PET)
     {
-        if (!creatureInfo->isTameable())
+        // Do not load pet corpses as current
+        if (!creatureInfo->isTameable() || (current && savedhealth < 1))
         {
             delete result;
             return false;
@@ -224,6 +250,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
             SetPower(POWER_HAPPINESS, fields[15].GetUInt32());
             setPowerType(POWER_FOCUS);
+            owner->SetDeadPet(false);
             break;
         default:
             sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
@@ -241,14 +268,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     m_charmInfo->SetReactState(ReactStates(fields[6].GetUInt8()));
     m_loyaltyPoints = fields[7].GetInt32();
 
-    uint32 savedhealth = fields[13].GetUInt32();
-    uint32 savedmana = fields[14].GetUInt32();
-
     // set current pet as current
     // 0=current
     // 1..MAX_PET_STABLES in stable slot
     // PET_SAVE_NOT_IN_SLOT(100) = not stable slot (summoning))
-    if (fields[10].GetUInt32() != 0)
+    if (fields[10].GetUInt32() != PET_SAVE_AS_CURRENT)
     {
         CharacterDatabase.BeginTransaction();
 
@@ -310,6 +334,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     {
         SetHealth(GetMaxHealth());
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    }
+    else if (getPetType() == HUNTER_PET && savedhealth < 1)
+    {
+        SetDeathState(JUST_DIED);
+        SetHealth(0);
     }
     else
     {
@@ -455,7 +484,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1));
-        savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
+        savePet.addUInt32(curhealth < 1 ? (getPetType() == HUNTER_PET ? 0 : 1) : curhealth);
         savePet.addUInt32(curmana);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
@@ -946,6 +975,9 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
             case GUARDIAN_PET:
                 owner->RemoveGuardian(this);
                 break;
+            case HUNTER_PET:
+                if (p_owner && (mode == PET_SAVE_NOT_IN_SLOT || mode == PET_SAVE_AS_CURRENT) && GetHealth() < 1)
+                    p_owner->SetDeadPet(true);
             default:
                 if (owner->GetPetGuid() == GetObjectGuid())
                     owner->SetPet(NULL);

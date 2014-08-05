@@ -5034,10 +5034,11 @@ SpellCastResult Spell::CheckCast(bool strict)
 		case SPELL_EFFECT_SUMMON_DEAD_PET:
 			{
 				Creature* pet = m_caster->GetPet();
-				if (!pet)
+				Player* p = (Player*)m_caster;
+				if (!pet && (!p || !p->HasDeadPet()))
 					return SPELL_FAILED_NO_PET;
 
-				if (pet->isAlive())
+				if (pet && pet->isAlive())
 					return SPELL_FAILED_ALREADY_HAVE_SUMMON;
 
 				break;
@@ -5075,6 +5076,9 @@ SpellCastResult Spell::CheckCast(bool strict)
 					else
 						return SPELL_FAILED_ALREADY_HAVE_SUMMON;
 				}
+
+				if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->HasDeadPet())
+					return SPELL_FAILED_ALREADY_HAVE_SUMMON;
 
 				if (m_caster->GetCharmGuid())
 					return SPELL_FAILED_ALREADY_HAVE_CHARM;

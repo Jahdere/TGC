@@ -429,6 +429,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_social = NULL;
 
+    m_hasDeadPet = false;
+
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
     m_groupUpdateMask = 0;
@@ -15609,7 +15611,11 @@ void Player::LoadPet()
     {
         Pet* pet = new Pet;
         if (!pet->LoadPetFromDB(this, 0, 0, true))
+        {
+            if (pet->IsDeadInDB(this))
+                SetDeadPet(true);
             delete pet;
+        }
     }
 }
 

@@ -1032,6 +1032,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemovePet(PetSaveMode mode);
         void RemoveMiniPet();
         Pet* GetMiniPet() const;
+        void SetDeadPet(bool pet) { m_hasDeadPet = pet; }
+        bool HasDeadPet() { return m_hasDeadPet; }
 
         // use only in Pet::Unsummon/Spell::DoSummon
         void _SetMiniPet(Pet* pet) { m_miniPetGuid = pet ? pet->GetObjectGuid() : ObjectGuid(); }
@@ -2341,6 +2343,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_auraUpdateMask;
 
         ObjectGuid m_miniPetGuid;
+        bool m_hasDeadPet;
 
         // Player summoning
         time_t m_summon_expire;
