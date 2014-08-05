@@ -976,7 +976,7 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= NULL*/)
                 owner->RemoveGuardian(this);
                 break;
             case HUNTER_PET:
-                if (p_owner && (mode == PET_SAVE_NOT_IN_SLOT || mode == PET_SAVE_AS_CURRENT) && GetHealth() < 1)
+				if (p_owner && (mode == PET_SAVE_AS_CURRENT || mode > PET_SAVE_LAST_STABLE_SLOT) && GetHealth() < 1)
                     p_owner->SetDeadPet(true);
             default:
                 if (owner->GetPetGuid() == GetObjectGuid())
