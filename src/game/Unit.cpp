@@ -6971,6 +6971,9 @@ void Unit::Unmount(bool from_aura)
 		SendMessageToSet(&data, true);
 	}
 
+	if (GetHealth() == 0)
+		return;
+
 	// only resummon old pet if the player is already added to a map
 	// this prevents adding a pet to a not created map which would otherwise cause a crash
 	// (it could probably happen when logging in after a previous crash)
