@@ -2937,6 +2937,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 //   Resist
 SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool CanReflect)
 {
+	// Execute precast is not allowed to miss (client won't even aknowledge it)
+	if (spell->SpellIconID == 1648 && spell->Id != 20647)
+		return SPELL_MISS_NONE;
 
 	// Return evade for units in evade mode
 	if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())

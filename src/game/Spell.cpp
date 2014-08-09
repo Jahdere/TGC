@@ -1093,6 +1093,8 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 			if (BTAura)
 				m_caster->CastSpell(m_caster, BTAura, true);
 		}
+		else if (m_spellInfo->Id == 20647) // Execute should only reset rage on true damage
+			m_caster->SetPower(POWER_RAGE, 0);
 	}
 	// Passive spell hits/misses or active spells only misses (only triggers if proc flags set)
 	else if (procAttacker || procVictim)
@@ -6389,7 +6391,8 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 bool Spell::IsNeedSendToClient() const
 {
 	return m_spellInfo->SpellVisual != 0 || IsChanneledSpell(m_spellInfo) ||
-		m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
+		m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell) ||
+		m_spellInfo->Id == 20647;
 }
 
 bool Spell::IsTriggeredSpellWithRedundentCastTime() const

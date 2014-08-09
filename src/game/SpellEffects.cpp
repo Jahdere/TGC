@@ -1838,8 +1838,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 					return;
 
 				int32 basePoints0 = damage + int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[eff_idx]);
-				m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
-				m_caster->SetPower(POWER_RAGE, 0);
+				m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true);
 				return;
 			}
 			// Warrior's Wrath
