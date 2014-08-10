@@ -4929,6 +4929,9 @@ void Spell::EffectInterruptCast(SpellEffectIndex /*eff_idx*/)
 	{
 		if (Spell* spell = unitTarget->GetCurrentSpell(CurrentSpellTypes(i)))
 		{
+			if (spell->getState() > SPELL_STATE_CASTING) // Spells shouldn't be interruptible when finished casting
+				return;
+
 			SpellEntry const* curSpellInfo = spell->m_spellInfo;
 			// check if we can interrupt spell
 			if (((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE) || curSpellInfo->Id == 41426) // Spirit Chock ??
