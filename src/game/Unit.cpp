@@ -3370,6 +3370,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 					InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
 				m_AutoRepeatFirstCast = true;
 			}
+			m_undelayableAutoShot = false;
 		} break;
 
 	case CURRENT_CHANNELED_SPELL:
@@ -3414,14 +3415,14 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 	pSpell->m_selfContainer = &(m_currentSpells[pSpell->GetCurrentContainer()]);
 }
 
-void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed)
+void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool sendAutoRepeatCancel)
 {
 	MANGOS_ASSERT(spellType < CURRENT_MAX_SPELL);
 
 	if (m_currentSpells[spellType] && (withDelayed || m_currentSpells[spellType]->getState() != SPELL_STATE_DELAYED))
 	{
 		// send autorepeat cancel message for autorepeat spells
-		if (spellType == CURRENT_AUTOREPEAT_SPELL)
+		if (spellType == CURRENT_AUTOREPEAT_SPELL && sendAutoRepeatCancel)
 		{
 			if (GetTypeId() == TYPEID_PLAYER)
 				((Player*)this)->SendAutoRepeatCancel();

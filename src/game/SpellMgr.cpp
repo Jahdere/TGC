@@ -121,6 +121,9 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 		return 0;
 
 	int32 castTime = spellCastTimeEntry->CastTime;
+	// Ranged +500ms casttime should be affected by ranged attack speed
+	if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
+		castTime += 500;
 
 	if (spell)
 	{
@@ -135,9 +138,6 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 				castTime = int32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
 		}
 	}
-
-	if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
-		castTime += 500;
 
 	return (castTime > 0) ? uint32(castTime) : 0;
 }

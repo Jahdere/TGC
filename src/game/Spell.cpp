@@ -2770,6 +2770,26 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 		return;
 	}
 
+	// Casting when autoshot is active
+	if (m_caster->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL) && !m_IsTriggeredSpell)
+	{
+		// Do not interrupt triggered autoshot with casted autoshot
+		if (m_caster->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL)->m_spellInfo->Id == m_spellInfo->Id)
+		{
+			m_caster->m_undelayableAutoShot = true;
+			SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+			finish(false);
+			return;
+		}
+		// Do not interrupt autoshot when casted with "!" macro
+		if (m_caster->m_undelayableAutoShot && m_caster->getAttackTimer(RANGED_ATTACK) <= 500)
+		{
+			SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+			finish(false);
+			return;
+		}
+	}
+
 	// Fill cost data
 	m_powerCost = CalculatePowerCost(m_spellInfo, m_caster, this, m_CastItem);
 
