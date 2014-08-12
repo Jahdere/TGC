@@ -4067,19 +4067,29 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     }
 
     Player* target;
+	Pet* pet;
     ObjectGuid target_guid;
     std::string target_name;
-    if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
+	if (!(pet = (Pet*)getSelectedCreature()) && !ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
 
-    int32 oldlevel = target ? target->getLevel() : Player::GetLevelFromDB(target_guid);
-    int32 newlevel = oldlevel + addlevel;
+	if (pet && (!pet->IsControlledByPlayer() || pet->getPetType() != HUNTER_PET))
+		return false;
+		
+	int32 oldlevel = pet ? pet->getLevel() : target ? target->getLevel() : Player::GetLevelFromDB(target_guid);
+	int32 newlevel = oldlevel + addlevel;
 
     if (newlevel < 1)
         newlevel = 1;
 
     if (newlevel > STRONG_MAX_LEVEL)                        // hardcoded maximum level
         newlevel = STRONG_MAX_LEVEL;
+
+	if (pet)
+	{
+		pet->GivePetLevel(newlevel);
+		return true;
+	}
 
     HandleCharacterLevel(target, target_guid, oldlevel, newlevel);
 
