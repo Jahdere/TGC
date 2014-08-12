@@ -494,11 +494,11 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 
 				switch (m_uiShieldGeneratorDown)
 				{
-				case 1: m_uiEnchantedElemental_Timer = urand(6000, 9000); break;
-				case 2: m_uiEnchantedElemental_Timer = urand(6000, 8000); break;
-				case 3: m_uiEnchantedElemental_Timer = urand(6000, 7000); break;
-				case 4: m_uiEnchantedElemental_Timer = urand(6000, 6500); break;
-				default: m_uiEnchantedElemental_Timer = urand(6000, 10000); break;
+				case 1: m_uiEnchantedElemental_Timer = urand(5000, 9000); break;
+				case 2: m_uiEnchantedElemental_Timer = urand(5000, 8000); break;
+				case 3: m_uiEnchantedElemental_Timer = urand(5000, 7000); break;
+				case 4: m_uiEnchantedElemental_Timer = urand(5000, 6000); break;
+				default: m_uiEnchantedElemental_Timer = urand(5000, 10000); break;
 				}
 
 			}
