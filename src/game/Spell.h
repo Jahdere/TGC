@@ -727,6 +727,9 @@ namespace MaNGOS
                         || !itr->getSource()->IsInMap(i_originalCaster))
                     continue;
 
+				if (i_TargetType != SPELL_TARGETS_ALL && (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem()))
+					continue;
+
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_HOSTILE:
@@ -747,9 +750,6 @@ namespace MaNGOS
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                     {
-                        if (itr->getSource()->GetTypeId() == TYPEID_UNIT && ((Creature*)itr->getSource())->IsTotem())
-                            continue;
-
                         if (i_playerControlled)
                         {
                             if (i_originalCaster->IsFriendlyTo(itr->getSource()))
