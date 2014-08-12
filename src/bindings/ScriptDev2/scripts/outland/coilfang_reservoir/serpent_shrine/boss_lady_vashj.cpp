@@ -336,7 +336,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 				//Randomly used in m_uiPhases 1 and 3 on Vashj's target, it's a Shock spell doing 8325-9675 nature damage and stunning the target for 5 seconds,
 				//during which she will not attack her target but switch to the next person on the aggro list.
 				if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOCK_BLAST) == CAST_OK)
-					m_uiShockBlast_Timer = urand(1000, 15000);  //random cooldown
+					m_uiShockBlast_Timer = urand(8000, 15000);  //random cooldown
 			}
 			else 
 				m_uiShockBlast_Timer -= uiDiff;
