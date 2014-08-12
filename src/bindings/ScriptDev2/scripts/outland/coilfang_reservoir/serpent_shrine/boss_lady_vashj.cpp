@@ -133,7 +133,6 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 	uint32 m_uiSummonSporebat_StaticTimer;
 	uint32 m_uiAddSporebat;							// @Lorh : Timer to increase the number of sporebat summoned
 	uint32 m_uiPersuasionTimer;						// @Lorh : Timer For Mind Control
-	uint8  m_uiEnchantedElemental_Pos;
 	uint8  m_uiPhase;
 	uint8  m_uiShieldGeneratorDown;
 	uint8  m_uiCountSporebat;						// @Lorh : Control How Many sporebat are summoned
@@ -161,7 +160,6 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		m_uiPersuasionTimer			   = 30000;		// @Lorh : Here Mind Control timer
 		m_uiAddSporebat				   = 60000;		// @Lorh : Control timer used for increasing m_uiCountSporebat
 		m_uiCountSporebat			   = 1;			// @Lorh : Start with 2 sporebat, it will increase with time
-		m_uiEnchantedElemental_Pos     = 0;
 		m_uiShieldGeneratorDown        = 0;
 		m_uiPhase                      = PHASE_1;
 
@@ -487,15 +485,12 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 			//NPC_ENCHANTED_ELEMENTAL
 			if (m_uiEnchantedElemental_Timer < uiDiff)
 			{
+				uint32 uiPos = urand(0, 7);
+				
 				if (Creature* pElemental = m_creature->SummonCreature(NPC_ENCHANTED_ELEMENTAL,
-					afElementPos[m_uiEnchantedElemental_Pos][0], afElementPos[m_uiEnchantedElemental_Pos][1], afElementPos[m_uiEnchantedElemental_Pos][2], afElementPos[m_uiEnchantedElemental_Pos][3],
+					afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3],
 					TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000))
 					pElemental->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
-
-				if (m_uiEnchantedElemental_Pos == 7)
-					m_uiEnchantedElemental_Pos = 0;
-				else
-					++m_uiEnchantedElemental_Pos;
 
 				switch (m_uiShieldGeneratorDown)
 				{
