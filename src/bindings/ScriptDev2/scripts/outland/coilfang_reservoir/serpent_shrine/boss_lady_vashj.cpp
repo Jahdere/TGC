@@ -647,7 +647,7 @@ struct MANGOS_DLL_DECL mob_tainted_elementalAI : public ScriptedAI
 		{
 			Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
 
-			if (pTarget && pTarget->IsWithinDistInMap(m_creature, 30.0f) && DoCastSpellIfCan(pTarget, SPELL_POISON_BOLT) == CAST_OK)
+			if (pTarget && DoCastSpellIfCan(pTarget, SPELL_POISON_BOLT) == CAST_OK)
 				m_uiPoisonBolt_Timer = urand(5000, 10000);
 		}
 		else
