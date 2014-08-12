@@ -2820,6 +2820,9 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 	// set timer base at cast time
 	ReSetTimer();
 
+	if (m_timer > 0 && m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+		m_caster->SetTargetGuid(m_targets.getUnitTargetGuid());
+
 	// stealth must be removed at cast starting (at show channel bar)
 	// skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
 	if (!m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo))
@@ -3349,6 +3352,9 @@ void Spell::finish(bool ok)
 		else
 			modOwner->ResetSpellModsDueToCanceledSpell(this);
 	}
+
+	if (m_caster->GetTypeId() != TYPEID_PLAYER && !m_caster->hasUnitState(UNIT_STAT_STUNNED) && !m_caster->HasAuraType(SPELL_AURA_MOD_TAUNT))
+		m_caster->SetTargetGuid(m_caster->getVictim() ? m_caster->getVictim()->GetObjectGuid() : ObjectGuid());
 
 	m_spellState = SPELL_STATE_FINISHED;
 
