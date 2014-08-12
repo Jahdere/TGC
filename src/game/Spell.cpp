@@ -1162,7 +1162,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 		if (!realCaster->IsFriendlyTo(unit))
 		{
 			// for delayed spells ignore not visible explicit target
-			if (speed > 0.0f && unit == m_targets.getUnitTarget() &&
+			if (speed > 0.0f && unit == m_targets.getUnitTarget() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) &&
 				!unit->isVisibleForOrDetect(m_caster, m_caster, false))
 			{
 				realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
@@ -6368,7 +6368,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)
 			if (WorldObject* caster = GetCastingObject())
-				if (!target->IsWithinLOSInMap(caster))
+				if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && !target->IsWithinLOSInMap(caster))
 					return false;
 		break;
 	}
