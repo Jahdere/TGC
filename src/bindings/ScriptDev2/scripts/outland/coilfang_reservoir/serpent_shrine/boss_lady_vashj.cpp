@@ -150,7 +150,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		m_uiStaticCharge_Timer         = urand(10000, 25000);
 		m_uiCheck_Timer                = 1000;
 
-		m_uiForkedLightning_Timer      = urand(43000, 49000);
+		m_uiForkedLightning_Timer      = 2000;
 		m_uiEnchantedElemental_Timer   = 10000;
 		m_uiTaintedElemental_Timer     = 50000;
 		m_uiCoilfangElite_Timer        = 45000;
