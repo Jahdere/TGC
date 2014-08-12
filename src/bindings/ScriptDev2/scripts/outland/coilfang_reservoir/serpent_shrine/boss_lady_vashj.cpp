@@ -814,6 +814,8 @@ bool ItemUse_item_tainted_core(Player* pPlayer, Item* pItem, SpellCastTargets co
 			pVashjAI->m_uiShieldGeneratorDown += 1;
 			if (pVashjAI->m_uiShieldGeneratorDown < 4)
 				pVashjAI->RefreshShieldGenerators();
+			else
+				pInstance->SetData(TYPE_VASHJ_PHASE3_CHECK, DONE);
 			pVashj->SetHealth((pVashj->GetMaxHealth() * 0.70) - (pVashj->GetMaxHealth() * 0.05 * pVashjAI->m_uiShieldGeneratorDown));
 
 			//remove this item
