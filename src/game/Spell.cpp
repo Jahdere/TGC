@@ -323,7 +323,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 	// determine reflection
 	m_canReflect = false;
 
-	if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+	if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL
+		&& m_spellInfo->Id != 38509) // Lady Vashj's Shock Blast (no flag ??)
 	{
 		for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
 		{
