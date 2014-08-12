@@ -512,7 +512,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 
 				m_creature->SummonCreature(NPC_TAINTED_ELEMENTAL,
 					afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3],
-					TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 15000);
+					TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000);
 
 				m_uiTaintedElemental_Timer = 120000;
 			}
@@ -626,14 +626,25 @@ struct MANGOS_DLL_DECL mob_tainted_elementalAI : public ScriptedAI
 
 	// timers
 	uint32 m_uiPoisonBolt_Timer;
+	uint32 m_uiUnsummon_Timer;
 
 	void Reset()
 	{
 		m_uiPoisonBolt_Timer = urand(5000, 10000);
+		m_uiUnsummon_Timer = 17000;
 	}
 
 	void UpdateAI(const uint32 uiDiff)
 	{
+		if (m_uiUnsummon_Timer < uiDiff)
+		{
+			m_creature->SetDeathState(DEAD); // Force plain despawn
+			m_uiUnsummon_Timer = 17000;
+			return;
+		}
+		else
+			m_uiUnsummon_Timer -= uiDiff;
+		
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
 			return;
 
