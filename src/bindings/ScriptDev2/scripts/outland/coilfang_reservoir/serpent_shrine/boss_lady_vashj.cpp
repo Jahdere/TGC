@@ -276,6 +276,9 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		{
 		case NPC_TAINTED_ELEMENTAL:
 			pSummoned->SetInCombatWithZone();
+		case NPC_ENCHANTED_ELEMENTAL:
+			pSummoned->ApplySpellImmune(0, IMMUNITY_DISPEL, DISPEL_POISON, true);
+			pSummoned->ApplySpellImmune(0, IMMUNITY_DISPEL, DISPEL_DISEASE, true);
 			break;
 		case NPC_COILFANG_STRIDER:
 		case NPC_COILFANG_ELITE:
