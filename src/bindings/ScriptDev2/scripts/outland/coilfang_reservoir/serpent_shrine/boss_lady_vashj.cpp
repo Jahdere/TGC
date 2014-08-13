@@ -28,6 +28,7 @@ enum
 	SAY_DEATH                   = -1548055,
 
 	POINT_MOVE_CENTER           = 0,
+	POINT_MOVE_FLOOR            = 0,
 
 	PHASE_1                     = 1,
 	PHASE_2                     = 2,
@@ -84,18 +85,16 @@ const float afElementPos[8][4] =
 	{-58.9f, -901.6f , 21.5f, 6.0f}
 };
 
-const float afCoilfangElitePos[3][4] =
+const float afFloorPoint[8][3] =
 {
-	{28.84f    , -923.28f    , 42.9f     , 6.0f     },
-	{31.183281f, -953.502625f, 41.523602f, 1.640957f},
-	{58.895180f, -923.124268f, 41.545307f, 3.152848f}
-};
-
-const float afCoilfangStriderPos[3][4] =
-{
-	{66.427f, -948.778f, 41.262245f, 2.584f},
-	{7.513f , -959.538f, 41.300422f, 1.0346f},
-	{-12.843f, -907.798f, 41.239620f, 6.087f}
+	{ 17.0f, -870.0f, 41.1f },
+	{ 43.7f, -870.1f, 41.1f },
+	{ 70.0f, -887.0f, 40.9f },
+	{ 68.7f, -960.8f, 41.1f },
+	{ 44.3f, -975.2f, 41.1f },
+	{ 17.5f, -976.0f, 41.1f },
+	{ -8.9f, -961.6f, 41.1f },
+	{ -23.2, -910.1f, 41.1f }
 };
 
 const float afShieldGeneratorChannelPos[4][4] =
@@ -249,6 +248,24 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		}
 	}
 
+	void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId)
+	{
+		if (uiType != POINT_MOTION_TYPE)
+			return;
+
+		uint32 uiEntry = pSummoned->GetEntry();
+		if (uiEntry != NPC_COILFANG_STRIDER && uiEntry != NPC_COILFANG_ELITE)
+			return;
+
+		if (uiPointId == POINT_MOVE_FLOOR)
+		{
+			pSummoned->RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE));
+			pSummoned->SetInCombatWithZone();
+			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+				pSummoned->AI()->AttackStart(pTarget);
+		}
+	}
+
 	void JustSummoned(Creature* pSummoned)
 	{
 		//pSummoned->addUnitState(UNIT_STAT_IGNORE_PATHFINDING);
@@ -262,9 +279,8 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 			break;
 		case NPC_COILFANG_STRIDER:
 		case NPC_COILFANG_ELITE:
-			pSummoned->SetInCombatWithZone();
-			if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-				pSummoned->AI()->AttackStart(pTarget);
+			pSummoned->SetWalk(false);
+			pSummoned->SetFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE));
 			break;
 		case NPC_TOXIC_SPOREBAT:
 			pSummoned->addUnitState(MOVEFLAG_LEVITATING);	////@Lorh : Flyyyyyy little wing... sporebat !
@@ -274,10 +290,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		case NPC_SHIELD_GENERATOR:
 			//we should really expect database to have this set already
 			if (!pSummoned->HasFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE)))
-			{
-				pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-				pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-			}
+				pSummoned->SetFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE));
 
 			pSummoned->CastSpell(m_creature, SPELL_MAGIC_BARRIER, true);
 			break;
@@ -511,7 +524,7 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 			//NPC_TAINTED_ELEMENTAL
 			if (m_uiTaintedElemental_Timer < uiDiff)
 			{
-				uint32 uiPos = urand(0,7);
+				uint32 uiPos = urand(0, 7);
 
 				m_creature->SummonCreature(NPC_TAINTED_ELEMENTAL,
 					afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3],
@@ -525,11 +538,12 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 			//NPC_COILFANG_ELITE
 			if (m_uiCoilfangElite_Timer < uiDiff)
 			{
-				uint32 uiPos = urand(0,2);
+				uint32 uiPos = urand(0, 7);
 
-				m_creature->SummonCreature(NPC_COILFANG_ELITE,
-					afCoilfangElitePos[uiPos][0], afCoilfangElitePos[uiPos][1], afCoilfangElitePos[uiPos][2], afCoilfangElitePos[uiPos][3],
-					TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15000); // @Lorh : I change the flag to avoid that he despawn after 45sec
+				if (Creature* pElite = m_creature->SummonCreature(NPC_COILFANG_ELITE,
+					afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3],
+					TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 15000)) // @Lorh : I change the flag to avoid that he despawn after 45sec
+					pElite->GetMotionMaster()->MovePoint(POINT_MOVE_FLOOR, afFloorPoint[uiPos][0], afFloorPoint[uiPos][1], afFloorPoint[uiPos][2]);
 
 				//wowwiki says 50 seconds, bosskillers says 45
 				m_uiCoilfangElite_Timer = urand(45000, 50000);
@@ -540,11 +554,12 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 			//NPC_COILFANG_STRIDER
 			if (m_uiCoilfangStrider_Timer < uiDiff)
 			{
-				uint32 uiPos = urand(0,2);
+				uint32 uiPos = urand(0, 7);
 
-				m_creature->SummonCreature(NPC_COILFANG_STRIDER,
-					afCoilfangStriderPos[uiPos][0], afCoilfangStriderPos[uiPos][1], afCoilfangStriderPos[uiPos][2], afCoilfangStriderPos[uiPos][3],
-					TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 5000); //@Lorh : I changed the flag, to avoid that aoe fear take effect after death
+				if (Creature* pStrider = m_creature->SummonCreature(NPC_COILFANG_STRIDER,
+					afElementPos[uiPos][0], afElementPos[uiPos][1], afElementPos[uiPos][2], afElementPos[uiPos][3],
+					TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 8000)) //@Lorh : I changed the flag, to avoid that aoe fear take effect after death
+					pStrider->GetMotionMaster()->MovePoint(POINT_MOVE_FLOOR, afFloorPoint[uiPos][0], afFloorPoint[uiPos][1], afFloorPoint[uiPos][2]);
 
 				//wowwiki says 60 seconds, bosskillers says 60-70
 				m_uiCoilfangStrider_Timer = urand(60000, 70000);
