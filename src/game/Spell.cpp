@@ -696,6 +696,9 @@ void Spell::prepareDataForTriggerSystem()
 		default:
 			break;
 		}
+
+		if (m_spellInfo->Id == 38258) // Vashj's Strider panic is triggered and should consume fear ward
+			m_canTrigger = true;
 	}
 
 	// Get data for type of attack and fill base info for trigger
