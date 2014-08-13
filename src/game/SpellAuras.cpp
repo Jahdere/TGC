@@ -7260,7 +7260,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
 
 	Unit* caster = GetCaster();
 
-	if (caster && IsPersistent())
+	if (caster)
 		if (DynamicObject* dynObj = caster->GetDynObject(GetId()))
 			dynObj->RemoveAffected(m_target);
 
