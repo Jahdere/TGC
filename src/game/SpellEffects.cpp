@@ -5499,6 +5499,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 					unitTarget->CastSpell(unitTarget, 38353, true, NULL, NULL, m_caster->GetObjectGuid());
 					return;
 				}
+			case 38573:                                 // Spore drop effect (Vashj)
+				{
+					if (!unitTarget)
+						return;
+
+					unitTarget->CastSpell(unitTarget, 38574, true, NULL, NULL, m_caster->GetObjectGuid());
+					return;
+				}
 			case 39497:                                 // Remove enchant weapon (Kael'thas)
 				{
 					if(!unitTarget)
