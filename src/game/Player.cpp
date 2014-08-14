@@ -17596,6 +17596,7 @@ void Player::HandleStealthedUnitsDetection()
     Cell::VisitAllObjects(this, searcher, MAX_PLAYER_STEALTH_DETECT_RANGE);
 
     WorldObject const* viewPoint = GetCamera().GetBody();
+	bool allowDetection = !(InArena() && HasAura(37803));
 
     for (std::list<Unit*>::const_iterator i = stealthedUnits.begin(); i != stealthedUnits.end(); ++i)
     {
@@ -17603,7 +17604,7 @@ void Player::HandleStealthedUnitsDetection()
             continue;
 
         bool hasAtClient = HaveAtClient((*i));
-        bool hasDetected = (*i)->isVisibleForOrDetect(this, viewPoint, true);
+		bool hasDetected = (*i)->isVisibleForOrDetect(this, viewPoint, allowDetection);
 
         if (hasDetected)
         {
