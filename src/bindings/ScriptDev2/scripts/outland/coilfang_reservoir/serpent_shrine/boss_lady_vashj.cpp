@@ -168,7 +168,10 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 		RemoveAllShieldGenerators();
 
 		if (m_pInstance)
+		{
 			m_pInstance->SetData(TYPE_LADYVASHJ_EVENT, NOT_STARTED);
+			m_pInstance->SetData(TYPE_VASHJ_PHASE3_CHECK, NOT_STARTED);
+		}
 	}
 
 	void RemoveAllShieldGenerators()
@@ -268,7 +271,6 @@ struct MANGOS_DLL_DECL boss_lady_vashjAI : public ScriptedAI
 
 	void JustSummoned(Creature* pSummoned)
 	{
-		//pSummoned->addUnitState(UNIT_STAT_IGNORE_PATHFINDING);
 		uint32 uiEntry = pSummoned->GetEntry();
 
 		//@Lorh : better with a switch case
