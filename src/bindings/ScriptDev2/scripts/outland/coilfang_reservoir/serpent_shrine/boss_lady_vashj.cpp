@@ -659,14 +659,17 @@ struct MANGOS_DLL_DECL mob_tainted_elementalAI : public ScriptedAI
 
 	void UpdateAI(const uint32 uiDiff)
 	{
-		if (m_uiUnsummon_Timer < uiDiff)
+		if (m_uiUnsummon_Timer)
 		{
-			m_creature->SetDeathState(DEAD); // Force plain despawn
-			m_uiUnsummon_Timer = 17000;
-			return;
+			if (m_uiUnsummon_Timer < uiDiff)
+			{
+				m_creature->SetDeathState(DEAD); // Force plain despawn
+				m_uiUnsummon_Timer = 0;
+				return;
+			}
+			else
+				m_uiUnsummon_Timer -= uiDiff;
 		}
-		else
-			m_uiUnsummon_Timer -= uiDiff;
 		
 		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
 			return;
