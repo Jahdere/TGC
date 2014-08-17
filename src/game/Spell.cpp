@@ -323,7 +323,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 	// determine reflection
 	m_canReflect = false;
 
-	if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+	if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && m_spellInfo->SchoolMask != SPELL_SCHOOL_MASK_NORMAL
+		&& m_spellInfo->Id != 38509) // Lady Vashj's Shock Blast (no flag ??)
 	{
 		for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
 		{
@@ -695,6 +696,9 @@ void Spell::prepareDataForTriggerSystem()
 		default:
 			break;
 		}
+
+		if (m_spellInfo->Id == 38258) // Vashj's Strider panic is triggered and should consume fear ward
+			m_canTrigger = true;
 	}
 
 	// Get data for type of attack and fill base info for trigger
@@ -1162,7 +1166,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 		if (!realCaster->IsFriendlyTo(unit))
 		{
 			// for delayed spells ignore not visible explicit target
-			if (speed > 0.0f && unit == m_targets.getUnitTarget() &&
+			if (speed > 0.0f && unit == m_targets.getUnitTarget() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) &&
 				!unit->isVisibleForOrDetect(m_caster, m_caster, false))
 			{
 				realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
@@ -2820,6 +2824,9 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 	// set timer base at cast time
 	ReSetTimer();
 
+	if (m_timer > 0 && m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+		m_caster->SetTargetGuid(m_targets.getUnitTargetGuid());
+
 	// stealth must be removed at cast starting (at show channel bar)
 	// skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
 	if (!m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo))
@@ -3349,6 +3356,9 @@ void Spell::finish(bool ok)
 		else
 			modOwner->ResetSpellModsDueToCanceledSpell(this);
 	}
+
+	if (m_caster->GetTypeId() != TYPEID_PLAYER && !m_caster->hasUnitState(UNIT_STAT_STUNNED) && !m_caster->HasAuraType(SPELL_AURA_MOD_TAUNT))
+		m_caster->SetTargetGuid(m_caster->getVictim() ? m_caster->getVictim()->GetObjectGuid() : ObjectGuid());
 
 	m_spellState = SPELL_STATE_FINISHED;
 
@@ -6362,7 +6372,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 		// Get GO cast coordinates if original caster -> GO
 		if (target != m_caster)
 			if (WorldObject* caster = GetCastingObject())
-				if (!target->IsWithinLOSInMap(caster))
+				if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED) && !target->IsWithinLOSInMap(caster))
 					return false;
 		break;
 	}
