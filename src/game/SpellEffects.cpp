@@ -2965,7 +2965,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 			int32 tickheal = targetAura->GetModifier()->m_amount;
 			int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / targetAura->GetSpellProto()->EffectAmplitude[idx] - 1;
 
-			unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
+			unitTarget->RemoveSpellAuraHolder(targetAura->GetHolder());
 
 			addhealth += tickheal * tickcount;
 		}else{
