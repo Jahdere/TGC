@@ -1007,6 +1007,8 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
                 // unsummon current and summon old pet if there was one and there isn't a current pet
                 plr->RemovePet(PET_SAVE_NOT_IN_SLOT);
                 plr->ResummonPetTemporaryUnSummonedIfAny();
+				if (Pet* pet = plr->GetPet())
+					pet->RemoveArenaAuras(true);
 
                 if (isRated() && GetStatus() == STATUS_IN_PROGRESS)
                 {

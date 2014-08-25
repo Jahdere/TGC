@@ -317,6 +317,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     // load spells/cooldowns/auras
     _LoadAuras(timediff);
+	// If in arena and preparation or first summon since arena start
+	if (BattleGround* bg = owner->GetBattleGround())
+	{
+		if (bg->isArena() && (bg->GetStatus() == STATUS_WAIT_JOIN || (bg->GetStatus() == STATUS_IN_PROGRESS && (timediff * IN_MILLISECONDS) < bg->GetStartTime())))
+			RemoveArenaAuras();
+	}
 
     // init AB
     if (is_temporary_summoned)
