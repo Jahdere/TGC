@@ -935,6 +935,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(NULL) + MAX_PLAYER_SUMMON_DELAY;
+            ++m_summon_concurrent;
             m_summon_mapid = mapid;
             m_summon_x = x;
             m_summon_y = y;
@@ -2347,6 +2348,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // Player summoning
         time_t m_summon_expire;
+        uint8  m_summon_concurrent;
         uint32 m_summon_mapid;
         float  m_summon_x;
         float  m_summon_y;

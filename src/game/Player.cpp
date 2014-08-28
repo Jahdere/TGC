@@ -537,6 +537,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     // Player summoning
     m_summon_expire = 0;
+	m_summon_concurrent = 0;
     m_summon_mapid = 0;
     m_summon_x = 0.0f;
     m_summon_y = 0.0f;
@@ -19453,13 +19454,19 @@ void Player::SummonIfPossible(bool agree)
 {
     if (!agree)
     {
-        m_summon_expire = 0;
+        if (m_summon_concurrent > 1)
+            --m_summon_concurrent;
+        else
+            m_summon_expire = 0;
         return;
     }
 
     // expire and auto declined
     if (m_summon_expire < time(NULL))
+    {
+        m_summon_concurrent = 0;
         return;
+    }
 
     // stop taxi flight at summon
     if (IsTaxiFlying())
@@ -19474,6 +19481,7 @@ void Player::SummonIfPossible(bool agree)
         bg->EventPlayerDroppedFlag(this);
 
     m_summon_expire = 0;
+    m_summon_concurrent = 0;
 
     TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z, GetOrientation());
 }
