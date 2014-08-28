@@ -1347,7 +1347,7 @@ void GameObject::Use(Unit* user)
 		}
 	case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              // 18
 		{
-			if (user->GetTypeId() != TYPEID_PLAYER)
+			if (user->GetTypeId() != TYPEID_PLAYER || getLootState() == GO_JUST_DEACTIVATED)
 				return;
 
 			Player* player = (Player*)user;
