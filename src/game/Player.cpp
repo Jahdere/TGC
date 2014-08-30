@@ -537,7 +537,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     // Player summoning
     m_summon_expire = 0;
-	m_summon_concurrent = 0;
+    m_summon_concurrent = 0;
     m_summon_mapid = 0;
     m_summon_x = 0.0f;
     m_summon_y = 0.0f;
