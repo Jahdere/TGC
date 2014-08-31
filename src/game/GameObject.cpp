@@ -1415,7 +1415,13 @@ void GameObject::Use(Unit* user)
 
 			// finish owners spell
 			if (owner)
+			{
+				// Warlock summon - take reagents when TP is ok
+				if (m_spellId == 46546)
+					((Player*)owner)->DestroyItemCount(6265, 1, true);
+
 				owner->FinishSpell(CURRENT_CHANNELED_SPELL);
+			}
 
 			// can be deleted now, if
 			if (!info->summoningRitual.ritualPersistent)

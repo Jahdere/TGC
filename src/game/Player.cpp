@@ -19589,6 +19589,10 @@ bool Player::CanNoReagentCast(SpellEntry const* spellInfo) const
     if (spellInfo->HasAttribute(SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION))
         return true;
 
+	// Reagents will be destroyed later
+	if (spellInfo->HasAttribute(SPELL_ATTR_EX6_UNK5))
+		return true;
+
     return false;
 }
 
