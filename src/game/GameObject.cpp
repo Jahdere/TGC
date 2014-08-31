@@ -340,6 +340,24 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 					}
 				}
 			}
+
+			// Bonus animation time
+			if (GetGOInfo()->type == GAMEOBJECT_TYPE_SUMMONING_RITUAL && m_cooldownTime)
+			{
+				if (m_cooldownTime >= time(NULL))
+					return;
+
+				GetOwner()->FinishSpell(CURRENT_CHANNELED_SPELL);
+
+				// can be deleted now, if
+				if (!GetGOInfo()->summoningRitual.ritualPersistent)
+					SetLootState(GO_JUST_DEACTIVATED);
+				// reset ritual for this GO
+				else
+					ClearAllUsesData();
+
+				m_cooldownTime = 0;
+			}
 			break;
 		}
 	case GO_ACTIVATED:
@@ -414,6 +432,21 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 				m_UniqueUsers.clear();
 				SetLootState(GO_READY);
 				return; // SetLootState and return because go is treated as "burning flag" due to GetGoAnimProgress() being 100 and would be removed on the client
+			case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
+				// stop channelers if portal is gone
+				for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+				{
+					if (Player* owner = GetMap()->GetPlayer(*itr))
+					{
+						if (Spell* spell = owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+						{
+							if (spell->m_spellInfo->Id == GetGOInfo()->summoningRitual.animSpell)
+								owner->InterruptSpell(CURRENT_CHANNELED_SPELL);
+						}
+							
+					}
+				}
+				break;
 			default:
 				break;
 			}
@@ -971,6 +1004,7 @@ void GameObject::Use(Unit* user)
 
 	// by default spell caster is user
 	Unit* spellCaster = user;
+	Unit* spellTarget = user;
 	uint32 spellId = 0;
 	bool triggered = false;
 
@@ -1390,9 +1424,32 @@ void GameObject::Use(Unit* user)
 
 			AddUniqueUse(player);
 
+			// Realtime channelers
+			uint8 realUseCount = owner ? 1 : 0;
+			for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+			{
+				if (Player* owner = GetMap()->GetPlayer(*itr))
+				{
+					if (Spell* spell = owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+					{
+						if (spell->m_spellInfo->Id == info->summoningRitual.animSpell)
+							++realUseCount;
+					}
+
+				}
+			}
+
 			if (info->summoningRitual.animSpell)
 			{
-				player->CastSpell(player, info->summoningRitual.animSpell, true);
+				if (m_cooldownTime) // Summon is already started, don't need to go further
+					return;
+				
+				if (realUseCount < info->summoningRitual.reqParticipants)
+				{
+					player->CastSpell(player, info->summoningRitual.animSpell, true);
+					if (++realUseCount < info->summoningRitual.reqParticipants)
+						return;
+				}
 
 				// for this case, summoningRitual.spellId is always triggered
 				triggered = true;
@@ -1416,9 +1473,28 @@ void GameObject::Use(Unit* user)
 			// finish owners spell
 			if (owner)
 			{
+				// Get original target
+				if (Unit* t = owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL)->m_targets.getUnitTarget())
+					spellTarget = t;
+
 				// Warlock summon - take reagents when TP is ok
 				if (m_spellId == 46546)
 					((Player*)owner)->DestroyItemCount(6265, 1, true);
+
+				// Since we have an animation spell, let's enjoy it until background cast is done
+				// Blizzlike-hack as we can't really monitor background cast
+				if (info->summoningRitual.animSpell)
+				{
+					SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+					if (spellInfo)
+					{
+						if (SpellCastTimesEntry const* entry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex))
+						{
+							m_cooldownTime = time(NULL) + (entry->CastTime / IN_MILLISECONDS);
+							break;
+						}
+					}
+				}
 
 				owner->FinishSpell(CURRENT_CHANNELED_SPELL);
 			}
@@ -1499,6 +1575,7 @@ void GameObject::Use(Unit* user)
 			if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
 				return;
 
+			spellTarget = targetPlayer;
 			spellId = 23598;
 
 			break;
@@ -1599,7 +1676,7 @@ void GameObject::Use(Unit* user)
 
 	// spell target is user of GO
 	SpellCastTargets targets;
-	targets.setUnitTarget(user);
+	targets.setUnitTarget(spellTarget);
 
 	spell->prepare(&targets);
 }

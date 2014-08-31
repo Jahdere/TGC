@@ -2595,8 +2595,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 					targetUnitMap.push_back(m_caster);
 				break;
 			case SPELL_EFFECT_SUMMON_PLAYER:
-				if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->GetSelectionGuid())
-					if (Player* target = sObjectMgr.GetPlayer(((Player*)m_caster)->GetSelectionGuid()))
+				if (m_caster->GetTypeId() == TYPEID_PLAYER && m_targets.getUnitTarget())
+					if (Player* target = sObjectMgr.GetPlayer(m_targets.getUnitTarget()->GetObjectGuid()))
 						targetUnitMap.push_back(target);
 				break;
 			case SPELL_EFFECT_RESURRECT_NEW:
@@ -2848,7 +2848,11 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 	}
 	// execute triggered without cast time explicitly in call point
 	else if (m_timer == 0)
+	{
+		if (IsChanneledSpell(m_spellInfo)) // Triggered channeled spell have castbar anyway
+			m_caster->SetCurrentCastedSpell(this);
 		cast(true);
+	}
 	// else triggered with cast time will execute execute at next tick or later
 	// without adding to cast type slot
 	// will not show cast bar but will show effects at casting time etc
@@ -4316,6 +4320,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 	if (!m_caster->isInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26))
 		return SPELL_FAILED_CASTER_AURASTATE;
 
+	// Non triggered summoning spells with true targets
+	bool ignoreTargetPosition = m_spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_TRANS_DOOR || m_spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_TRIGGER_SPELL_2;
 	if (Unit* target = m_targets.getUnitTarget())
 	{
 		// target state requirements (not allowed state), apply to self also
@@ -4335,7 +4341,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
 		bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
-		if (non_caster_target)
+		if (non_caster_target && !ignoreTargetPosition)
 		{
 			// target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
 			if (m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState), m_caster->GetObjectGuid()))
@@ -4749,7 +4755,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
 	if (!m_IsTriggeredSpell)
 	{
-		if (!m_triggeredByAuraSpell)
+		if (!m_triggeredByAuraSpell && !ignoreTargetPosition)
 		{
 			SpellCastResult castResult = CheckRange(strict);
 			if (castResult != SPELL_CAST_OK)
@@ -5117,16 +5123,37 @@ SpellCastResult Spell::CheckCast(bool strict)
 
 				break;
 			}
+		case SPELL_EFFECT_TRIGGER_SPELL_2: // Warlock ritual of summoning
+			{
+				if (strict)
+				{
+					if (Player* p = (Player*)m_caster)
+					{
+						if (!p->GetSelectionGuid())
+							return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+						m_targets.setUnitTarget(ObjectAccessor::FindPlayer(p->GetSelectionGuid()));
+					}
+					else
+						return SPELL_FAILED_BAD_TARGETS;
+				}
+			}
+		case SPELL_EFFECT_TRANS_DOOR: // Meeting stone portal
+			{
+				if (m_spellInfo->SpellIconID != 164)
+					break;
+			}
 		case SPELL_EFFECT_SUMMON_PLAYER:
 			{
 				if (m_caster->GetTypeId() != TYPEID_PLAYER)
 					return SPELL_FAILED_BAD_TARGETS;
-				if (!((Player*)m_caster)->GetSelectionGuid())
+				if (!m_targets.getUnitTarget())
 					return SPELL_FAILED_BAD_TARGETS;
 
-				Player* target = sObjectMgr.GetPlayer(((Player*)m_caster)->GetSelectionGuid());
-				if (!target || !target->IsInSameRaidWith((Player*)m_caster))
+				Player* target = ((Player*)m_targets.getUnitTarget());
+				if (!target)
 					return SPELL_FAILED_BAD_TARGETS;
+				if (!target->IsInSameRaidWith((Player*)m_caster))
+					return SPELL_FAILED_TARGET_NOT_IN_RAID;
 
 				// check if our map is dungeon
 				if (sMapStore.LookupEntry(m_caster->GetMapId())->IsDungeon())

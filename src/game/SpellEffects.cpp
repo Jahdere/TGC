@@ -2360,7 +2360,8 @@ void Spell::EffectTriggerRitualOfSummoning(SpellEffectIndex eff_idx)
 
 	finish();
 
-	m_caster->CastSpell(unitTarget, spellInfo, false);
+	// Transmit true target
+	m_caster->CastSpell(m_targets.getUnitTarget(), spellInfo, true);
 }
 
 void Spell::EffectForceCast(SpellEffectIndex eff_idx)
