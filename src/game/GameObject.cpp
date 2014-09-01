@@ -432,21 +432,6 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 				m_UniqueUsers.clear();
 				SetLootState(GO_READY);
 				return; // SetLootState and return because go is treated as "burning flag" due to GetGoAnimProgress() being 100 and would be removed on the client
-			case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
-				// stop channelers if portal is gone
-				for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
-				{
-					if (Player* owner = GetMap()->GetPlayer(*itr))
-					{
-						if (Spell* spell = owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-						{
-							if (spell->m_spellInfo->Id == GetGOInfo()->summoningRitual.animSpell)
-								owner->InterruptSpell(CURRENT_CHANNELED_SPELL);
-						}
-							
-					}
-				}
-				break;
 			default:
 				break;
 			}
@@ -528,6 +513,23 @@ void GameObject::Delete()
 
 	SetGoState(GO_STATE_READY);
 	SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
+
+	if (GetGOInfo()->type == GAMEOBJECT_TYPE_SUMMONING_RITUAL)
+	{
+		// stop channelers if portal is gone
+		for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
+		{
+			if (Player* owner = GetMap()->GetPlayer(*itr))
+			{
+				if (Spell* spell = owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+				{
+					if (spell->m_spellInfo->Id == GetGOInfo()->summoningRitual.animSpell)
+						owner->InterruptSpell(CURRENT_CHANNELED_SPELL);
+				}
+
+			}
+		}
+	}
 
 	if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(GetGUIDLow()))
 		sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
