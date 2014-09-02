@@ -627,8 +627,6 @@ void Spell::FillTargetMap()
 		{
 			if (!CheckTarget(*itr, SpellEffectIndex(i)))
 			{
-				if((*itr) && m_spellInfo->Id == 32053)
-					sLog.outError("CREATURE ENTRY -> %u", (*itr)->GetEntry());
 				itr = tmpUnitLists[effToIndex[i]].erase(itr);
 				continue;
 			}
@@ -638,10 +636,7 @@ void Spell::FillTargetMap()
 
 		for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
 		{
-			if((m_spellInfo->Id == 32053 || m_spellInfo->Id == 16807) && (*iunit)->GetTypeId() == TYPEID_UNIT)
-				sLog.outError("************CREATURE ENTRY : %u ****************)",(*iunit)->GetEntry());
 			AddUnitTarget((*iunit), SpellEffectIndex(i));
-
 		}
 	}
 }
@@ -1873,7 +1868,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 				}
 			}
 		}
-		sLog.outError("Size of Area Target ******* ===  %u", targetUnitMap.size());
 		break;
 	case TARGET_AREAEFFECT_INSTANT:
 		{
