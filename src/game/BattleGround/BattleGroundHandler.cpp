@@ -222,12 +222,13 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
         case BATTLEGROUND_WS:
         {
             uint32 flagCarrierCount = 0;
+            BattleGroundWS* wsg = (BattleGroundWS*)bg;
 
-            Player* flagCarrierAlliance = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagCarrierGuid());
+            Player* flagCarrierAlliance = _player->GetTeam() == HORDE || wsg->IsFlagCarrierVisible(ALLIANCE) ? sObjectMgr.GetPlayer(wsg->GetAllianceFlagCarrierGuid()) : NULL;
             if (flagCarrierAlliance)
                 ++flagCarrierCount;
 
-            Player* flagCarrierHorde = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagCarrierGuid());
+            Player* flagCarrierHorde = _player->GetTeam() == ALLIANCE || wsg->IsFlagCarrierVisible(HORDE) ? sObjectMgr.GetPlayer(wsg->GetHordeFlagCarrierGuid()) : NULL;
             if (flagCarrierHorde)
                 ++flagCarrierCount;
 

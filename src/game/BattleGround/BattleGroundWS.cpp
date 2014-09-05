@@ -62,6 +62,12 @@ void BattleGroundWS::Update(uint32 diff)
                 RespawnDroppedFlag(ALLIANCE);
             }
         }
+        if (m_FlagState[BG_TEAM_ALLIANCE] != BG_WS_FLAG_STATE_WAIT_RESPAWN && m_FlagsTimer[BG_TEAM_ALLIANCE] > 0)
+        {
+            m_FlagsTimer[BG_TEAM_ALLIANCE] -= diff;
+            if (m_FlagsTimer[BG_TEAM_ALLIANCE] < 0)
+                m_FlagsTimer[BG_TEAM_ALLIANCE] = 0;
+        }
         if (m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_WAIT_RESPAWN)
         {
             m_FlagsTimer[BG_TEAM_HORDE] -= diff;
@@ -81,6 +87,12 @@ void BattleGroundWS::Update(uint32 diff)
                 m_FlagsDropTimer[BG_TEAM_HORDE] = 0;
                 RespawnDroppedFlag(HORDE);
             }
+        }
+        if (m_FlagState[BG_TEAM_HORDE] != BG_WS_FLAG_STATE_WAIT_RESPAWN && m_FlagsTimer[BG_TEAM_HORDE] > 0)
+        {
+			m_FlagsTimer[BG_TEAM_HORDE] -= diff;
+            if (m_FlagsTimer[BG_TEAM_HORDE] < 0)
+                m_FlagsTimer[BG_TEAM_HORDE] = 0;
         }
     }
 }
@@ -326,6 +338,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
         UpdateFlagState(HORDE, BG_WS_FLAG_STATE_ON_PLAYER);
         UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 1);
         source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG, true);
+        m_FlagsTimer[BG_TEAM_ALLIANCE] = BG_WS_CARRIER_VISION_TIME;
     }
 
     // horde flag picked up from base
@@ -342,6 +355,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
         UpdateFlagState(ALLIANCE, BG_WS_FLAG_STATE_ON_PLAYER);
         UpdateWorldState(BG_WS_FLAG_UNK_HORDE, 1);
         source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG, true);
+        m_FlagsTimer[BG_TEAM_HORDE] = BG_WS_CARRIER_VISION_TIME;
     }
 
     // Alliance flag on ground(not in base) (returned or picked up again from ground!)

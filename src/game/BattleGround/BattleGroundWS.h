@@ -24,6 +24,7 @@
 #define BG_WS_MAX_TEAM_SCORE      3
 #define BG_WS_FLAG_RESPAWN_TIME   (23*IN_MILLISECONDS)
 #define BG_WS_FLAG_DROP_TIME      (10*IN_MILLISECONDS)
+#define BG_WS_CARRIER_VISION_TIME (45*IN_MILLISECONDS)
 
 enum BG_WS_Sound
 {
@@ -105,6 +106,8 @@ class BattleGroundWS : public BattleGround
         /* BG Flags */
         ObjectGuid GetAllianceFlagCarrierGuid() const { return m_flagCarrierAlliance; }
         ObjectGuid GetHordeFlagCarrierGuid() const { return m_flagCarrierHorde; }
+
+        bool IsFlagCarrierVisible(Team team) { return m_FlagsTimer[team == ALLIANCE ? BG_TEAM_ALLIANCE : BG_TEAM_HORDE] == 0; }
 
         void SetAllianceFlagCarrier(ObjectGuid guid) { m_flagCarrierAlliance = guid; }
         void SetHordeFlagCarrier(ObjectGuid guid) { m_flagCarrierHorde = guid; }
