@@ -90,7 +90,7 @@ void BattleGroundWS::Update(uint32 diff)
         }
         if (m_FlagState[BG_TEAM_HORDE] != BG_WS_FLAG_STATE_WAIT_RESPAWN && m_FlagsTimer[BG_TEAM_HORDE] > 0)
         {
-			m_FlagsTimer[BG_TEAM_HORDE] -= diff;
+            m_FlagsTimer[BG_TEAM_HORDE] -= diff;
             if (m_FlagsTimer[BG_TEAM_HORDE] < 0)
                 m_FlagsTimer[BG_TEAM_HORDE] = 0;
         }

@@ -2924,8 +2924,9 @@ void Spell::cast(bool skipCheck)
 	// update pointers base at GUIDs to prevent access to already nonexistent object
 	UpdatePointers();
 
-	// cancel at lost main target unit
-	if (!m_targets.getUnitTarget() && m_targets.getUnitTargetGuid() && m_targets.getUnitTargetGuid() != m_caster->GetObjectGuid())
+	// cancel at lost main target unit / main GO
+	if (!m_targets.getUnitTarget() && m_targets.getUnitTargetGuid() && m_targets.getUnitTargetGuid() != m_caster->GetObjectGuid() ||
+		m_targets.getGOTargetGuid() && (!m_targets.getGOTarget() || !m_targets.getGOTarget()->isSpawned()))
 	{
 		cancel();
 		m_caster->DecreaseCastCounter();
