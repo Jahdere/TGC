@@ -4931,7 +4931,7 @@ void Spell::EffectInterruptCast(SpellEffectIndex /*eff_idx*/)
 		if (Spell* spell = unitTarget->GetCurrentSpell(CurrentSpellTypes(i)))
 		{
 			if (spell->getState() > SPELL_STATE_CASTING) // Spells shouldn't be interruptible when finished casting
-				return;
+				continue;
 
 			SpellEntry const* curSpellInfo = spell->m_spellInfo;
 			// check if we can interrupt spell
