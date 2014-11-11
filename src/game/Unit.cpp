@@ -6975,7 +6975,7 @@ void Unit::Unmount(bool from_aura)
 		SendMessageToSet(&data, true);
 	}
 
-	if (GetHealth() == 0)
+	if (GetHealth() == 0 || HasAura(37803)) // Dead or forced invisibility
 		return;
 
 	// only resummon old pet if the player is already added to a map
