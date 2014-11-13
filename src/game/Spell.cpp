@@ -2818,7 +2818,7 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 	// set timer base at cast time
 	ReSetTimer();
 
-	if (m_timer > 0 && m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
+	if (m_timer > 0 && !m_IsTriggeredSpell && m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
 		m_caster->SetTargetGuid(m_targets.getUnitTargetGuid());
 
 	// stealth must be removed at cast starting (at show channel bar)
@@ -3035,6 +3035,10 @@ void Spell::cast(bool skipCheck)
 	m_targets.updateTradeSlotItem();
 
 	FillTargetMap();
+
+	if (m_caster->GetTypeId() != TYPEID_PLAYER && !m_IsTriggeredSpell && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster &&
+		!m_caster->hasUnitState(UNIT_STAT_STUNNED) && !m_caster->HasAuraType(SPELL_AURA_MOD_TAUNT))
+		m_caster->SetTargetGuid(m_caster->getVictim() ? m_caster->getVictim()->GetObjectGuid() : ObjectGuid());
 
 	if (m_spellState == SPELL_STATE_FINISHED)               // stop cast if spell marked as finish somewhere in FillTargetMap
 	{
@@ -3356,7 +3360,8 @@ void Spell::finish(bool ok)
 			modOwner->ResetSpellModsDueToCanceledSpell(this);
 	}
 
-	if (m_caster->GetTypeId() != TYPEID_PLAYER && !m_caster->hasUnitState(UNIT_STAT_STUNNED) && !m_caster->HasAuraType(SPELL_AURA_MOD_TAUNT))
+	if (!ok && m_caster->GetTypeId() != TYPEID_PLAYER && !m_IsTriggeredSpell && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster &&
+		!m_caster->hasUnitState(UNIT_STAT_STUNNED) && !m_caster->HasAuraType(SPELL_AURA_MOD_TAUNT))
 		m_caster->SetTargetGuid(m_caster->getVictim() ? m_caster->getVictim()->GetObjectGuid() : ObjectGuid());
 
 	m_spellState = SPELL_STATE_FINISHED;
