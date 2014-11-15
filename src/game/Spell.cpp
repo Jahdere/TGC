@@ -3382,7 +3382,7 @@ void Spell::finish(bool ok)
 			{
 				// check m_caster->GetGUID() let load auras at login and speedup most often case
 				Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
-				if (unit && unit->isAlive())
+				if (unit)
 				{
 					SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
 					SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
