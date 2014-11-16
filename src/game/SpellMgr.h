@@ -75,6 +75,11 @@ enum SpellSpecific
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
 
+#define MAX_UNIQUE_SPELL_AURAS 1
+const uint32 uniqueSpellAuraTypes[MAX_UNIQUE_SPELL_AURAS] = {
+	SPELL_AURA_HASTE_SPELLS
+};
+
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = NULL);

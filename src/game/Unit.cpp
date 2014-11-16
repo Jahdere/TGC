@@ -4007,6 +4007,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 		if (i_spellId == spellId) continue;
 
 		bool is_triggered_by_spell = false;
+		bool is_multipleUniqueAuras = false;
 		uint32 i_aurasTypesOccurences = 0;
 		for (int j = 0; j < MAX_EFFECT_INDEX; ++j) {
 			// prevent triggering aura of removing aura that triggered it
@@ -4016,13 +4017,20 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 			if (spellProto->EffectTriggerSpell[j] == i_spellId)
 				is_triggered_by_spell = true;
 			// prevent unique auras effects to be applied
-			if (spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS && i_spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS) {
-				i_aurasTypesOccurences = 2;
-				break;
-			}
+			for (int k = 0; k < MAX_UNIQUE_SPELL_AURAS; ++k) {
+				if (spellProto->EffectApplyAuraName[j] == uniqueSpellAuraTypes[k] && i_spellProto->EffectApplyAuraName[j] == uniqueSpellAuraTypes[k]) {
+					is_multipleUniqueAuras = true;
+					break;
+				}
 
-			if (spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS || i_spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS) {
-				++i_aurasTypesOccurences;
+				if (spellProto->EffectApplyAuraName[j] == uniqueSpellAuraTypes[k] || i_spellProto->EffectApplyAuraName[j] == uniqueSpellAuraTypes[k]) {
+					if (i_aurasTypesOccurences & (1 << k)) {
+						is_multipleUniqueAuras = true;
+						break;
+					}
+					else
+						i_aurasTypesOccurences |= (1 << k);
+				}
 			}
 		}
 
@@ -4034,7 +4042,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 		// single allowed spell specific from same caster or from any caster at target
 		bool is_spellSpecPerTargetPerCaster = IsSingleFromSpellSpecificPerTargetPerCaster(spellId_spec, i_spellId_spec);
 		bool is_spellSpecPerTarget = IsSingleFromSpellSpecificPerTarget(spellId_spec, i_spellId_spec);
-		if (is_spellSpecPerTarget || i_aurasTypesOccurences > 1 || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
+		if (is_spellSpecPerTarget || is_multipleUniqueAuras || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
 		{
 			// cannot remove higher rank
 			if (sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
