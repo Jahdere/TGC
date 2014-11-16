@@ -4007,15 +4007,24 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 		if (i_spellId == spellId) continue;
 
 		bool is_triggered_by_spell = false;
-		// prevent triggering aura of removing aura that triggered it
-		for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+		uint32 i_aurasTypesOccurences = 0;
+		for (int j = 0; j < MAX_EFFECT_INDEX; ++j) {
+			// prevent triggering aura of removing aura that triggered it
 			if (i_spellProto->EffectTriggerSpell[j] == spellId)
 				is_triggered_by_spell = true;
-
-		// prevent triggered aura of removing aura that triggering it (triggered effect early some aura of parent spell
-		for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+			// prevent triggered aura of removing aura that triggering it (triggered effect early some aura of parent spell
 			if (spellProto->EffectTriggerSpell[j] == i_spellId)
 				is_triggered_by_spell = true;
+			// prevent unique auras effects to be applied
+			if (spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS && i_spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS) {
+				i_aurasTypesOccurences = 2;
+				break;
+			}
+
+			if (spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS || i_spellProto->EffectApplyAuraName[j] == SPELL_AURA_HASTE_SPELLS) {
+				++i_aurasTypesOccurences;
+			}
+		}
 
 		if (is_triggered_by_spell)
 			continue;
@@ -4025,7 +4034,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 		// single allowed spell specific from same caster or from any caster at target
 		bool is_spellSpecPerTargetPerCaster = IsSingleFromSpellSpecificPerTargetPerCaster(spellId_spec, i_spellId_spec);
 		bool is_spellSpecPerTarget = IsSingleFromSpellSpecificPerTarget(spellId_spec, i_spellId_spec);
-		if (is_spellSpecPerTarget || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
+		if (is_spellSpecPerTarget || i_aurasTypesOccurences > 1 || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
 		{
 			// cannot remove higher rank
 			if (sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))

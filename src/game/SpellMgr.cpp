@@ -519,12 +519,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 			if (spellInfo->IsFitToFamilyMask(UI64LIT(0x00000820180400)) && spellInfo->HasAttribute(SPELL_ATTR_EX3_UNK9))
 				return SPELL_JUDGEMENT;
 
-			for (int i = 0; i < 3; ++i)
-			{
-				// only paladin auras have this
-				if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
-					return SPELL_AURA;
-			}
+			// only paladin auras have this
+			if (IsSpellHaveEffect(spellInfo, SPELL_EFFECT_APPLY_AREA_AURA_PARTY))
+				return SPELL_AURA;
+
 			break;
 		}
 	case SPELLFAMILY_SHAMAN:
