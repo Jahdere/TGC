@@ -574,6 +574,26 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
 				}
 				break;
 			}
+		case SPELLFAMILY_SHAMAN:
+			{
+				// Lightning Bolt & Chain Lightning
+				if(m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x000000001) || m_spellInfo->SpellFamilyFlags & UI64LIT(0x000000002)))
+				{
+					Unit::AuraList const& mclassScritAuras = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+					for (Unit::AuraList::const_iterator itr = mclassScritAuras.begin(); itr != mclassScritAuras.end(); ++itr)
+					{
+						switch((*itr)->GetModifier()->m_miscvalue)
+						{
+							case 4554: // Totem of the Storm
+							case 5142: // Totem of the Void
+							case 6008: // Totem of Ancestral Guidance
+								damage += (*itr)->GetModifier()->m_amount;
+							break;
+							default:break;
+						}
+					}
+				}
+			}
 		}
 
 		if (damage >= 0)
