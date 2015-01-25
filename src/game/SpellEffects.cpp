@@ -3032,12 +3032,23 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 				}
 			}
 
-			//Libram of the lightbringer
-			if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & UI64LIT(0x80000000))
-			{ 
-				if(Aura* dummyAura = m_caster->GetDummyAura(34231))
+			
+			if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
+			{
+				if(m_spellInfo->SpellFamilyFlags & UI64LIT(0x80000000))
 				{
-					addhealth += dummyAura->GetModifier()->m_amount;
+					//Libram of the lightbringer
+					if(Aura* dummyAura = m_caster->GetDummyAura(34231))
+						addhealth += dummyAura->GetModifier()->m_amount;
+					// Libram of Souls Redeemed (greater)
+					else if (Aura* dummyAura = m_caster->GetDummyAura(38320))
+						addhealth += dummyAura->GetModifier()->m_amount;
+				}
+				else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x40000000))
+				{
+					// Libram of Souls Redeemed (flash)
+					if (Aura* dummyAura = m_caster->GetDummyAura(38320))
+						addhealth += dummyAura->GetModifier()->m_amount / 2;
 				}
 			}
 		}
