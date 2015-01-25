@@ -2552,6 +2552,21 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 					((Player*)target)->AddSpellMod(m_spellmod, apply);
 					return;
 				}
+			case 39926:									// Idol of the Raven Goddess
+				{
+					if (target->GetTypeId() != TYPEID_PLAYER)
+						return;
+
+					if(target->HasAura(5420))
+					{
+						int32 health_mod = int32(target->GetStat(STAT_SPIRIT) / 4);
+						if(apply)
+							health_mod += m_modifier.m_amount;
+
+						target->CastCustomSpell(target, 34123, &health_mod, NULL, NULL, true, NULL);
+					}
+					return;
+				}
 			}
 
 			// Lifebloom
