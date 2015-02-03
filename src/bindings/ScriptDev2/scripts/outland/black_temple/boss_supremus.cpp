@@ -223,6 +223,7 @@ struct MANGOS_DLL_DECL boss_supremusAI : public ScriptedAI
 				m_bTankPhase = true;
 				m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
 				m_creature->FixateTarget(NULL);
+				DoResetThreat();
 			}
 			else
 			{
